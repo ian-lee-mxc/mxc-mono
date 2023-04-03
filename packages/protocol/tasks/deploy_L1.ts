@@ -4,6 +4,7 @@ import * as types from "hardhat/internal/core/params/argumentTypes";
 import * as config from "./config";
 import * as log from "./log";
 import * as utils from "./utils";
+require("dotenv").config();
 
 task("deploy_L1")
     .addParam("daoVault", "The DAO vault address")

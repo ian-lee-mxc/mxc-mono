@@ -90,7 +90,7 @@ library LibProposing {
             resolver.resolve("mxc_token", false)
         );
         uint256 reward = _calcProposeReward(state, mxcToken.totalSupply());
-
+        uint256 txListLength;
         {
             bytes calldata txList = inputs[1];
             // perform validation and populate some fields
@@ -104,6 +104,7 @@ library LibProposing {
                 state.nextBlockId >=
                 state.latestVerifiedId + config.maxNumBlocks
             ) revert L1_TOO_MANY_BLOCKS();
+            txListLength = txList.length;
             // Change(MXC): block interval
             if (txList.length > 0) {
                 if (
@@ -128,7 +129,7 @@ library LibProposing {
             meta.l1Hash = LibUtils.getBlockHash(LibUtils.getBlockNumber() - 1);
             meta.timestamp = uint64(block.timestamp);
 
-            meta.extraData = abi.encodePacked(reward);
+//            meta.extraData = bytes.concat(bytes32(reward));
             // After The Merge, L1 mixHash contains the prevrandao
             // from the beacon chain. Since multiple Taiko blocks
             // can be proposed in one Ethereum block, we need to
@@ -153,8 +154,12 @@ library LibProposing {
                 maf: config.feeBaseMAF
             });
         }
-
-        mxcToken.mint(resolver.resolve("token_vault", false), reward);
+        if(txListLength > 0) {
+            mxcToken.mint(msg.sender, reward);
+        }else {
+            // to miningPool
+            mxcToken.mint(resolver.resolve("token_vault", false), reward);
+        }
         state.rewards[state.nextBlockId] = reward;
 
         _saveProposedBlock(
