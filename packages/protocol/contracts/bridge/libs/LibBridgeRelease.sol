@@ -24,7 +24,7 @@ library LibBridgeRelease {
     event EtherReleased(bytes32 indexed msgHash, address to, uint256 amount);
 
     /**
-     * Release Ether to the message owner, only if the Taiko Bridge state says:
+     * Release Ether to the message owner, only if the MXC Bridge state says:
      * - Ether for this message has not been released before.
      * - The message is in a failed state.
      */
@@ -65,7 +65,7 @@ library LibBridgeRelease {
 
         if (releaseAmount > 0) {
             address ethVault = resolver.resolve("ether_vault", true);
-            // if on Taiko
+            // if on MXC
             if (ethVault != address(0)) {
                 EtherVault(payable(ethVault)).releaseEther(
                     message.owner,

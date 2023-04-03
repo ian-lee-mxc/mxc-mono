@@ -6,7 +6,7 @@
 
 pragma solidity ^0.8.18;
 
-import {TaikoData} from "../L1/TaikoData.sol";
+import {MXCData} from "../L1/MXCData.sol";
 import {LibTxDecoder} from "../libs/LibTxDecoder.sol";
 import {LibTxUtils} from "../libs/LibTxUtils.sol";
 import {LibRLPReader} from "../thirdparty/LibRLPReader.sol";
@@ -48,7 +48,7 @@ library LibInvalidTxList {
     }
 
     function verifyTxListInvalid(
-        TaikoData.Config memory config,
+        MXCData.Config memory config,
         bytes calldata encoded,
         Hint hint,
         uint256 txIdx

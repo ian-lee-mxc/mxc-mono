@@ -2,7 +2,7 @@ import { Config } from "./interface";
 const fs = require("fs");
 const path = require("path");
 const { ethers } = require("ethers");
-const { deployTaikoL2 } = require("./taikoL2");
+const { deployMXCL2 } = require("./MXCL2");
 const { deployERC20 } = require("./erc20");
 
 // Generate a L2 genesis JSON based on the given configurations.
@@ -45,9 +45,9 @@ async function main() {
 
     console.log("config: %o", config);
 
-    console.log("start deploy TaikoL2 contract");
+    console.log("start deploy MXCL2 contract");
 
-    let result = await deployTaikoL2(config, {
+    let result = await deployMXCL2(config, {
         alloc: {},
         storageLayouts: {},
     }).catch(console.error);

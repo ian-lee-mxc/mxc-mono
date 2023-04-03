@@ -1,5 +1,5 @@
 {
-  "name": "@taiko/protocol",
+  "name": "@mxc/protocol",
   "version": "0.6.0",
   "private": true,
   "scripts": {
@@ -37,7 +37,7 @@
     "zkRollup",
     "Layer2"
   ],
-  "author": "Taiko Labs",
+  "author": "MXC Foundation",
   "license": "MIT",
   "devDependencies": {
     "@defi-wonderland/smock": "^2.3.3",
