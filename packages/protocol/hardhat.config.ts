@@ -10,6 +10,7 @@ import "solidity-coverage";
 import "solidity-docgen";
 import "./tasks/compile_yul";
 import "./tasks/deploy_L1";
+import "./tasks/deploy_L2";
 
 const hardhatMnemonic =
     "test test test test test test test test test test test taik";

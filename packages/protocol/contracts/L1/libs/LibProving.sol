@@ -221,6 +221,8 @@ library LibProving {
             address oracleProver = resolver.resolve("oracle_prover", true);
             if (msg.sender == oracleProver) {
                 oracleProving = true;
+                fc.prover = evidence.prover;
+                fc.provenAt = uint64(block.timestamp);
             } else {
                 if (oracleProver != address(0)) revert L1_NOT_ORACLE_PROVER();
                 fc.prover = evidence.prover;
