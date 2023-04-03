@@ -6,24 +6,25 @@
 
 pragma solidity ^0.8.18;
 
-import {IProofVerifier} from "../../L1/ProofVerifier.sol";
-import {TaikoL1} from "../../L1/TaikoL1.sol";
-import {TaikoData} from "../../L1/TaikoData.sol";
+import {MXCL2} from "../../L2/MXCL2.sol";
+import {MXCData} from "../../L1/MXCData.sol";
 
-contract TestTaikoL1EnableTokenomics is TaikoL1, IProofVerifier {
+contract TestMXCL2EnablePublicInputsCheck is MXCL2 {
+    constructor(address _addressManager) MXCL2(_addressManager) {}
+
     function getConfig()
         public
         pure
         override
-        returns (TaikoData.Config memory config)
+        returns (MXCData.Config memory config)
     {
         config.chainId = 167;
         // up to 2048 pending blocks
-        config.maxNumBlocks = 6;
-        config.blockHashHistory = 10;
+        config.maxNumBlocks = 4;
+        config.blockHashHistory = 3;
         // This number is calculated from maxNumBlocks to make
         // the 'the maximum value of the multiplier' close to 20.0
-        config.maxVerificationsPerTx = 0; // dont verify blocks automatically
+        config.maxVerificationsPerTx = 2;
         config.commitConfirmations = 1;
         config.blockMaxGasLimit = 30000000; // TODO
         config.maxTransactionsPerBlock = 20; // TODO
@@ -43,27 +44,10 @@ contract TestTaikoL1EnableTokenomics is TaikoL1, IProofVerifier {
         config.feeGracePeriodPctg = 125; // 125%
         config.feeMaxPeriodPctg = 375; // 375%
         config.blockTimeCap = 48 seconds;
-        config.proofTimeCap = 5 seconds;
+        config.proofTimeCap = 60 minutes;
         config.bootstrapDiscountHalvingPeriod = 1 seconds;
         config.enableTokenomics = true;
-        config.enablePublicInputsCheck = false;
-        config.enableAnchorValidation = false;
-    }
-
-    function verifyZKP(
-        string memory /*verifierId*/,
-        bytes calldata /*zkproof*/,
-        bytes32 /*instance*/
-    ) public pure override returns (bool) {
-        return true;
-    }
-
-    function verifyMKP(
-        bytes memory /*key*/,
-        bytes memory /*value*/,
-        bytes memory /*proof*/,
-        bytes32 /*root*/
-    ) public pure override returns (bool) {
-        return true;
+        config.enablePublicInputsCheck = true;
+        config.enableAnchorValidation = true;
     }
 }

@@ -8,7 +8,7 @@ pragma solidity ^0.8.18;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-// An ERC20 token for testing the Taiko Bridge on testnets.
+// An ERC20 token for testing the MXC Bridge on testnets.
 // This token has 50% of failure on transfers so we can
 // test the bridge's error handling.
 contract MayFailFreeMintERC20 is ERC20 {

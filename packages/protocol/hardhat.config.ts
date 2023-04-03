@@ -108,20 +108,6 @@ const config: HardhatUserConfig = {
                     : [],
             url: process.env.ROPSTEN_URL || "",
         },
-        internal_devnet_l1: {
-            url: "https://l1rpc.internal.taiko.xyz/",
-            accounts:
-                process.env.PRIVATE_KEY !== undefined
-                    ? [process.env.PRIVATE_KEY]
-                    : [],
-        },
-        internal_devnet_l2: {
-            url: "https://l2rpc.internal.taiko.xyz/",
-            accounts:
-                process.env.PRIVATE_KEY !== undefined
-                    ? [process.env.PRIVATE_KEY]
-                    : [],
-        },
     },
     etherscan: {
         apiKey: {

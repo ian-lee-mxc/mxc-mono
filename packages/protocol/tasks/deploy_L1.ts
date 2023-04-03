@@ -10,8 +10,8 @@ task("deploy_L1")
     .addParam("daoVault", "The DAO vault address")
     .addParam("teamVault", "The team vault address")
     .addOptionalParam(
-        "taikoL2",
-        "The TaikoL2 address",
+        "mxcL2",
+        "The MXCL2 address",
         ethers.constants.AddressZero
     )
     .addOptionalParam(
@@ -74,7 +74,7 @@ export async function deployContracts(hre: any) {
     const daoVault = hre.args.daoVault;
     const teamVault = hre.args.teamVault;
     const l2GenesisBlockHash = hre.args.l2GenesisBlockHash;
-    const taikoL2Address = hre.args.taikoL2;
+    const MXCL2Address = hre.args.mxc_L2;
     const l2ChainId = hre.args.l2ChainId;
     const bridgeFunderPrivateKey = hre.args.bridgeFunderPrivateKey;
     const bridgeFund = hre.args.bridgeFund;
@@ -86,7 +86,7 @@ export async function deployContracts(hre: any) {
     log.debug(`deployer: ${deployer}`);
     log.debug(`daoVault: ${daoVault}`);
     log.debug(`l2GenesisBlockHash: ${l2GenesisBlockHash}`);
-    log.debug(`taikoL2Address: ${taikoL2Address}`);
+    log.debug(`MXCL2Address: ${MXCL2Address}`);
     log.debug(`l2ChainId: ${l2ChainId}`);
     log.debug(`bridgeFunderPrivateKey: ${bridgeFunderPrivateKey}`);
     log.debug(`bridgeFund: ${bridgeFund}`);
@@ -120,7 +120,10 @@ export async function deployContracts(hre: any) {
     // Used by LibProving
     await utils.waitTx(
         hre,
-        await AddressManager.setAddress(`${l2ChainId}.taiko`, taikoL2Address)
+        await AddressManager.setAddress(
+            `${l2ChainId}.mxc_header_sync`,
+            MXCL2Address
+        )
     );
 
     // MXCToken
@@ -148,10 +151,10 @@ export async function deployContracts(hre: any) {
         "PARK",
     ]);
 
-    // TaikoL1
-    const TaikoL1 = await utils.deployContract(
+    // MXCL1
+    const MXCL1 = await utils.deployContract(
         hre,
-        "TaikoL1",
+        "MXCL1",
         await deployBaseLibs(hre)
     );
 
@@ -159,21 +162,24 @@ export async function deployContracts(hre: any) {
 
     await utils.waitTx(
         hre,
-        await TaikoL1.init(AddressManager.address, l2GenesisBlockHash, feeBase)
+        await MXCL1.init(AddressManager.address, l2GenesisBlockHash, feeBase)
     );
 
     // Used by LibBridgeRead
     await utils.waitTx(
         hre,
-        await AddressManager.setAddress(`${chainId}.taiko`, TaikoL1.address)
+        await AddressManager.setAddress(
+            `${chainId}.mxc_header_sync`,
+            MXCL1.address
+        )
     );
 
-    // Used by TaikoToken
+    // Used by MXCToken
     await utils.waitTx(
         hre,
         await AddressManager.setAddress(
             `${chainId}.proto_broker`,
-            TaikoL1.address
+            MXCL1.address
         )
     );
 
@@ -281,7 +287,7 @@ export async function deployContracts(hre: any) {
     await utils.waitTx(
         hre,
         await AddressManager.setAddress(
-            `${l2ChainId}.taiko`,
+            `${l2ChainId}.mxc_header_sync`,
             "0x0000777700000000000000000000000000000001"
         )
     );
@@ -316,7 +322,7 @@ export async function deployContracts(hre: any) {
         contracts: Object.assign(
             { AddressManager: AddressManager.address },
             { MXCToken: MXCToken.address },
-            { TaikoL1: TaikoL1.address },
+            { MXCL1: MXCL1.address },
             { Bridge: Bridge.address },
             { SignalService: SignalService.address },
             { TokenVault: TokenVault.address },

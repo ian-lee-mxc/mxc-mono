@@ -39,11 +39,11 @@ library LibBridgeData {
 
     /**
      * @return msgHash The keccak256 hash of the message encoded with
-     * "TAIKO_BRIDGE_MESSAGE".
+     * "MXC_BRIDGE_MESSAGE".
      */
     function hashMessage(
         IBridge.Message memory message
     ) internal pure returns (bytes32) {
-        return keccak256(abi.encode("TAIKO_BRIDGE_MESSAGE", message));
+        return keccak256(abi.encode("MXC_BRIDGE_MESSAGE", message));
     }
 }

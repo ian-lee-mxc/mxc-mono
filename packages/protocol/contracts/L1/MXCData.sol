@@ -8,7 +8,7 @@ pragma solidity ^0.8.18;
 
 import {BlockHeader} from "../libs/LibBlockHeader.sol";
 
-library TaikoData {
+library MXCData {
     struct Config {
         uint256 chainId;
         // up to 2048 pending blocks
@@ -60,7 +60,7 @@ library TaikoData {
     }
 
     struct Evidence {
-        TaikoData.BlockMetadata meta;
+        MXCData.BlockMetadata meta;
         BlockHeader header;
         address prover;
         bytes[] proofs;

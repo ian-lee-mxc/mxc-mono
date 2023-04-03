@@ -17,9 +17,9 @@ import {LibAnchorSignature} from "../libs/LibAnchorSignature.sol";
 import {LibInvalidTxList} from "../libs/LibInvalidTxList.sol";
 import {LibSharedConfig} from "../libs/LibSharedConfig.sol";
 import {LibTxDecoder} from "../libs/LibTxDecoder.sol";
-import {TaikoData} from "../L1/TaikoData.sol";
+import {MXCData} from "../L1/MXCData.sol";
 
-contract TaikoL2 is AddressResolver, ReentrancyGuard, IHeaderSync {
+contract MXCL2 is AddressResolver, ReentrancyGuard, IHeaderSync {
     using LibTxDecoder for bytes;
 
     /**********************
@@ -92,7 +92,7 @@ contract TaikoL2 is AddressResolver, ReentrancyGuard, IHeaderSync {
      * @param l1Hash The latest L1 block hash when this block was proposed.
      */
     function anchor(uint256 l1Height, bytes32 l1Hash) external {
-        TaikoData.Config memory config = getConfig();
+        MXCData.Config memory config = getConfig();
         if (config.enablePublicInputsCheck) {
             _checkPublicInputs();
         }
@@ -120,7 +120,7 @@ contract TaikoL2 is AddressResolver, ReentrancyGuard, IHeaderSync {
 
         if (tx.gasprice != 0) revert L2_INVALID_GAS_PRICE();
 
-        TaikoData.Config memory config = getConfig();
+        MXCData.Config memory config = getConfig();
         LibInvalidTxList.verifyTxListInvalid({
             config: config,
             encoded: txList,
@@ -143,7 +143,7 @@ contract TaikoL2 is AddressResolver, ReentrancyGuard, IHeaderSync {
         public
         view
         virtual
-        returns (TaikoData.Config memory config)
+        returns (MXCData.Config memory config)
     {
         config = LibSharedConfig.getConfig();
         config.chainId = block.chainid;

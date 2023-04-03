@@ -6,25 +6,24 @@
 
 pragma solidity ^0.8.18;
 
-import {TaikoL2} from "../../L2/TaikoL2.sol";
-import {TaikoData} from "../../L1/TaikoData.sol";
+import {IProofVerifier} from "../../L1/ProofVerifier.sol";
+import {MXCL1} from "../../L1/MXCL1.sol";
+import {MXCData} from "../../L1/MXCData.sol";
 
-contract TestTaikoL2EnablePublicInputsCheck is TaikoL2 {
-    constructor(address _addressManager) TaikoL2(_addressManager) {}
-
+contract TestMXCL1EnableTokenomics is MXCL1, IProofVerifier {
     function getConfig()
         public
         pure
         override
-        returns (TaikoData.Config memory config)
+        returns (MXCData.Config memory config)
     {
         config.chainId = 167;
         // up to 2048 pending blocks
-        config.maxNumBlocks = 4;
-        config.blockHashHistory = 3;
+        config.maxNumBlocks = 6;
+        config.blockHashHistory = 10;
         // This number is calculated from maxNumBlocks to make
         // the 'the maximum value of the multiplier' close to 20.0
-        config.maxVerificationsPerTx = 2;
+        config.maxVerificationsPerTx = 0; // dont verify blocks automatically
         config.commitConfirmations = 1;
         config.blockMaxGasLimit = 30000000; // TODO
         config.maxTransactionsPerBlock = 20; // TODO
@@ -44,10 +43,27 @@ contract TestTaikoL2EnablePublicInputsCheck is TaikoL2 {
         config.feeGracePeriodPctg = 125; // 125%
         config.feeMaxPeriodPctg = 375; // 375%
         config.blockTimeCap = 48 seconds;
-        config.proofTimeCap = 60 minutes;
+        config.proofTimeCap = 5 seconds;
         config.bootstrapDiscountHalvingPeriod = 1 seconds;
         config.enableTokenomics = true;
-        config.enablePublicInputsCheck = true;
-        config.enableAnchorValidation = true;
+        config.enablePublicInputsCheck = false;
+        config.enableAnchorValidation = false;
+    }
+
+    function verifyZKP(
+        string memory /*verifierId*/,
+        bytes calldata /*zkproof*/,
+        bytes32 /*instance*/
+    ) public pure override returns (bool) {
+        return true;
+    }
+
+    function verifyMKP(
+        bytes memory /*key*/,
+        bytes memory /*value*/,
+        bytes memory /*proof*/,
+        bytes32 /*root*/
+    ) public pure override returns (bool) {
+        return true;
     }
 }

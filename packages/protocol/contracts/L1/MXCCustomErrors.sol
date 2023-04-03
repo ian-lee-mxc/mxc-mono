@@ -6,7 +6,7 @@
 
 pragma solidity ^0.8.18;
 
-abstract contract TaikoCustomErrors {
+abstract contract MXCCustomErrors {
     // The following custom errors must match the definitions in other V1 libraries.
     error L1_0_FEE_BASE();
     error L1_ALREADY_PROVEN();
