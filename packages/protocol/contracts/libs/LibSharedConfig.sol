@@ -13,7 +13,7 @@ library LibSharedConfig {
     function getConfig() internal pure returns (TaikoData.Config memory) {
         return
             TaikoData.Config({
-                chainId: 167,
+                chainId: 5167003,
                 maxNumBlocks: 2049, // owner:daniel
                 blockHashHistory: 40, // owner:daniel
                 maxVerificationsPerTx: 10, //owner:david. Each time one more block is verified, there will be ~20k more gas cost.
@@ -36,6 +36,10 @@ library LibSharedConfig {
                 blockTimeCap: 60 seconds, // owner:daniel
                 proofTimeCap: 30 minutes, // owner:daniel
                 bootstrapDiscountHalvingPeriod: 1 seconds, // owner:daniel
+                // CHANGE(MXC): config
+                blockInterval: 1 seconds, // owner:luanxu
+                emptyBlockInterval: 4 hours, // owner:luanxu
+                proposeBlockDeposit: 5000000000000000000000,
                 enableTokenomics: true,
                 enablePublicInputsCheck: true,
                 enableAnchorValidation: true

@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    environment:
+      # 时区上海 - Time zone Shanghai (Change if needed)
+      TZ: Asia/Shanghai
+      # root 密码 - root password
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - 3306:3306
+    volumes:
+      # 数据挂载 - Data mounting
+      - ./data/mysql/data:/var/lib/mysql
+      # 日志
+    command:
+      #      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+      --explicit_defaults_for_timestamp=true
+      --lower_case_table_names=1
+    privileged: true
+    restart: always
+    networks:
+      - mxc_net
+  relayer:
+    build: ./
+    container_name: relayer
+    restart: always
+    volumes:
+      - ./.env:/app/.env
+    ports:
+      - 4101:4101
+      - 6061:6061
+    working_dir: /app
+    entrypoint:
+      relayer
+    networks:
+      - mxc_net
+networks:
+  mxc_net:
+    external:
+      name: simple-taiko-node_mxc_net
+  main:
+    driver: bridge

@@ -114,3 +114,6 @@ __pycache__/
 
 # whitepaper
 .pdf
+
+# jetbrains
+.idea/

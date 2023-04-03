@@ -15,12 +15,19 @@ import {LibMath} from "../../libs/LibMath.sol";
 import {LibAddress} from "../../libs/LibAddress.sol";
 import {IBridge} from "../IBridge.sol";
 import {AddressResolver} from "../../common/AddressResolver.sol";
+import {LibSharedConfig} from "../../libs/LibSharedConfig.sol";
+import {
+    SafeERC20Upgradeable
+} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import {ERC20Upgradeable} from "../../thirdparty/ERC20Upgradeable.sol";
+import {TokenVault} from "../TokenVault.sol";
 
 /**
  * Process bridge messages on the destination chain.
  * @title LibBridgeProcess
  */
 library LibBridgeProcess {
+    using SafeERC20Upgradeable for ERC20Upgradeable;
     using LibMath for uint256;
     using LibAddress for address;
     using LibBridgeData for IBridge.Message;
@@ -86,24 +93,12 @@ library LibBridgeProcess {
             revert B_SIGNAL_NOT_RECEIVED();
         }
 
-        uint256 allValue = message.depositValue +
-            message.callValue +
-            message.processingFee;
-        // We retrieve the necessary ether from EtherVault if receiving on
-        // Taiko, otherwise it is already available in this Bridge.
-        address ethVault = resolver.resolve("ether_vault", true);
-        if (ethVault != address(0) && (allValue > 0)) {
-            EtherVault(payable(ethVault)).releaseEther(allValue);
-        }
-        // We send the Ether before the message call in case the call will
-        // actually consume Ether.
-        if (message.depositValue > 0) {
-            message.owner.sendEther(message.depositValue);
-        }
-
         LibBridgeStatus.MessageStatus status;
         uint256 refundAmount;
 
+        // change(MXC) chain token mxc
+        bool chainToken = (message.srcChainId ==
+            LibSharedConfig.getConfig().chainId) && message.depositValue > 0;
         // if the user is sending to the bridge or zero-address, just process as DONE
         // and refund the owner
         if (message.to == address(this) || message.to == address(0)) {
@@ -111,46 +106,73 @@ library LibBridgeProcess {
             // invoked but will be marked DONE. The callValue will be refunded.
             status = LibBridgeStatus.MessageStatus.DONE;
             refundAmount = message.callValue;
+        } else if (chainToken) {
+            // change(MXC) release live chain mxc
+            TokenVault(resolver.resolve("token_vault", false)).receiveMXC(
+                message.owner,
+                message.depositValue
+            );
+            status = LibBridgeStatus.MessageStatus.DONE;
         } else {
-            // use the specified message gas limit if not called by the owner
-            uint256 gasLimit = msg.sender == message.owner
-                ? gasleft()
-                : message.gasLimit;
-
-            // this will call receiveERC20 on the tokenVault, sending the tokens to the user
-            bool success = LibBridgeInvoke.invokeMessageCall({
-                state: state,
-                message: message,
-                msgHash: msgHash,
-                gasLimit: gasLimit
-            });
-
-            if (success) {
+            if (_checkAndReleaseEther(message, resolver)) {
                 status = LibBridgeStatus.MessageStatus.DONE;
             } else {
-                status = LibBridgeStatus.MessageStatus.RETRIABLE;
-                if (ethVault != address(0)) {
-                    ethVault.sendEther(message.callValue);
+                // use the specified message gas limit if not called by the owner
+                uint256 gasLimit = msg.sender == message.owner
+                    ? gasleft()
+                    : message.gasLimit;
+
+                // this will call receiveERC20 on the tokenVault, sending the tokens to the user
+                bool success = LibBridgeInvoke.invokeMessageCall({
+                    state: state,
+                    message: message,
+                    msgHash: msgHash,
+                    gasLimit: gasLimit
+                });
+
+                if (success) {
+                    status = LibBridgeStatus.MessageStatus.DONE;
+                } else {
+                    status = LibBridgeStatus.MessageStatus.RETRIABLE;
                 }
             }
         }
-
         // Mark the status as DONE or RETRIABLE.
         LibBridgeStatus.updateMessageStatus(msgHash, status);
+    }
 
-        address refundAddress = message.refundAddress == address(0)
-            ? message.owner
-            : message.refundAddress;
+    struct CanonicalERC20 {
+        uint256 chainId;
+        address addr;
+        uint8 decimals;
+        string symbol;
+        string name;
+    }
 
-        // if sender is the refundAddress
-        if (msg.sender == refundAddress) {
-            refundAddress.sendEther(message.processingFee + refundAmount);
-        } else {
-            // if sender is another address (eg. the relayer)
-            // First attempt relayer is rewarded the processingFee
-            // message.owner has to eat the cost
-            msg.sender.sendEther(message.processingFee);
-            refundAddress.sendEther(refundAmount);
+    /**
+     * Special case for releasing ether
+     * @param message The message to process.
+     * @param resolver The address resolver.
+     */
+    function _checkAndReleaseEther(
+        IBridge.Message calldata message,
+        AddressResolver resolver
+    ) internal returns (bool) {
+        (CanonicalERC20 memory token, , address to, uint256 amount) = abi
+            .decode(
+                message.data[4:],
+                (CanonicalERC20, address, address, uint256)
+            );
+        // change(MXC) release ether
+        if (
+            token.addr ==
+            resolver.resolve(message.srcChainId, "mxc_token", false) &&
+            message.destChainId == LibSharedConfig.getConfig().chainId
+        ) {
+            EtherVault(payable(resolver.resolve("ether_vault", false)))
+                .releaseEther(to, amount);
+            return true;
         }
+        return false;
     }
 }

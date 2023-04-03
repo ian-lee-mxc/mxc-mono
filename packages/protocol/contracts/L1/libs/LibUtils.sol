@@ -13,6 +13,16 @@ import {
 import {LibMath} from "../../libs/LibMath.sol";
 import {TaikoData} from "../TaikoData.sol";
 
+interface ArbSys {
+    /**
+     * @notice Get Arbitrum block number (distinct from L1 block number; Arbitrum genesis block has block number 0)
+     * @return block number as int
+     */
+    function arbBlockNumber() external view returns (uint);
+
+    function arbBlockHash(uint256 blockNumber) external view returns (bytes32);
+}
+
 library LibUtils {
     using LibMath for uint256;
 
@@ -151,5 +161,15 @@ library LibUtils {
         }
         uint256 _ma = (maValue * (maf - 1) + newValue) / maf;
         return _ma > 0 ? _ma : maValue;
+    }
+
+    function getBlockNumber() internal view returns (uint256 blockNumber) {
+        blockNumber = ArbSys(address(100)).arbBlockNumber();
+    }
+
+    function getBlockHash(
+        uint256 blockNumber
+    ) internal view returns (bytes32 L1BlockHash) {
+        L1BlockHash = ArbSys(address(100)).arbBlockHash(blockNumber);
     }
 }

@@ -122,37 +122,30 @@ export async function deployContracts(hre: any) {
         await AddressManager.setAddress(`${l2ChainId}.taiko`, taikoL2Address)
     );
 
-    // TaikoToken
-    const TaikoToken = await utils.deployContract(hre, "TaikoToken");
+    // MXCToken
+    const MXCToken = await utils.deployContract(hre, "MXCToken");
     await utils.waitTx(
         hre,
-        await TaikoToken.init(
-            "Test Taiko Token",
-            "TTKO",
-            AddressManager.address
-        )
+        await MXCToken.init("Test MXC Token", "MXC", AddressManager.address)
     );
     await utils.waitTx(
         hre,
         await AddressManager.setAddress(
-            `${chainId}.tko_token`,
-            TaikoToken.address
+            `${chainId}.mxc_token`,
+            MXCToken.address
         )
     );
 
-    // HorseToken
-    const HorseToken = await utils.deployContract(hre, "FreeMintERC20", {}, [
-        "Horse Token",
-        "HORSE",
+    // RideToken
+    const RideToken = await utils.deployContract(hre, "FreeMintERC20", {}, [
+        "Ride Token",
+        "RIDE",
     ]);
 
-    // BullToken
-    const BullToken = await utils.deployContract(
-        hre,
-        "MayFailFreeMintERC20",
-        {},
-        ["Bull Token", "BLL"]
-    );
+    const ParkToken = await utils.deployContract(hre, "FreeMintERC20", {}, [
+        "Park Token",
+        "PARK",
+    ]);
 
     // TaikoL1
     const TaikoL1 = await utils.deployContract(
@@ -193,6 +186,14 @@ export async function deployContracts(hre: any) {
     await utils.waitTx(
         hre,
         await AddressManager.setAddress(`${chainId}.bridge`, Bridge.address)
+    );
+
+    await utils.waitTx(
+        hre,
+        await AddressManager.setAddress(
+            `${chainId}.token_vault`,
+            TokenVault.address
+        )
     );
 
     // Fund L1 bridge, which is necessary when there is a L2 faucet
@@ -276,6 +277,34 @@ export async function deployContracts(hre: any) {
             )
         );
     }
+    await utils.waitTx(
+        hre,
+        await AddressManager.setAddress(
+            `${l2ChainId}.taiko`,
+            "0x0000777700000000000000000000000000000001"
+        )
+    );
+    await utils.waitTx(
+        hre,
+        await AddressManager.setAddress(
+            `${l2ChainId}.bridge`,
+            "0x0000777700000000000000000000000000000004"
+        )
+    );
+    await utils.waitTx(
+        hre,
+        await AddressManager.setAddress(
+            `${l2ChainId}.token_vault`,
+            "0x0000777700000000000000000000000000000002"
+        )
+    );
+    await utils.waitTx(
+        hre,
+        await AddressManager.setAddress(
+            `${l2ChainId}.signal_service`,
+            "0x0000777700000000000000000000000000000007"
+        )
+    );
 
     // save deployments
     const deployments = {
@@ -285,13 +314,13 @@ export async function deployContracts(hre: any) {
         l2GenesisBlockHash,
         contracts: Object.assign(
             { AddressManager: AddressManager.address },
-            { TaikoToken: TaikoToken.address },
+            { MXCToken: MXCToken.address },
             { TaikoL1: TaikoL1.address },
             { Bridge: Bridge.address },
             { SignalService: SignalService.address },
             { TokenVault: TokenVault.address },
-            { BullToken: BullToken.address },
-            { HorseToken: HorseToken.address }
+            { Ride: RideToken.address },
+            { Park: ParkToken.address }
         ),
     };
 
@@ -372,14 +401,14 @@ async function deployPlonkVerifiers(hre: any): Promise<any> {
         {
             address: await utils.deployBytecode(
                 hre,
-                PlonkVerifier10TxsByteCode,
+                PlonkVerifier10TxsByteCode.replace("\r", ""),
                 "PlonkVerifier_10_txs"
             ),
         },
         {
             address: await utils.deployBytecode(
                 hre,
-                PlonkVerifier80TxsByteCode,
+                PlonkVerifier80TxsByteCode.replace("\r", ""),
                 "PlonkVerifier_80_txs"
             ),
         },

@@ -30,7 +30,7 @@ async function deployContract(
 }
 
 function compileYulContract(contractPath: string): string {
-    const SOLC_COMMAND = path.join(__dirname, "../bin/solc");
+    const SOLC_COMMAND = path.join(__dirname, "../bin/solc.exe");
 
     if (!fs.existsSync(SOLC_COMMAND)) {
         throw new Error(

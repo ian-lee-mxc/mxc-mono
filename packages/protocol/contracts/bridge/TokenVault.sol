@@ -16,7 +16,6 @@ import {
 } from "@openzeppelin/contracts-upgradeable/utils/Create2Upgradeable.sol";
 
 import {EssentialContract} from "../common/EssentialContract.sol";
-import {TaikoToken} from "../L1/TaikoToken.sol";
 import {BridgedERC20} from "./BridgedERC20.sol";
 import {IBridge} from "./IBridge.sol";
 
@@ -321,6 +320,18 @@ contract TokenVault is EssentialContract {
             token: token,
             amount: amount
         });
+    }
+
+    /**
+     * @dev This function can only be called by the bridge contract while receiving L2 eth
+     * @param to The destination address.
+     * @param amount The amount of tokens to be sent. 0 is a valid value.
+     */
+    function receiveMXC(
+        address to,
+        uint256 amount
+    ) external nonReentrant onlyFromNamed("bridge") {
+        ERC20Upgradeable(resolve("mxc_token", false)).safeTransfer(to, amount);
     }
 
     /**

@@ -45,6 +45,27 @@ const config: HardhatUserConfig = {
                     : [],
             url: process.env.GOERLI_URL || "",
         },
+        arb_goerli: {
+            accounts:
+                process.env.PRIVATE_KEY !== undefined
+                    ? [process.env.PRIVATE_KEY]
+                    : [],
+            url: process.env.ARB_GOERLI_URL || "",
+        },
+        mxc_testnet: {
+            accounts:
+                process.env.L2_PRIVATE_KEY !== undefined
+                    ? [process.env.L2_PRIVATE_KEY]
+                    : [],
+            url: process.env.MXC_TESTNET_URL || "",
+        },
+        sepolia: {
+            accounts:
+                process.env.PRIVATE_KEY !== undefined
+                    ? [process.env.PRIVATE_KEY]
+                    : [],
+            url: process.env.SEPOLIA_URL || "",
+        },
         hardhat: {
             accounts: {
                 mnemonic: hardhatMnemonic,

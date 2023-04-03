@@ -35,6 +35,10 @@ library TaikoData {
         uint64 feeMaxPeriodPctg;
         uint64 blockTimeCap;
         uint64 proofTimeCap;
+        // Change(MXC): config
+        uint64 blockInterval; // interval of each block
+        uint64 emptyBlockInterval; // interval of empty block
+        uint256 proposeBlockDeposit; //allow to propose
         uint64 bootstrapDiscountHalvingPeriod;
         bool enableTokenomics;
         bool enablePublicInputsCheck;
@@ -90,6 +94,10 @@ library TaikoData {
         mapping(address proposerAddress => mapping(uint256 commitSlot => bytes32 commitHash)) commits;
         // solhint-disable-next-line max-line-length
         mapping(address prover => uint256 outstandingReward) balances;
+        // Change(MXC): reward and staking
+        // solhint-disable-next-line max-line-length
+        mapping(address proposer => uint256 stakingBalance) stakingBalances;
+        mapping(uint256 blockId => uint256 reward) rewards;
         // Never or rarely changed
         uint64 genesisHeight;
         uint64 genesisTimestamp;

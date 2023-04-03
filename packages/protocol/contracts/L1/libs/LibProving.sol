@@ -41,6 +41,8 @@ library LibProving {
         uint64 provenAt
     );
 
+    event HeaderSynced(uint256 indexed srcHeight, bytes32 srcHash);
+
     error L1_ALREADY_PROVEN();
     error L1_ANCHOR_CALLDATA();
     error L1_ANCHOR_DEST();

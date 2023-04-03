@@ -92,6 +92,8 @@ contract TaikoL1 is
         bytes[] calldata inputs
     ) external onlyFromEOA nonReentrant {
         TaikoData.Config memory config = getConfig();
+        if (state.stakingBalances[msg.sender] < config.proposeBlockDeposit)
+            revert L1_STAKE_AMOUNT();
         LibProposing.proposeBlock({
             state: state,
             config: config,
@@ -184,6 +186,19 @@ contract TaikoL1 is
             config: getConfig(),
             maxBlocks: maxBlocks
         });
+    }
+
+    function stake(uint256 amount) external nonReentrant {
+        TaikoData.Config memory config = getConfig();
+        LibVerifying.stake(state, AddressResolver(this), config, amount);
+    }
+
+    function unStake() external nonReentrant {
+        LibVerifying.unStake(state, AddressResolver(this));
+    }
+
+    function getStakeAmount() external view returns (uint256) {
+        return state.stakingBalances[msg.sender];
     }
 
     function withdrawBalance() external nonReentrant {

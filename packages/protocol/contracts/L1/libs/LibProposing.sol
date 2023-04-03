@@ -11,7 +11,7 @@ import {
 } from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
 import {LibTxDecoder} from "../../libs/LibTxDecoder.sol";
-import {TaikoToken} from "../TaikoToken.sol";
+import {IMintableERC20} from "../../common/IMintableERC20.sol";
 import {LibUtils} from "./LibUtils.sol";
 import {TaikoData} from "../TaikoData.sol";
 import {AddressResolver} from "../../common/AddressResolver.sol";
@@ -35,6 +35,8 @@ library LibProposing {
     error L1_SOLO_PROPOSER();
     error L1_TOO_MANY_BLOCKS();
     error L1_TX_LIST();
+    error L1_FAST_PROPOSE();
+    error L1_FAST_EMPTY_PROPOSE();
 
     function commitBlock(
         TaikoData.State storage state,
@@ -44,7 +46,10 @@ library LibProposing {
     ) public {
         assert(config.commitConfirmations > 0);
 
-        bytes32 hash = _aggregateCommitHash(block.number, commitHash);
+        bytes32 hash = _aggregateCommitHash(
+            LibUtils.getBlockNumber(),
+            commitHash
+        );
 
         if (state.commits[msg.sender][commitSlot] == hash)
             revert L1_COMMITTED();
@@ -65,9 +70,9 @@ library LibProposing {
         // the tokenomics.
 
         // TODO(daniel): remove this special address.
-        address soloProposer = resolver.resolve("solo_proposer", true);
-        if (soloProposer != address(0) && soloProposer != msg.sender)
-            revert L1_SOLO_PROPOSER();
+        // address soloProposer = resolver.resolve("solo_proposer", true);
+        // if (soloProposer != address(0) && soloProposer != msg.sender)
+        //    revert L1_SOLO_PROPOSER();
 
         if (inputs.length != 2) revert L1_INPUT_SIZE();
         TaikoData.BlockMetadata memory meta = abi.decode(
@@ -80,6 +85,11 @@ library LibProposing {
             meta: meta
         });
         _validateMetadata(config, meta);
+
+        IMintableERC20 mxcToken = IMintableERC20(
+            resolver.resolve("mxc_token", false)
+        );
+        uint256 reward = _calcProposeReward(state, mxcToken.totalSupply());
 
         {
             bytes calldata txList = inputs[1];
@@ -94,12 +104,31 @@ library LibProposing {
                 state.nextBlockId >=
                 state.latestVerifiedId + config.maxNumBlocks
             ) revert L1_TOO_MANY_BLOCKS();
+            // Change(MXC): block interval
+            if (txList.length > 0) {
+                if (
+                    uint64(block.timestamp) - state.lastProposedAt <
+                    config.blockInterval
+                ) {
+                    revert L1_FAST_PROPOSE();
+                }
+            }
+            // Change(MXC): empty block interval
+            if (txList.length == 0) {
+                if (
+                    uint64(block.timestamp) - state.lastProposedAt <
+                    config.emptyBlockInterval
+                ) {
+                    revert L1_FAST_EMPTY_PROPOSE();
+                }
+            }
 
             meta.id = state.nextBlockId;
-            meta.l1Height = block.number - 1;
-            meta.l1Hash = blockhash(block.number - 1);
+            meta.l1Height = LibUtils.getBlockNumber() - 1;
+            meta.l1Hash = LibUtils.getBlockHash(LibUtils.getBlockNumber() - 1);
             meta.timestamp = uint64(block.timestamp);
 
+            meta.extraData = abi.encodePacked(reward);
             // After The Merge, L1 mixHash contains the prevrandao
             // from the beacon chain. Since multiple Taiko blocks
             // can be proposed in one Ethereum block, we need to
@@ -115,10 +144,7 @@ library LibProposing {
             {
                 uint256 fee;
                 (newFeeBase, fee, deposit) = getBlockFee(state, config);
-                TaikoToken(resolver.resolve("tko_token", false)).burn(
-                    msg.sender,
-                    fee + deposit
-                );
+                mxcToken.burn(msg.sender, fee + deposit);
             }
             // Update feeBase and avgBlockTime
             state.feeBase = LibUtils.movingAverage({
@@ -127,6 +153,9 @@ library LibProposing {
                 maf: config.feeBaseMAF
             });
         }
+
+        mxcToken.mint(resolver.resolve("token_vault", false), reward);
+        state.rewards[state.nextBlockId] = reward;
 
         _saveProposedBlock(
             state,
@@ -151,6 +180,15 @@ library LibProposing {
         state.lastProposedAt = meta.timestamp;
 
         emit BlockProposed(state.nextBlockId++, meta);
+    }
+
+    function _calcProposeReward(
+        TaikoData.State storage state,
+        uint256 totalSupply
+    ) public view returns (uint256 reward) {
+        reward =
+            (totalSupply / 7 / 365 days) *
+            (block.timestamp - state.lastProposedAt);
     }
 
     function getBlockFee(
@@ -187,7 +225,7 @@ library LibProposing {
         bytes32 hash = _aggregateCommitHash(commitHeight, commitHash);
         return
             state.commits[msg.sender][commitSlot] == hash &&
-            block.number >= commitHeight + commitConfirmations;
+            LibUtils.getBlockNumber() >= commitHeight + commitConfirmations;
     }
 
     function getProposedBlock(

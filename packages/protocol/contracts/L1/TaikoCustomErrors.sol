@@ -45,4 +45,5 @@ abstract contract TaikoCustomErrors {
     error L1_TOO_MANY_BLOCKS();
     error L1_TX_LIST();
     error L1_ZKP();
+    error L1_STAKE_AMOUNT();
 }

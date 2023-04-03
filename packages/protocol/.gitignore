@@ -17,6 +17,8 @@ npm-debug.log*
 cache
 artifacts
 out
+contracts/.deps
 
 # Editors
 .vscode
+.idea

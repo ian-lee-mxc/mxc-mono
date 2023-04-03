@@ -11,9 +11,13 @@ import {
 } from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
 import {AddressResolver} from "../../common/AddressResolver.sol";
-import {TaikoToken} from "../TaikoToken.sol";
+import {MXCToken} from "../MXCToken.sol";
 import {LibUtils} from "./LibUtils.sol";
 import {TaikoData} from "../../L1/TaikoData.sol";
+import {TaikoCustomErrors} from "../../L1/TaikoCustomErrors.sol";
+import {
+    SafeERC20Upgradeable
+} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 /**
  * LibVerifying.
@@ -21,13 +25,14 @@ import {TaikoData} from "../../L1/TaikoData.sol";
 library LibVerifying {
     using SafeCastUpgradeable for uint256;
     using LibUtils for TaikoData.State;
-
+    using SafeERC20Upgradeable for MXCToken;
     event BlockVerified(uint256 indexed id, bytes32 blockHash);
     event HeaderSynced(uint256 indexed srcHeight, bytes32 srcHash);
 
     error L1_0_FEE_BASE();
     error L1_INVALID_CONFIG();
     error L1_INVALID_PARAM();
+    error L1_STAKE_AMOUNT();
 
     function init(
         TaikoData.State storage state,
@@ -56,7 +61,7 @@ library LibVerifying {
 
         if (feeBase == 0) revert L1_0_FEE_BASE();
 
-        state.genesisHeight = uint64(block.number);
+        state.genesisHeight = uint64(LibUtils.getBlockNumber());
         state.genesisTimestamp = uint64(block.timestamp);
         state.feeBase = feeBase;
         state.nextBlockId = 1;
@@ -142,10 +147,38 @@ library LibVerifying {
         if (balance <= 1) return;
 
         state.balances[msg.sender] = 1;
-        TaikoToken(resolver.resolve("tko_token", false)).mint(
+        MXCToken(resolver.resolve("mxc_token", false)).mint(
             msg.sender,
             balance - 1
         );
+    }
+
+    function stake(
+        TaikoData.State storage state,
+        AddressResolver resolver,
+        TaikoData.Config memory config,
+        uint256 amount
+    ) public {
+        if (amount < config.proposeBlockDeposit) revert L1_STAKE_AMOUNT();
+        MXCToken(resolver.resolve("mxc_token", false)).safeTransferFrom(
+            msg.sender,
+            address(this),
+            amount
+        );
+        state.stakingBalances[msg.sender] += amount;
+    }
+
+    function unStake(
+        TaikoData.State storage state,
+        AddressResolver resolver
+    ) public {
+        uint256 amount = state.stakingBalances[msg.sender];
+        if (amount == 0) revert L1_STAKE_AMOUNT();
+        MXCToken(resolver.resolve("mxc_token", false)).safeTransfer(
+            msg.sender,
+            amount
+        );
+        state.stakingBalances[msg.sender] -= amount;
     }
 
     function getProofReward(
