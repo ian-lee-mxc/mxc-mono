@@ -16,6 +16,8 @@
   let showProcessingFeeTooltip: boolean = false;
   let showNoneFeeTooltip: boolean = false;
 
+  // console.log($toChain, $fromChain, 999)
+
   $: recommendProcessingFee($toChain, $fromChain, method, $token, $signer)
     .then((recommendedFee) => (amount = recommendedFee))
     .catch((e) => console.error(e));
