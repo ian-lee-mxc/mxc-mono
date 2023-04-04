@@ -108,10 +108,15 @@
     role="button"
     tabindex="0"
     class="flex items-center justify-center hover:cursor-pointer">
-    {#if $token.logoComponent}
+    <!-- {#if $token.logoComponent}
       <svelte:component this={$token.logoComponent} />
     {:else}
       <Erc20 />
+    {/if} -->
+    {#if $token.logoUrl}
+      <img src={$token.logoUrl} height={22} width={22} alt="" />
+    {:else}
+      <svelte:component this={$token.logoComponent} height={22} width={22} />
     {/if}
     <p class="px-2 text-sm">{$token.symbol.toUpperCase()}</p>
     <ChevronDown size="20" />
@@ -124,7 +129,12 @@
     {#each tokens as t}
       <li class="cursor-pointer w-full hover:bg-dark-5 rounded-none">
         <button on:click={() => select(t)} class="flex hover:bg-dark-5 p-4">
-          <svelte:component this={t.logoComponent} height={22} width={22} />
+          {#if t.logoUrl}
+            <img src={t.logoUrl} height={22} width={22} alt="" />
+          {:else}
+            <svelte:component this={t.logoComponent} height={22} width={22} />
+          {/if}
+        
           <span class="text-sm font-medium bg-transparent px-2"
             >{t.symbol.toUpperCase()}</span>
         </button>
