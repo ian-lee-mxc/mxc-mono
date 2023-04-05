@@ -30,6 +30,7 @@ async function deployContract(
 }
 
 function compileYulContract(contractPath: string): string {
+    // const SOLC_COMMAND = path.join(__dirname, "../bin/solc");
     const SOLC_COMMAND = path.join(__dirname, "../bin/solc.exe");
 
     if (!fs.existsSync(SOLC_COMMAND)) {
@@ -111,6 +112,9 @@ async function getDeployer(hre: any) {
 }
 
 async function waitTx(hre: any, tx: any) {
+    if (hre.args.confirmations <= 0) {
+        return;
+    }
     return tx.wait(hre.args.confirmations);
 }
 

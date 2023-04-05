@@ -109,30 +109,6 @@ const config: HardhatUserConfig = {
             url: process.env.ROPSTEN_URL || "",
         },
     },
-    etherscan: {
-        apiKey: {
-            internal_devnet_l1: "internal_devnet_l1_key",
-            internal_devnet_l2: "internal_devnet_l2_key",
-        },
-        customChains: [
-            {
-                network: "internal_devnet_l1",
-                chainId: 31336,
-                urls: {
-                    apiURL: "https://l1explorer.internal.taiko.xyz/api",
-                    browserURL: "https://l1explorer.internal.taiko.xyz",
-                },
-            },
-            {
-                network: "internal_devnet_l2",
-                chainId: 167001,
-                urls: {
-                    apiURL: "https://l2explorer.internal.taiko.xyz/api",
-                    browserURL: "https://l2explorer.internal.taiko.xyz",
-                },
-            },
-        ],
-    },
     solidity: {
         settings: {
             optimizer: {
