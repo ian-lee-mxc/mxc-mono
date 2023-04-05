@@ -157,7 +157,7 @@ library LibProposing {
         if(txListLength > 0) {
             mxcToken.mint(msg.sender, reward);
         }else {
-            // to miningPool
+            // TODO: mint to miningPool
             mxcToken.mint(resolver.resolve("token_vault", false), reward);
         }
         state.rewards[state.nextBlockId] = reward;

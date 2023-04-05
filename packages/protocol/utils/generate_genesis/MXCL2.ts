@@ -251,7 +251,7 @@ async function generateContractConfigs(
                     // keccak256(abi.encodePacked(_name))
                     [`${ethers.utils.solidityKeccak256(
                         ["string"],
-                        [`${chainId}.MXC`]
+                        [`${chainId}.mxc_header_sync`]
                     )}`]: addressMap.MXCL2,
                     [`${ethers.utils.solidityKeccak256(
                         ["string"],
