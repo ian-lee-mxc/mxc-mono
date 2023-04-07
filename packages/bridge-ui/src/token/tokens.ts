@@ -71,9 +71,9 @@ const symbolToLogoComponent = {
 };
 
 const symbolToLogoSvg = {
-  RIDE: RideIcon,
-  PARK: ParkIcon,
-  MOON: MoonIcon
+  Ride: RideIcon,
+  Park: ParkIcon,
+  Moon: MoonIcon
 };
 
 export const testERC20Tokens: Token[] = TEST_ERC20.map(

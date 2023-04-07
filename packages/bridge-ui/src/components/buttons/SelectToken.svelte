@@ -19,6 +19,8 @@
   let showAddressField = false;
   let loading = false;
 
+  console.log(tokens)
+
   function select(t: Token) {
     if (t === $token) return;
 

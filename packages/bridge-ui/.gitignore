@@ -27,3 +27,4 @@ dist-ssr
 
 # vite
 vite.config.ts.timestamp-*.mjs
+.vercel
