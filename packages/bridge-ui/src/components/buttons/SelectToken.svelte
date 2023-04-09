@@ -19,8 +19,6 @@
   let showAddressField = false;
   let loading = false;
 
-  console.log(tokens)
-
   function select(t: Token) {
     if (t === $token) return;
 
@@ -106,6 +104,7 @@
 
 <div class="dropdown dropdown-bottom" bind:this={dropdownElement}>
   <!-- svelte-ignore a11y-label-has-associated-control -->
+  <!-- svelte-ignore a11y-no-noninteractive-element-to-interactive-role -->
   <label
     role="button"
     tabindex="0"

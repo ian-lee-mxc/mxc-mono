@@ -4,6 +4,7 @@
   import BridgeForm from '../../components/form/BridgeForm.svelte';
   import TaikoBanner from '../../components/TaikoBanner.svelte';
   import Transactions from '../../components/Transactions';
+  import Faucet from '../../components/Faucet/index.svelte'
   import { Tabs, TabList, Tab, TabPanel } from '../../components/Tabs';
 
   let bridgeWidth: number;
@@ -14,13 +15,13 @@
   const tabsRoute = [
     { name: 'bridge', href: '/' },
     { name: 'transactions', href: '/transactions' },
+    { name: 'faucet', href: '/faucet' },
     // Add more tabs if needed
   ];
 
   // TODO: we're assuming we have only two tabs here.
   //       Change strategy if needed.
-  $: activeTab = $location === '/' ? tabsRoute[0].name : tabsRoute[1].name;
-
+  $: activeTab = $location === '/' ? tabsRoute[0].name : ($location === '/transactions' ? tabsRoute[1].name : tabsRoute[2].name);
   // TODO: do we really need all these tricks to style containers
   //       Rethink this part: fluid, fixing on bigger screens
   $: isBridge = activeTab === tabsRoute[0].name;
@@ -43,12 +44,14 @@
     bind:activeTab>
     {@const tab1 = tabsRoute[0]}
     {@const tab2 = tabsRoute[1]}
+    {@const tab3 = tabsRoute[2]}
 
     <TabList class="block mb-4">
       <Tab name={tab1.name} href={tab1.href}>Bridge</Tab>
       <Tab name={tab2.name} href={tab2.href}>
         Transactions ({$transactions.length})
       </Tab>
+      <Tab name={tab3.name} href={tab3.href}>Faucet</Tab>
     </TabList>
 
     <TabPanel tab={tab1.name}>
@@ -60,6 +63,10 @@
 
     <TabPanel tab={tab2.name}>
       <Transactions />
+    </TabPanel>
+
+    <TabPanel tab={tab3.name}>
+      <Faucet />
     </TabPanel>
   </Tabs>
 </div>

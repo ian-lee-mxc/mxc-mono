@@ -6,6 +6,10 @@
   import { switchNetwork } from '@wagmi/core';
   import { ChevronDown, ExclamationTriangle } from 'svelte-heros-v2';
   import { mainnetChain, taikoChain } from '../chain/chains';
+  import MxcIcon from "../assets/token/mxc.png"
+  import EthIcon from "../assets/ether.png"
+
+  console.log($fromChain,33)
 
   const changeChain = async (chain: Chain) => {
     await switchNetwork({
@@ -26,13 +30,15 @@
 
 <div class="dropdown dropdown-end mr-4">
   <!-- svelte-ignore a11y-label-has-associated-control -->
+  <!-- svelte-ignore a11y-no-noninteractive-element-to-interactive-role -->
   <label
     role="button"
     tabindex="0"
-    class="btn btn-md justify-around md:w-[194px]">
-    <span class="font-normal flex-1 text-left mr-2">
+    class="btn btn-md justify-around md:w-[200px]">
+    <span class="font-normal flex-1 text-left mr-2 flex items-center justify-center">
       {#if $fromChain}
-        <svelte:component this={$fromChain.icon} />
+        <!-- <svelte:component this={$fromChain.icon} /> -->
+        <img src={$fromChain.logoUrl} height={30} width={30} alt="" >
         <span class="ml-2 hidden md:inline-block">{$fromChain.name}</span>
       {:else}
         <span class="ml-2 flex items-center">
@@ -53,7 +59,8 @@
         on:click={async () => {
           await changeChain(mainnetChain);
         }}>
-        <svelte:component this={mainnetChain.icon} height={24} />
+        <!-- <svelte:component this={mainnetChain.icon} height={24} /> -->
+        <img src={EthIcon} height={24} width={24} alt="" />
         <span class="pl-1.5 text-left flex-1">{mainnetChain.name}</span>
       </button>
     </li>
@@ -63,7 +70,8 @@
         on:click={async () => {
           await changeChain(taikoChain);
         }}>
-        <svelte:component this={taikoChain.icon} height={24} />
+        <!-- <svelte:component this={taikoChain.icon} height={24} /> -->
+        <img src={MxcIcon} height={24} width={24} alt="" />
         <span class="pl-1.5 text-left flex-1">{taikoChain.name}</span>
       </button>
     </li>
