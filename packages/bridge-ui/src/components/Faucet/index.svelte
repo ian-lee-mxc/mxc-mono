@@ -8,8 +8,6 @@
   import Button from '../buttons/Button.svelte';
 
   let address: string = '';
-  let mxcDisabled: boolean = false;
-  let moonDisabled: boolean = false;
   let loading: boolean = false;
   let loading2: boolean = false;
 
@@ -35,11 +33,16 @@
   async function getMxcToken() {
     loading = true;
 
+    if(!address) {
+      errorToast("No address account!");
+      return
+    }
+
     let res =  await getMXCTokenApi(address);
     if(res.status==200) {
-      successToast("request successful!");
+      successToast("Request successful!");
     } else {
-      errorToast("request fail!");
+      errorToast("Request failed!");
     }
     loading = false
   }
@@ -47,11 +50,16 @@
   async function getMoonToken() {
     loading2 = true;
 
+    if(!address) {
+      errorToast("No address account!");
+      return
+    }
+
     let res =  await getMoonTokenApi(address);
     if(res.status==200) {
-      successToast("request successful!");
+      successToast("Request successful!");
     } else {
-      errorToast("request fail!");
+      errorToast("Request failed!");
     }
     loading2 = false
   }
@@ -64,17 +72,14 @@
 </script>
 
 <div class="my-4 md:px-4">
-  <div class="max-w-lg mx-auto mb-5">
-    <label class="label" for="address">
-      <span class="label-text">Address</span>
-    </label>
-    <!-- svelte-ignore a11y-label-has-associated-control -->
+  <!-- <div class="max-w-lg mx-auto mb-5">
+    <div>Address</div>
     <label
       class="input-group relative rounded-lg bg-dark-2 justify-between items-center pr-4">
       <div class="text-sm">{address}</div>
     </label>
-  </div>
-  <div>
+  </div> -->
+  <div class="pt-5">
     {#if loading}
     <Button type="accent" size="lg" class="w-6/12" disabled={true}>
       <LottiePlayer
@@ -93,13 +98,13 @@
       type="accent"
       size="lg"
       class="w-6/12"
-      disabled={mxcDisabled}
+      disabled={!address}
       on:click={getMxcToken}>
       Claim 100 MXC
     </Button>
     {/if}
     
-    <div class="mb-5 text-sm">Note: Restrict one address to once a day</div>
+    <p class="mb-5 mt-1 text-sm">Limit the use of a single address to once per day.</p>
   </div>
 
   <div>
@@ -121,11 +126,12 @@
       type="accent"
       size="lg"
       class="w-6/12"
-      disable={moonDisabled}
+      disabled={!address}
       on:click={getMoonToken}>
-      Claim 1 Moon token
+      Claim 1 Moon
     </Button>
     {/if}
-    <div class="mb-5 text-sm">Note: Restrict one address get it once</div>
+    <p class="mt-1 text-sm">Limit the token redemption to a single occurrence </p>
+    <p class="text-sm">for a specific wallet address.</p>
   </div>
 </div>

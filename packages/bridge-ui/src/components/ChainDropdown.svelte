@@ -9,8 +9,6 @@
   import MxcIcon from "../assets/token/mxc.png"
   import EthIcon from "../assets/ether.png"
 
-  console.log($fromChain,33)
-
   const changeChain = async (chain: Chain) => {
     await switchNetwork({
       chainId: chain.id,

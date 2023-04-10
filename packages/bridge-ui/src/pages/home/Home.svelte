@@ -6,6 +6,8 @@
   import Transactions from '../../components/Transactions';
   import Faucet from '../../components/Faucet/index.svelte'
   import { Tabs, TabList, Tab, TabPanel } from '../../components/Tabs';
+  import { fromChain } from '../../store/chain';
+  import { L2_CHAIN_ID } from '../../constants/envVars';
 
   let bridgeWidth: number;
   let bridgeHeight: number;
@@ -51,7 +53,10 @@
       <Tab name={tab2.name} href={tab2.href}>
         Transactions ({$transactions.length})
       </Tab>
-      <Tab name={tab3.name} href={tab3.href}>Faucet</Tab>
+      {#if $fromChain && $fromChain.id==L2_CHAIN_ID}
+        <Tab name={tab3.name} href={tab3.href}>Faucet</Tab>
+      {/if}
+      
     </TabList>
 
     <TabPanel tab={tab1.name}>
