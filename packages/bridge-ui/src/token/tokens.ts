@@ -97,4 +97,4 @@ export const testERC20Tokens: Token[] = TEST_ERC20.map(
   }),
 );
 // ETHToken
-export const tokens = [MXCToken, ETHToken, ...testERC20Tokens];
+export const tokens = [MXCToken, ...testERC20Tokens];

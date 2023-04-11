@@ -51,7 +51,8 @@
   let memoError: string;
   let to: string = '';
   let showTo: boolean = false;
-  let feeMethod: ProcessingFeeMethod = ProcessingFeeMethod.RECOMMENDED;
+  // let feeMethod: ProcessingFeeMethod = ProcessingFeeMethod.RECOMMENDED;
+  let feeMethod: ProcessingFeeMethod = ProcessingFeeMethod.NONE;
   let feeAmount: string = '0';
 
   // TODO: too much going on here. We need to extract

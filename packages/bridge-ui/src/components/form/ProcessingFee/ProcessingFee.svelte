@@ -12,10 +12,10 @@
   import { L2_CHAIN_ID } from '../../../constants/envVars';
 
   // export let method: ProcessingFeeMethod = ProcessingFeeMethod.RECOMMENDED;
-  let method: ProcessingFeeMethod = ProcessingFeeMethod.NONE;
+  export let method: ProcessingFeeMethod = ProcessingFeeMethod.NONE;
   export let amount: string = '0';
 
-  console.log(method)
+  // console.log(method)
 
   let showProcessingFeeTooltip: boolean = false;
   let showNoneFeeTooltip: boolean = false;
