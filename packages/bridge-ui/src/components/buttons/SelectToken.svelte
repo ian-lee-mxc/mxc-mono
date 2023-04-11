@@ -114,13 +114,21 @@
     {:else}
       <Erc20 />
     {/if} -->
+
     {#if $token.logoUrl}
-      <img src={$token.logoUrl} height={22} width={22} alt="" />
-    {:else}
-      <svelte:component this={$token.logoComponent} height={22} width={22} />
+      <div class="flex pr-5">
+        <img src={$token.logoUrl} height={22} width={22} alt="" />      
+        <p class="px-2 text-sm">{$token.symbol.toUpperCase()}</p>
+      </div>
+      {:else}
+      <div class="flex">
+        <svelte:component this={$token.logoComponent} height={22} width={22} />
+        <p class="px-2 text-sm">{$token.symbol.toUpperCase()}</p>
+      </div>
     {/if}
-    <p class="px-2 text-sm">{$token.symbol.toUpperCase()}</p>
-    <ChevronDown size="20" />
+    <div>
+      <ChevronDown size="20" />
+    </div>
   </label>
 
   <ul

@@ -25,7 +25,7 @@ export default async function handler(req, res) {
   const contractFaucet = new ethers.Contract(c_faucet, abiFaucet, wallet);
   try {
     await contractFaucet.callStatic.requestMXC(address, {
-      gasPrice: 6000000000000,
+      gasPrice: 9000000000000,
       gasLimit: 3000000,
     });
   } catch (error) {
@@ -36,7 +36,7 @@ export default async function handler(req, res) {
   }
 
   let tx = await contractFaucet.requestMXC(address, {
-    gasPrice: 6000000000000,
+    gasPrice: 9000000000000,
     gasLimit: 3000000,
   });
   await tx.wait();

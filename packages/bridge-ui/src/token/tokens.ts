@@ -96,5 +96,5 @@ export const testERC20Tokens: Token[] = TEST_ERC20.map(
     logoUrl: symbolToLogoSvg[symbol],
   }),
 );
-
+// ETHToken
 export const tokens = [MXCToken, ETHToken, ...testERC20Tokens];
