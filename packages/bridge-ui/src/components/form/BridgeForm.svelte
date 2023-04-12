@@ -7,12 +7,11 @@
   import { activeBridge, bridgeType } from '../../store/bridge';
   import { signer } from '../../store/signer';
   import { BigNumber, Contract, ethers, Signer } from 'ethers';
-  import ProcessingFee from './ProcessingFee';
+  // import ProcessingFee from './ProcessingFee';
   import SelectToken from '../buttons/SelectToken.svelte';
 
   import type { Token } from '../../domain/token';
   import type { BridgeOpts, BridgeType } from '../../domain/bridge';
-
   import type { Chain } from '../../domain/chain';
   import { truncateString } from '../../utils/truncateString';
   import {
@@ -203,7 +202,8 @@
       const userBalance = await $signer.getBalance('latest');
 
       let balanceAvailableForTx = userBalance;
-      if ($token.symbol === ETHToken.symbol) {
+      // in l2
+      if ($token.symbol === ETHToken.symbol && $fromChain.id==L2_CHAIN_ID) {
         balanceAvailableForTx = userBalance.sub(
           ethers.utils.parseEther(amount),
         );
@@ -269,7 +269,6 @@
       }
 
       const tx = await $activeBridge.Bridge(bridgeOpts);
-
       // tx.chainId is not set immediately but we need it later. set it
       // manually.
       tx.chainId = $fromChain.id;

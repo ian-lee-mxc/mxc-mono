@@ -14,7 +14,7 @@
   import AddCustomErc20 from '../form/AddCustomERC20.svelte';
   import { ETHToken, tokens } from '../../token/tokens';
   import { errorToast, successToast } from '../Toast.svelte';
-  import { L1_CHAIN_ID } from '../../constants/envVars';
+  import { L1_CHAIN_ID, L2_CHAIN_ID} from '../../constants/envVars';
 
 
   let dropdownElement: HTMLDivElement;
@@ -36,7 +36,7 @@
 
     token.set(t);
 
-    if (t.symbol.toLowerCase() === ETHToken.symbol.toLowerCase()) {
+    if (t.symbol.toLowerCase() === ETHToken.symbol.toLowerCase() && $fromChain.id===L2_CHAIN_ID) {
       bridgeType.set(BridgeType.ETH);
     } else {
       bridgeType.set(BridgeType.ERC20);

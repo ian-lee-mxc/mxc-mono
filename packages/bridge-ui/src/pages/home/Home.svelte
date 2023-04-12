@@ -1,6 +1,7 @@
 <script lang="ts">
   import { location } from 'svelte-spa-router';
   import { transactions } from '../../store/transactions';
+  import { onMount } from 'svelte';
   import BridgeForm from '../../components/form/BridgeForm.svelte';
   import TaikoBanner from '../../components/TaikoBanner.svelte';
   import Transactions from '../../components/Transactions';
@@ -8,6 +9,11 @@
   import { Tabs, TabList, Tab, TabPanel } from '../../components/Tabs';
   import { fromChain } from '../../store/chain';
   import { L2_CHAIN_ID } from '../../constants/envVars';
+  import { bridgeType } from '../../store/bridge';
+  import { BridgeType, type HTMLBridgeForm } from '../../domain/bridge';
+  import type { Chain } from '../../domain/chain';
+  import { L1_CHAIN_ID } from '../../constants/envVars';
+
 
   let bridgeWidth: number;
   let bridgeHeight: number;
@@ -21,6 +27,12 @@
     // Add more tabs if needed
   ];
 
+  async function setBridge() {
+    // in l1, set
+    // console.log($fromChain.id)
+    bridgeType.set(BridgeType.ERC20);
+  }
+
   // TODO: we're assuming we have only two tabs here.
   //       Change strategy if needed.
   $: activeTab = $location === '/' ? tabsRoute[0].name : ($location === '/transactions' ? tabsRoute[1].name : tabsRoute[2].name);
@@ -33,6 +45,10 @@
     isBridge && $transactions.length > 0
       ? ''
       : `min-height: ${bridgeHeight}px;`;
+  
+  $: if ($fromChain && $fromChain.id === L1_CHAIN_ID) {
+    setBridge();
+  }
 </script>
 
 <div

@@ -1,7 +1,7 @@
 // import Bull from '../components/icons/Bull.svelte';
 // import Horse from '../components/icons/Horse.svelte';
 // import Tko from '../components/icons/TKO.svelte';
-import Eth from '../components/icons/ETH.svelte';
+// import Eth from '../components/icons/ETH.svelte';
 import Mxc from '../components/icons/MXC.svelte';
 import Unknown from '../components/icons/Unknown.svelte';
 import { L1_CHAIN_ID, L2_CHAIN_ID, TEST_ERC20 } from '../constants/envVars';
