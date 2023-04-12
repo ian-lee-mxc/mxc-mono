@@ -237,18 +237,18 @@ library LibProving {
             fc.provenAt = uint64(block.timestamp);
         }
 
-        if (oracleProving) {
+//        if (oracleProving) {
             // do not verify zkp
-        } else {
-            bool verified = proofVerifier.verifyZKP({
-                verifierId: string(
-                    abi.encodePacked("plonk_verifier_", evidence.circuitId)
-                ),
-                zkproof: evidence.proofs[0],
-                instance: _getInstance(evidence)
-            });
-            if (!verified) revert L1_ZKP();
-        }
+//        } else {
+//          }
+        bool verified = proofVerifier.verifyZKP({
+            verifierId: string(
+                abi.encodePacked("plonk_verifier_", evidence.circuitId)
+            ),
+            zkproof: evidence.proofs[0],
+            instance: _getInstance(evidence)
+        });
+        if (!verified) revert L1_ZKP();
 
         emit BlockProven({
             id: target.id,

@@ -74,7 +74,7 @@ export async function deployContracts(hre: any) {
     const daoVault = hre.args.daoVault;
     const teamVault = hre.args.teamVault;
     const l2GenesisBlockHash = hre.args.l2GenesisBlockHash;
-    const MXCL2Address = "0x0000777700000000000000000000000000000001"
+    const MXCL2Address = "0x0000777700000000000000000000000000000001";
     const l2ChainId = hre.args.l2ChainId;
     const bridgeFunderPrivateKey = hre.args.bridgeFunderPrivateKey;
     const bridgeFund = hre.args.bridgeFund;
