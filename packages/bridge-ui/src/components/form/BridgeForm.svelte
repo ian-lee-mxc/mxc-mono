@@ -39,6 +39,7 @@
   import { isOnCorrectChain } from '../../utils/isOnCorrectChain';
   import { ProcessingFeeMethod } from '../../domain/fee';
   import Button from '../buttons/Button.svelte';
+  import { L2_CHAIN_ID } from '../../constants/envVars';
 
   let amount: string;
   let amountInput: HTMLInputElement;
@@ -89,7 +90,7 @@
     fromChain: Chain,
   ) {
     if (signer && token) {
-      if (token.symbol == ETHToken.symbol) {
+      if (token.symbol == ETHToken.symbol && token.isETHToken && fromChain.id==L2_CHAIN_ID) {
         const userBalance = await signer.getBalance('latest');
         tokenBalance = ethers.utils.formatEther(userBalance);
       } else {
@@ -202,7 +203,6 @@
       const userBalance = await $signer.getBalance('latest');
 
       let balanceAvailableForTx = userBalance;
-
       if ($token.symbol === ETHToken.symbol) {
         balanceAvailableForTx = userBalance.sub(
           ethers.utils.parseEther(amount),
@@ -211,6 +211,7 @@
 
       return balanceAvailableForTx.gte(requiredGas);
     } catch (e) {
+      console.log(e,"error")
       return false;
     }
   }
@@ -455,7 +456,7 @@
 
 <To bind:showTo bind:to />
 
-<ProcessingFee bind:method={feeMethod} bind:amount={feeAmount} />
+<!-- <ProcessingFee bind:method={feeMethod} bind:amount={feeAmount} /> -->
 
 <Memo bind:memo bind:memoError />
 

@@ -15,8 +15,6 @@
   export let method: ProcessingFeeMethod = ProcessingFeeMethod.NONE;
   export let amount: string = '0';
 
-  // console.log(method)
-
   let showProcessingFeeTooltip: boolean = false;
   let showNoneFeeTooltip: boolean = false;
   // let $fromChain.id && $fromChain.id==L2_CHAIN_ID = $fromChain.id==167004;

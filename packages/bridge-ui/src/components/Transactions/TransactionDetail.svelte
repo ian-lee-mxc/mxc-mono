@@ -10,6 +10,8 @@
   //       in which case we need to guard => transaction?.prop
   export let transaction: BridgeTransaction;
   export let onClose: () => void;
+
+  console.log(transaction)
 </script>
 
 <Modal {onClose} isOpen={!!transaction} title="Transaction Details">
@@ -54,7 +56,7 @@
           <td>Call value</td>
           <td class="text-right">
             {ethers.utils.formatEther(transaction.message.callValue.toString())}
-            ETH
+            MXC
           </td>
         </tr>
       {/if}
@@ -62,7 +64,7 @@
         <tr>
           <td>Processing Fee</td>
           <td class="text-right">
-            {ethers.utils.formatEther(transaction.message.processingFee)} ETH
+            {ethers.utils.formatEther(transaction.message.processingFee)} MXC
           </td>
         </tr>
       {/if}
