@@ -10,9 +10,10 @@ import {
     getL2Provider,
 } from "./provider";
 import { createAndSeedWallets, sendTinyEtherToZeroAddress } from "./seed";
-import { defaultFeeBase, deployTaikoL1 } from "./taikoL1";
-import { deployTaikoL2 } from "./taikoL2";
-import deployTaikoToken from "./taikoToken";
+import { defaultFeeBase, deployMXCL1 } from "./mxcL1";
+import { deployMXCL2 } from "./mxcL2";
+import deployMXCToken from "./mxcToken";
+import deployArbSys from "./arbsys";
 
 async function initIntegrationFixture(
     mintTkoToProposer: boolean,
@@ -36,20 +37,21 @@ async function initIntegrationFixture(
         await Promise.all([l1Signer.unlock(""), l2Signer.unlock("")]);
     } catch (_) {}
 
+    await deployArbSys();
     const l2AddressManager = await deployAddressManager(l2Signer);
-    const taikoL2 = await deployTaikoL2(
+    const MXCL2 = await deployMXCL2(
         l2Signer,
         l2AddressManager,
         false,
         5000000 // Note: need to explicitly set gasLimit here, otherwise the deployment transaction may fail.
     );
-    const taikoL2DeployReceipt = await taikoL2.deployTransaction.wait();
+    const MXCL2DeployReceipt = await MXCL2.deployTransaction.wait();
 
-    const genesisHash = taikoL2DeployReceipt.blockHash as string;
-    const genesisHeight = taikoL2DeployReceipt.blockNumber as number;
+    const genesisHash = MXCL2DeployReceipt.blockHash as string;
+    const genesisHeight = MXCL2DeployReceipt.blockNumber as number;
 
     const l1AddressManager = await deployAddressManager(l1Signer);
-    const taikoL1 = await deployTaikoL1(
+    const MXCL1 = await deployMXCL1(
         l1AddressManager,
         genesisHash,
         enableTokenomics,
@@ -62,39 +64,37 @@ async function initIntegrationFixture(
         l1Signer
     );
 
-    const taikoTokenL1 = await deployTaikoToken(
+    const MXCTokenL1 = await deployMXCToken(
         l1Signer,
         l1AddressManager,
-        taikoL1.address
+        MXCL1.address
     );
 
     await (
         await l1AddressManager.setAddress(
-            `${chainId}.tko_token`,
-            taikoTokenL1.address
+            `${chainId}.mxc_token`,
+            MXCTokenL1.address
         )
     ).wait(1);
 
     const { chainId: l2ChainId } = await l2Provider.getNetwork();
 
     await (
-        await l1AddressManager.setAddress(`${l2ChainId}.taiko`, taikoL2.address)
+        await l1AddressManager.setAddress(`${l2ChainId}.MXC`, MXCL2.address)
     ).wait(1);
 
     await (
         await l1AddressManager.setAddress(
             `${chainId}.proof_verifier`,
-            taikoL1.address
+            MXCL1.address
         )
     ).wait(1);
 
     if (mintTkoToProposer) {
-        const mintTx = await taikoTokenL1
-            .connect(l1Signer)
-            .mintAnyone(
-                await proposerSigner.getAddress(),
-                ethers.utils.parseEther("100")
-            );
+        const mintTx = await MXCTokenL1.connect(l1Signer).mintAnyone(
+            await proposerSigner.getAddress(),
+            ethers.utils.parseEther("100")
+        );
 
         await mintTx.wait(1);
     }
@@ -118,10 +118,10 @@ async function initIntegrationFixture(
     await tx.wait(1);
 
     const chan = new SimpleChannel<number>();
-    const config = await taikoL1.getConfig();
+    const config = await MXCL1.getConfig();
 
     const proposer = new Proposer(
-        taikoL1.connect(proposerSigner),
+        MXCL1.connect(proposerSigner),
         l2Provider,
         config.commitConfirmations.toNumber(),
         config.maxNumBlocks.toNumber(),
@@ -129,10 +129,10 @@ async function initIntegrationFixture(
         proposerSigner
     );
 
-    const prover = new Prover(taikoL1, l2Provider, proverSigner);
+    const prover = new Prover(MXCL1, l2Provider, proverSigner);
     return {
-        taikoL1,
-        taikoL2,
+        MXCL1,
+        MXCL2,
         l1Provider,
         l2Provider,
         l1Signer,
@@ -141,7 +141,7 @@ async function initIntegrationFixture(
         proverSigner,
         genesisHeight,
         genesisHash,
-        taikoTokenL1,
+        MXCTokenL1,
         l1AddressManager,
         interval,
         interval2,

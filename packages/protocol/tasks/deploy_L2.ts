@@ -14,7 +14,7 @@ export async function deployContracts(hre: any) {
     const l2AddressManager = contractArtifacts.attach(
         "0x0000777700000000000000000000000000000006"
     );
-    await l2AddressManager.setAddress(`${chainId}.taiko`, l1.contracts.TaikoL1);
+    await l2AddressManager.setAddress(`${chainId}.mxc_header_sync`, l1.contracts.MXCL1);
     await l2AddressManager.setAddress(
         `${chainId}.mxc_token`,
         l1.contracts.MXCToken

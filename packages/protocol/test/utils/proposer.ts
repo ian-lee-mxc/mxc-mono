@@ -1,12 +1,12 @@
 import { ethers } from "ethers";
-import { TaikoL1 } from "../../typechain";
+import { MXCL1 } from "../../typechain";
 import { BlockProposedEvent } from "../../typechain/LibProposing";
 import { commitBlock } from "./commit";
 import { proposeBlock } from "./propose";
 import sleep from "./sleep";
 
 class Proposer {
-    private readonly taikoL1: TaikoL1;
+    private readonly taikoL1: MXCL1;
     private readonly l2Provider: ethers.providers.JsonRpcProvider;
     private readonly commitConfirms: number;
     private readonly maxNumBlocks: number;
@@ -16,7 +16,7 @@ class Proposer {
     private proposingMutex: boolean = false;
 
     constructor(
-        taikoL1: TaikoL1,
+        taikoL1: MXCL1,
         l2Provider: ethers.providers.JsonRpcProvider,
         commitConfirms: number,
         maxNumBlocks: number,

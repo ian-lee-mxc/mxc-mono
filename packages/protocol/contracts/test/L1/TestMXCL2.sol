@@ -6,17 +6,17 @@
 
 pragma solidity ^0.8.18;
 
-import {TaikoL2} from "../../L2/TaikoL2.sol";
-import {TaikoData} from "../../L1/TaikoData.sol";
+import {MXCL2} from "../../L2/MXCL2.sol";
+import {MXCData} from "../../L1/MXCData.sol";
 
-contract TestTaikoL2 is TaikoL2 {
-    constructor(address _addressManager) TaikoL2(_addressManager) {}
+contract TestMXCL2 is MXCL2 {
+    constructor(address _addressManager) MXCL2(_addressManager) {}
 
     function getConfig()
         public
         pure
         override
-        returns (TaikoData.Config memory config)
+        returns (MXCData.Config memory config)
     {
         config.chainId = 167;
         // up to 2048 pending blocks

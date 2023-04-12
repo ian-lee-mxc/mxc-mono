@@ -1,8 +1,7 @@
 import { expect } from "chai";
 import { SimpleChannel } from "channel-ts";
 import { ethers } from "ethers";
-import { TaikoL1 } from "../../typechain";
-import { TestTaikoToken } from "../../typechain/TestTaikoToken";
+import { MXCL1, TestMXCToken } from "../../typechain";
 import blockListener from "../utils/blockListener";
 import { initIntegrationFixture } from "../utils/fixture";
 import Proposer from "../utils/proposer";
@@ -11,26 +10,26 @@ import { seedTko } from "../utils/seed";
 import { commitProposeProveAndVerify } from "../utils/verify";
 
 describe("tokenomics: proofReward", function () {
-    let taikoL1: TaikoL1;
+    let mxcL1: MXCL1;
     let l2Provider: ethers.providers.JsonRpcProvider;
     let l1Signer: any;
     let genesisHeight: number;
-    let taikoTokenL1: TestTaikoToken;
+    let mxcTokenL1: TestMXCToken;
     let interval: any;
     let chan: SimpleChannel<number>;
     let proposer: Proposer;
     let prover: Prover;
 
     /* eslint-disable-next-line */
-    let config: Awaited<ReturnType<TaikoL1["getConfig"]>>;
+    let config: Awaited<ReturnType<MXCL1["getConfig"]>>;
 
     beforeEach(async () => {
         ({
-            taikoL1,
+            MXCL1: mxcL1,
             l2Provider,
             l1Signer,
             genesisHeight,
-            taikoTokenL1,
+            MXCTokenL1: mxcTokenL1,
             interval,
             chan,
             config,
@@ -53,7 +52,7 @@ describe("tokenomics: proofReward", function () {
     the proposer should receive a refund on his deposit because he holds a tkoBalance > 0 at time of verification.`, async function () {
         // prover needs TKO or their reward will be cut down to 1 wei.
 
-        await seedTko([prover], taikoTokenL1.connect(l1Signer));
+        await seedTko([prover], mxcTokenL1.connect(l1Signer));
 
         l2Provider.on("block", blockListener(chan, genesisHeight));
 
@@ -65,30 +64,30 @@ describe("tokenomics: proofReward", function () {
             ) {
                 break;
             }
-            const balanceBefore = await taikoTokenL1.balanceOf(
+            const balanceBefore = await mxcTokenL1.balanceOf(
                 await prover.getSigner().address
             );
 
             const { provedEvent, proposedBlock, verifyEvent } =
                 await commitProposeProveAndVerify(
-                    taikoL1,
+                    mxcL1,
                     l2Provider,
                     blockNumber,
                     proposer,
-                    taikoTokenL1,
+                    mxcTokenL1,
                     prover
                 );
 
             expect(verifyEvent).not.to.be.undefined;
 
-            const proofReward = await taikoL1.getProofReward(
+            const proofReward = await mxcL1.getProofReward(
                 provedEvent.args.provenAt,
                 proposedBlock.proposedAt
             );
 
             // proof reward can be 0. make sure there is a proof reward first
             if (proofReward.gt(0)) {
-                const rewardBalance = await taikoL1.getRewardBalance(
+                const rewardBalance = await mxcL1.getRewardBalance(
                     await prover.getSigner().getAddress()
                 );
 
@@ -98,18 +97,18 @@ describe("tokenomics: proofReward", function () {
                 // make sure we have a valid reward balance waiting to be withdrawn
                 // before comparing balances.
                 if (rewardBalance.gt(1)) {
-                    let balanceAfter = await taikoTokenL1.balanceOf(
+                    let balanceAfter = await mxcTokenL1.balanceOf(
                         await prover.getSigner().address
                     );
 
                     expect(balanceAfter).to.be.eq(balanceBefore);
 
-                    const tx = await taikoL1
+                    const tx = await mxcL1
                         .connect(prover.getSigner())
                         .withdrawBalance();
                     await tx.wait();
 
-                    balanceAfter = await taikoTokenL1.balanceOf(
+                    balanceAfter = await mxcTokenL1.balanceOf(
                         await prover.getSigner().address
                     );
 

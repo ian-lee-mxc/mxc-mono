@@ -7,15 +7,15 @@
 pragma solidity ^0.8.18;
 
 import {IProofVerifier} from "../../L1/ProofVerifier.sol";
-import {TaikoL1} from "../../L1/TaikoL1.sol";
-import {TaikoData} from "../../L1/TaikoData.sol";
+import {MXCL1} from "../../L1/MXCL1.sol";
+import {MXCData} from "../../L1/MXCData.sol";
 
-contract TestTaikoL1 is TaikoL1, IProofVerifier {
+contract TestMXCL1 is MXCL1, IProofVerifier {
     function getConfig()
         public
         pure
         override
-        returns (TaikoData.Config memory config)
+        returns (MXCData.Config memory config)
     {
         config.chainId = 167;
         // up to 2048 pending blocks

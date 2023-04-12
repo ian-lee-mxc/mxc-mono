@@ -11,7 +11,7 @@ import {
 } from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
 import {LibMath} from "../../libs/LibMath.sol";
-import {TaikoData} from "../TaikoData.sol";
+import {MXCData} from "../MXCData.sol";
 
 interface ArbSys {
     /**
@@ -43,15 +43,15 @@ library LibUtils {
     }
 
     function getProposedBlock(
-        TaikoData.State storage state,
+        MXCData.State storage state,
         uint256 maxNumBlocks,
         uint256 id
-    ) internal view returns (TaikoData.ProposedBlock storage) {
+    ) internal view returns (MXCData.ProposedBlock storage) {
         return state.proposedBlocks[id % maxNumBlocks];
     }
 
     function getL2BlockHash(
-        TaikoData.State storage state,
+        MXCData.State storage state,
         uint256 number,
         uint256 blockHashHistory
     ) internal view returns (bytes32) {
@@ -64,7 +64,7 @@ library LibUtils {
     }
 
     function getStateVariables(
-        TaikoData.State storage state
+        MXCData.State storage state
     ) internal view returns (StateVariables memory) {
         return
             StateVariables({
@@ -82,8 +82,8 @@ library LibUtils {
 
     // Implement "Incentive Multipliers", see the whitepaper.
     function getTimeAdjustedFee(
-        TaikoData.State storage state,
-        TaikoData.Config memory config,
+        MXCData.State storage state,
+        MXCData.Config memory config,
         bool isProposal,
         uint64 tNow,
         uint64 tLast,
@@ -117,8 +117,8 @@ library LibUtils {
 
     // Implement "Slot-availability Multipliers", see the whitepaper.
     function getSlotsAdjustedFee(
-        TaikoData.State storage state,
-        TaikoData.Config memory config,
+        MXCData.State storage state,
+        MXCData.Config memory config,
         bool isProposal,
         uint256 feeBase
     ) internal view returns (uint256) {
@@ -135,8 +135,8 @@ library LibUtils {
 
     // Implement "Bootstrap Discount Multipliers", see the whitepaper.
     function getBootstrapDiscountedFee(
-        TaikoData.State storage state,
-        TaikoData.Config memory config,
+        MXCData.State storage state,
+        MXCData.Config memory config,
         uint256 feeBase
     ) internal view returns (uint256) {
         uint256 halves = uint256(block.timestamp - state.genesisTimestamp) /
@@ -146,7 +146,7 @@ library LibUtils {
     }
 
     function hashMetadata(
-        TaikoData.BlockMetadata memory meta
+        MXCData.BlockMetadata memory meta
     ) internal pure returns (bytes32) {
         return keccak256(abi.encode(meta));
     }

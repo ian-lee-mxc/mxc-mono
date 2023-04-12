@@ -13,17 +13,17 @@ import {
 import {LibTxDecoder} from "../../libs/LibTxDecoder.sol";
 import {IMintableERC20} from "../../common/IMintableERC20.sol";
 import {LibUtils} from "./LibUtils.sol";
-import {TaikoData} from "../TaikoData.sol";
+import {MXCData} from "../MXCData.sol";
 import {AddressResolver} from "../../common/AddressResolver.sol";
 
 library LibProposing {
     using LibTxDecoder for bytes;
     using SafeCastUpgradeable for uint256;
-    using LibUtils for TaikoData.BlockMetadata;
-    using LibUtils for TaikoData.State;
+    using LibUtils for MXCData.BlockMetadata;
+    using LibUtils for MXCData.State;
 
     event BlockCommitted(uint64 commitSlot, bytes32 commitHash);
-    event BlockProposed(uint256 indexed id, TaikoData.BlockMetadata meta);
+    event BlockProposed(uint256 indexed id, MXCData.BlockMetadata meta);
 
     error L1_COMMITTED();
     error L1_EXTRA_DATA();
@@ -39,8 +39,8 @@ library LibProposing {
     error L1_FAST_EMPTY_PROPOSE();
 
     function commitBlock(
-        TaikoData.State storage state,
-        TaikoData.Config memory config,
+        MXCData.State storage state,
+        MXCData.Config memory config,
         uint64 commitSlot,
         bytes32 commitHash
     ) public {
@@ -60,8 +60,8 @@ library LibProposing {
     }
 
     function proposeBlock(
-        TaikoData.State storage state,
-        TaikoData.Config memory config,
+        MXCData.State storage state,
+        MXCData.Config memory config,
         AddressResolver resolver,
         bytes[] calldata inputs
     ) public {
@@ -75,9 +75,9 @@ library LibProposing {
         //    revert L1_SOLO_PROPOSER();
 
         if (inputs.length != 2) revert L1_INPUT_SIZE();
-        TaikoData.BlockMetadata memory meta = abi.decode(
+        MXCData.BlockMetadata memory meta = abi.decode(
             inputs[0],
-            (TaikoData.BlockMetadata)
+            (MXCData.BlockMetadata)
         );
         _verifyBlockCommit({
             state: state,
@@ -131,7 +131,7 @@ library LibProposing {
 
 //            meta.extraData = bytes.concat(bytes32(reward));
             // After The Merge, L1 mixHash contains the prevrandao
-            // from the beacon chain. Since multiple Taiko blocks
+            // from the beacon chain. Since multiple MXC blocks
             // can be proposed in one Ethereum block, we need to
             // add salt to this random number as L2 mixHash
             meta.mixHash = keccak256(
@@ -157,7 +157,7 @@ library LibProposing {
         if(txListLength > 0) {
             mxcToken.mint(msg.sender, reward);
         }else {
-            // to miningPool
+            // TODO: mint to miningPool
             mxcToken.mint(resolver.resolve("token_vault", false), reward);
         }
         state.rewards[state.nextBlockId] = reward;
@@ -166,7 +166,7 @@ library LibProposing {
             state,
             config.maxNumBlocks,
             state.nextBlockId,
-            TaikoData.ProposedBlock({
+            MXCData.ProposedBlock({
                 metaHash: meta.hashMetadata(),
                 deposit: deposit,
                 proposer: msg.sender,
@@ -188,7 +188,7 @@ library LibProposing {
     }
 
     function _calcProposeReward(
-        TaikoData.State storage state,
+        MXCData.State storage state,
         uint256 totalSupply
     ) public view returns (uint256 reward) {
         reward =
@@ -197,8 +197,8 @@ library LibProposing {
     }
 
     function getBlockFee(
-        TaikoData.State storage state,
-        TaikoData.Config memory config
+        MXCData.State storage state,
+        MXCData.Config memory config
     ) public view returns (uint256 newFeeBase, uint256 fee, uint256 deposit) {
         (newFeeBase, ) = LibUtils.getTimeAdjustedFee({
             state: state,
@@ -220,7 +220,7 @@ library LibProposing {
     }
 
     function isCommitValid(
-        TaikoData.State storage state,
+        MXCData.State storage state,
         uint256 commitConfirmations,
         uint256 commitSlot,
         uint256 commitHeight,
@@ -234,10 +234,10 @@ library LibProposing {
     }
 
     function getProposedBlock(
-        TaikoData.State storage state,
+        MXCData.State storage state,
         uint256 maxNumBlocks,
         uint256 id
-    ) internal view returns (TaikoData.ProposedBlock storage) {
+    ) internal view returns (MXCData.ProposedBlock storage) {
         if (id <= state.latestVerifiedId || id >= state.nextBlockId) {
             revert L1_ID();
         }
@@ -245,18 +245,18 @@ library LibProposing {
     }
 
     function _saveProposedBlock(
-        TaikoData.State storage state,
+        MXCData.State storage state,
         uint256 maxNumBlocks,
         uint256 id,
-        TaikoData.ProposedBlock memory blk
+        MXCData.ProposedBlock memory blk
     ) private {
         state.proposedBlocks[id % maxNumBlocks] = blk;
     }
 
     function _verifyBlockCommit(
-        TaikoData.State storage state,
+        MXCData.State storage state,
         uint256 commitConfirmations,
-        TaikoData.BlockMetadata memory meta
+        MXCData.BlockMetadata memory meta
     ) private view {
         if (commitConfirmations == 0) {
             return;
@@ -278,8 +278,8 @@ library LibProposing {
     }
 
     function _validateMetadata(
-        TaikoData.Config memory config,
-        TaikoData.BlockMetadata memory meta
+        MXCData.Config memory config,
+        MXCData.BlockMetadata memory meta
     ) private pure {
         if (
             meta.id != 0 ||

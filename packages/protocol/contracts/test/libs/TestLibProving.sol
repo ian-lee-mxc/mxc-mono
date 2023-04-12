@@ -25,12 +25,12 @@ import {LibTxUtils} from "../../libs/LibTxUtils.sol";
 import {LibBytesUtils} from "../../thirdparty/LibBytesUtils.sol";
 import {LibRLPWriter} from "../../thirdparty/LibRLPWriter.sol";
 import {LibUtils} from "../../L1/libs/LibUtils.sol";
-import {TaikoData} from "../../L1/TaikoData.sol";
+import {MXCData} from "../../L1/MXCData.sol";
 
 library TestLibProving {
     using LibBlockHeader for BlockHeader;
-    using LibUtils for TaikoData.BlockMetadata;
-    using LibUtils for TaikoData.State;
+    using LibUtils for MXCData.BlockMetadata;
+    using LibUtils for MXCData.State;
 
     bool private constant FLAG_VALIDATE_ANCHOR_TX_SIGNATURE = false;
     bool private constant FLAG_CHECK_METADATA = false;
@@ -75,17 +75,17 @@ library TestLibProving {
     error L1_ZKP();
 
     function proveBlock(
-        TaikoData.State storage state,
-        TaikoData.Config memory config,
+        MXCData.State storage state,
+        MXCData.Config memory config,
         AddressResolver resolver,
         uint256 blockId,
         bytes[] calldata inputs
     ) public {
         // Check and decode inputs
         if (inputs.length != 3) revert L1_INPUT_SIZE();
-        TaikoData.Evidence memory evidence = abi.decode(
+        MXCData.Evidence memory evidence = abi.decode(
             inputs[0],
-            (TaikoData.Evidence)
+            (MXCData.Evidence)
         );
 
         // Check evidence
@@ -121,21 +121,21 @@ library TestLibProving {
     }
 
     function proveBlockInvalid(
-        TaikoData.State storage state,
-        TaikoData.Config memory config,
+        MXCData.State storage state,
+        MXCData.Config memory config,
         AddressResolver resolver,
         uint256 blockId,
         bytes[] calldata inputs
     ) public {
         // Check and decode inputs
         if (inputs.length != 3) revert L1_INPUT_SIZE();
-        TaikoData.Evidence memory evidence = abi.decode(
+        MXCData.Evidence memory evidence = abi.decode(
             inputs[0],
-            (TaikoData.Evidence)
+            (MXCData.Evidence)
         );
-        TaikoData.BlockMetadata memory target = abi.decode(
+        MXCData.BlockMetadata memory target = abi.decode(
             inputs[1],
-            (TaikoData.BlockMetadata)
+            (MXCData.BlockMetadata)
         );
 
         // Check evidence
@@ -170,12 +170,12 @@ library TestLibProving {
     }
 
     function _proveBlock(
-        TaikoData.State storage state,
-        TaikoData.Config memory config,
+        MXCData.State storage state,
+        MXCData.Config memory config,
         AddressResolver resolver,
         IProofVerifier proofVerifier,
-        TaikoData.Evidence memory evidence,
-        TaikoData.BlockMetadata memory target,
+        MXCData.Evidence memory evidence,
+        MXCData.BlockMetadata memory target,
         bytes32 blockHashOverride
     ) private {
         if (evidence.meta.id != target.id) revert L1_ID();
@@ -215,7 +215,7 @@ library TestLibProving {
 
         bool oracleProving;
 
-        TaikoData.ForkChoice storage fc = state.forkChoices[target.id][
+        MXCData.ForkChoice storage fc = state.forkChoices[target.id][
             evidence.header.parentHash
         ];
 
@@ -265,10 +265,10 @@ library TestLibProving {
     }
 
     function _proveAnchorForValidBlock(
-        TaikoData.Config memory config,
+        MXCData.Config memory config,
         AddressResolver resolver,
         IProofVerifier proofVerifier,
-        TaikoData.Evidence memory evidence,
+        MXCData.Evidence memory evidence,
         bytes calldata anchorTx,
         bytes calldata anchorReceipt
     ) private view {
@@ -278,7 +278,7 @@ library TestLibProving {
             anchorTx
         );
         if (_tx.txType != 0) revert L1_ANCHOR_TYPE();
-        if (_tx.destination != resolver.resolve(config.chainId, "taiko", false))
+        if (_tx.destination != resolver.resolve(config.chainId, "mxc_header_sync", false))
             revert L1_ANCHOR_DEST();
         if (_tx.gasLimit != config.anchorTxGasLimit)
             revert L1_ANCHOR_GAS_LIMIT();
@@ -335,11 +335,11 @@ library TestLibProving {
     }
 
     function _proveAnchorForInvalidBlock(
-        TaikoData.Config memory config,
+        MXCData.Config memory config,
         AddressResolver resolver,
-        TaikoData.BlockMetadata memory target,
+        MXCData.BlockMetadata memory target,
         IProofVerifier proofVerifier,
-        TaikoData.Evidence memory evidence,
+        MXCData.Evidence memory evidence,
         bytes calldata invalidateBlockReceipt
     ) private view {
         if (
@@ -359,7 +359,7 @@ library TestLibProving {
         LibReceiptDecoder.Log memory log = receipt.logs[0];
         if (
             log.contractAddress !=
-            resolver.resolve(config.chainId, "taiko", false)
+            resolver.resolve(config.chainId, "mxc_header_sync", false)
         ) revert L1_ANCHOR_RECEIPT_ADDR();
         if (log.data.length != 0) revert L1_ANCHOR_RECEIPT_DATA();
         if (
@@ -370,7 +370,7 @@ library TestLibProving {
     }
 
     function _getInstance(
-        TaikoData.Evidence memory evidence
+        MXCData.Evidence memory evidence
     ) internal pure returns (bytes32) {
         bytes[] memory list = LibBlockHeader.getBlockHeaderRLPItemsList(
             evidence.header,

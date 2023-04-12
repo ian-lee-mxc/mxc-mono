@@ -122,7 +122,7 @@ describe("integrationbridge:Bridge", function () {
 
         await addressManager
             .connect(owner)
-            .setAddress(`${srcChainId}.taiko`, l1HeaderSync.address);
+            .setAddress(`${srcChainId}.mxc_header_sync`, l1HeaderSync.address);
 
         l2HeaderSync = await (await ethers.getContractFactory("TestHeaderSync"))
             .connect(l2Signer)
@@ -130,7 +130,7 @@ describe("integrationbridge:Bridge", function () {
 
         await l2AddressManager
             .connect(l2Signer)
-            .setAddress(`${enabledDestChainId}.taiko`, l2HeaderSync.address);
+            .setAddress(`${enabledDestChainId}.mxc_header_sync`, l2HeaderSync.address);
 
         m = {
             id: 1,

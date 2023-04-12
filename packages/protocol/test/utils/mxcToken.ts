@@ -2,17 +2,17 @@ import { ethers } from "ethers";
 import { ethers as hardhatEthers } from "hardhat";
 import { AddressManager } from "../../typechain";
 
-const deployTaikoToken = async (
+const deployMXCToken = async (
     signer: ethers.Signer,
     addressManager: AddressManager,
     protoBroker: string
 ) => {
     const token = await (
-        await hardhatEthers.getContractFactory("TestTaikoToken")
+        await hardhatEthers.getContractFactory("TestMXCToken")
     )
         .connect(signer)
         .deploy();
-    await token.init("Taiko Token", "TKO", addressManager.address);
+    await token.init("MXC Token", "MXC", addressManager.address);
 
     const network = await signer.provider?.getNetwork();
 
@@ -24,4 +24,4 @@ const deployTaikoToken = async (
     return token;
 };
 
-export default deployTaikoToken;
+export default deployMXCToken;

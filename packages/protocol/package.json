@@ -1,5 +1,5 @@
 {
-  "name": "@taiko/protocol",
+  "name": "@mxc/protocol",
   "version": "0.6.0",
   "private": true,
   "scripts": {
@@ -20,8 +20,9 @@
     "test:integration": "TEST_TYPE=integration ./test/test_integration.sh",
     "test:tokenomics": "TEST_TYPE=tokenomics ./test/test_integration.sh",
     "test:all": "pnpm run test && pnpm run test:integration && pnpm run test:tokenomics && pnpm run test:genesis",
-    "deploy:hardhat": "pnpm hardhat deploy_L1 --network arb_goerli --dao-vault 0x48A92CCc4Bb837Ec0A8D7766F930AACdFf4912cF --team-vault 0x48A92CCc4Bb837Ec0A8D7766F930AACdFf4912cF --l2-genesis-block-hash 0xe68f70e2582b1b62d2a1f240855539150e468f883d995aa4c510c2afbf0ef77d --bridge-funder-private-key 0x006ce077e1e1f3935c31c1c4ace150d8772faf4f4fca1dccb59ebbca90ca4af6 --bridge-fund 0xff --oracle-prover 0x48A92CCc4Bb837Ec0A8D7766F930AACdFf4912cF --solo-proposer 0x48A92CCc4Bb837Ec0A8D7766F930AACdFf4912cF --confirmations 1",
+    "deploy:hardhat": "pnpm hardhat deploy_L1 --network arb_goerli --dao-vault 0x67FBaF4596207631c12a437A0bB618066471B2dB --team-vault 0x67FBaF4596207631c12a437A0bB618066471B2dB --l2-genesis-block-hash 0xc2aaf43ee2e2bfc28a0cf76d30b92caf5073df07bb0b916b9355230fb50cec58 --bridge-funder-private-key ${privateKey} --bridge-fund 0xff --oracle-prover 0x67FBaF4596207631c12a437A0bB618066471B2dB --solo-proposer 0x67FBaF4596207631c12a437A0bB618066471B2dB --confirmations 1",
     "deploy:L2": "pnpm hardhat deploy_L2 --network mxc_testnet",
+    "task:mockTransactionL2": "pnpm hardhat mock_transaction_L2 --network mxc_testnet",
     "lint-staged": "lint-staged --allow-empty",
     "sizer": "pnpm hardhat size-contracts"
   },
@@ -37,7 +38,7 @@
     "zkRollup",
     "Layer2"
   ],
-  "author": "Taiko Labs",
+  "author": "MXC Foundation",
   "license": "MIT",
   "devDependencies": {
     "@defi-wonderland/smock": "^2.3.3",
@@ -74,6 +75,7 @@
     "hardhat-gas-reporter": "^1.0.7",
     "lint-staged": "^12.3.4",
     "merkle-patricia-tree": "^4.2.4",
+    "mocha": "^10.2.0",
     "prettier": "^2.5.1",
     "prettier-plugin-solidity": "^1.1.2",
     "rlp": "^3.0.0",

@@ -13,8 +13,8 @@ import {
 import {AddressResolver} from "../../common/AddressResolver.sol";
 import {MXCToken} from "../MXCToken.sol";
 import {LibUtils} from "./LibUtils.sol";
-import {TaikoData} from "../../L1/TaikoData.sol";
-import {TaikoCustomErrors} from "../../L1/TaikoCustomErrors.sol";
+import {MXCData} from "../../L1/MXCData.sol";
+import {MXCCustomErrors} from "../../L1/MXCCustomErrors.sol";
 import {
     SafeERC20Upgradeable
 } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
@@ -24,7 +24,7 @@ import {
  */
 library LibVerifying {
     using SafeCastUpgradeable for uint256;
-    using LibUtils for TaikoData.State;
+    using LibUtils for MXCData.State;
     using SafeERC20Upgradeable for MXCToken;
     event BlockVerified(uint256 indexed id, bytes32 blockHash);
     event HeaderSynced(uint256 indexed srcHeight, bytes32 srcHash);
@@ -35,8 +35,8 @@ library LibVerifying {
     error L1_STAKE_AMOUNT();
 
     function init(
-        TaikoData.State storage state,
-        TaikoData.Config memory config,
+        MXCData.State storage state,
+        MXCData.Config memory config,
         bytes32 genesisBlockHash,
         uint feeBase
     ) internal {
@@ -73,8 +73,8 @@ library LibVerifying {
     }
 
     function verifyBlocks(
-        TaikoData.State storage state,
-        TaikoData.Config memory config,
+        MXCData.State storage state,
+        MXCData.Config memory config,
         uint256 maxBlocks
     ) public {
         uint64 latestL2Height = state.latestVerifiedHeight;
@@ -88,10 +88,10 @@ library LibVerifying {
             i < state.nextBlockId && processed < maxBlocks;
 
         ) {
-            TaikoData.ForkChoice storage fc = state.forkChoices[i][
+            MXCData.ForkChoice storage fc = state.forkChoices[i][
                 latestL2Hash
             ];
-            TaikoData.ProposedBlock storage target = state.getProposedBlock(
+            MXCData.ProposedBlock storage target = state.getProposedBlock(
                 config.maxNumBlocks,
                 i
             );
@@ -140,7 +140,7 @@ library LibVerifying {
     }
 
     function withdrawBalance(
-        TaikoData.State storage state,
+        MXCData.State storage state,
         AddressResolver resolver
     ) public {
         uint256 balance = state.balances[msg.sender];
@@ -154,9 +154,9 @@ library LibVerifying {
     }
 
     function stake(
-        TaikoData.State storage state,
+        MXCData.State storage state,
         AddressResolver resolver,
-        TaikoData.Config memory config,
+        MXCData.Config memory config,
         uint256 amount
     ) public {
         if (amount < config.proposeBlockDeposit) revert L1_STAKE_AMOUNT();
@@ -169,7 +169,7 @@ library LibVerifying {
     }
 
     function unStake(
-        TaikoData.State storage state,
+        MXCData.State storage state,
         AddressResolver resolver
     ) public {
         uint256 amount = state.stakingBalances[msg.sender];
@@ -182,8 +182,8 @@ library LibVerifying {
     }
 
     function getProofReward(
-        TaikoData.State storage state,
-        TaikoData.Config memory config,
+        MXCData.State storage state,
+        MXCData.Config memory config,
         uint64 provenAt,
         uint64 proposedAt
     ) public view returns (uint256 newFeeBase, uint256 reward, uint256 tRelBp) {
@@ -207,10 +207,10 @@ library LibVerifying {
     }
 
     function _verifyBlock(
-        TaikoData.State storage state,
-        TaikoData.Config memory config,
-        TaikoData.ForkChoice storage fc,
-        TaikoData.ProposedBlock storage target,
+        MXCData.State storage state,
+        MXCData.Config memory config,
+        MXCData.ForkChoice storage fc,
+        MXCData.ProposedBlock storage target,
         uint64 latestL2Height,
         bytes32 latestL2Hash
     ) private returns (uint64 _latestL2Height, bytes32 _latestL2Hash) {

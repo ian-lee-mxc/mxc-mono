@@ -5,15 +5,15 @@ import {
     ERC20_TRANSFER_AMOUNT_EXCEEDED,
 } from "../constants/errors";
 import { BigNumber } from "ethers";
-import deployTaikoToken from "../utils/taikoToken";
-import { TestTaikoToken } from "../../typechain/TestTaikoToken";
+import deployMXCToken from "../utils/mxcToken";
+import { TestMXCToken } from "../../typechain";
 import deployAddressManager from "../utils/addressManager";
 
-describe("TaikoToken", function () {
+describe("MXCToken", function () {
     let owner: any;
     let nonOwner: any;
     let protoBroker: any;
-    let token: TestTaikoToken;
+    let token: TestMXCToken;
     let amountMinted: BigNumber;
 
     before(async function () {
@@ -22,13 +22,15 @@ describe("TaikoToken", function () {
 
     beforeEach(async function () {
         const addressManager = await deployAddressManager(owner);
-        token = await deployTaikoToken(
+        token = await deployMXCToken(
             owner,
             addressManager,
             protoBroker.address
         );
         amountMinted = ethers.utils.parseEther("100");
-        await token.connect(protoBroker).mint(owner.address, amountMinted);
+        await token
+            .connect(protoBroker)
+            ["mint(address,uint256)"](owner.address, amountMinted);
 
         const ownerBalance = await token.balanceOf(owner.address);
         expect(ownerBalance).to.be.eq(amountMinted);
@@ -37,13 +39,20 @@ describe("TaikoToken", function () {
     describe("mint()", async () => {
         it("throws when to is equal to the zero address", async () => {
             await expect(
-                token.connect(protoBroker).mint(ethers.constants.AddressZero, 1)
+                token
+                    .connect(protoBroker)
+                    ["mint(address,uint256)"](ethers.constants.AddressZero, 1)
             ).to.be.revertedWith("TKO_INVALID_ADDR()");
         });
 
         it("throws when minter is not the protoBroker", async () => {
             await expect(
-                token.connect(owner).mint(nonOwner.address, amountMinted.add(1))
+                token
+                    .connect(owner)
+                    ["mint(address,uint256)"](
+                        nonOwner.address,
+                        amountMinted.add(1)
+                    )
             ).to.be.revertedWith("RESOLVER_DENIED()");
         });
 
@@ -52,7 +61,7 @@ describe("TaikoToken", function () {
 
             await token
                 .connect(protoBroker)
-                .mint(nonOwner.address, amountMinted);
+                ["mint(address,uint256)"](nonOwner.address, amountMinted);
 
             const postTransferBalance = await token.balanceOf(nonOwner.address);
             expect(postTransferBalance).to.be.eq(

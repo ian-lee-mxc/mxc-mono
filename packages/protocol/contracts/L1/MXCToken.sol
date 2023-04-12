@@ -18,7 +18,7 @@ import {
     IERC20Upgradeable
 } from "../thirdparty/ERC20Upgradeable.sol";
 
-/// @dev This is Taiko's governance and fee token.
+/// @dev This is MXC's governance and fee token.
 contract MXCToken is EssentialContract, ERC20Upgradeable, IMintableERC20 {
     using LibMath for uint256;
     using SafeCastUpgradeable for uint256;

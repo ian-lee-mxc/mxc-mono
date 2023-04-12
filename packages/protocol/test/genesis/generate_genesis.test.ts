@@ -128,7 +128,7 @@ action("Generate Genesis", function () {
             );
 
             const taikoL2 = await addressManager.getAddress(
-                `${testConfig.chainId}.taiko`
+                `${testConfig.chainId}.mxc_header_sync`
             );
 
             expect(taikoL2).to.be.equal(getContractAlloc("TaikoL2").address);

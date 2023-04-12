@@ -10,24 +10,24 @@ import {EssentialContract} from "../common/EssentialContract.sol";
 import {IHeaderSync} from "../common/IHeaderSync.sol";
 import {LibAnchorSignature} from "../libs/LibAnchorSignature.sol";
 import {LibSharedConfig} from "../libs/LibSharedConfig.sol";
-import {TaikoData} from "./TaikoData.sol";
-import {TaikoEvents} from "./TaikoEvents.sol";
-import {TaikoCustomErrors} from "./TaikoCustomErrors.sol";
+import {MXCData} from "./MXCData.sol";
+import {MXCEvents} from "./MXCEvents.sol";
+import {MXCCustomErrors} from "./MXCCustomErrors.sol";
 import {LibProposing} from "./libs/LibProposing.sol";
 import {LibProving} from "./libs/LibProving.sol";
 import {LibUtils} from "./libs/LibUtils.sol";
 import {LibVerifying} from "./libs/LibVerifying.sol";
 import {AddressResolver} from "../common/AddressResolver.sol";
 
-contract TaikoL1 is
+contract MXCL1 is
     EssentialContract,
     IHeaderSync,
-    TaikoEvents,
-    TaikoCustomErrors
+    MXCEvents,
+    MXCCustomErrors
 {
-    using LibUtils for TaikoData.State;
+    using LibUtils for MXCData.State;
 
-    TaikoData.State public state;
+    MXCData.State public state;
     uint256[100] private __gap;
 
     modifier onlyFromEOA() {
@@ -70,7 +70,7 @@ contract TaikoL1 is
     }
 
     /**
-     * Propose a Taiko L2 block.
+     * Propose a MXC L2 block.
      *
      * @param inputs A list of data input:
      *        - inputs[0] is abi-encoded BlockMetadata that the actual L2 block
@@ -91,7 +91,7 @@ contract TaikoL1 is
     function proposeBlock(
         bytes[] calldata inputs
     ) external onlyFromEOA nonReentrant {
-        TaikoData.Config memory config = getConfig();
+        MXCData.Config memory config = getConfig();
         if (state.stakingBalances[msg.sender] < config.proposeBlockDeposit)
             revert L1_STAKE_AMOUNT();
         LibProposing.proposeBlock({
@@ -126,7 +126,7 @@ contract TaikoL1 is
         uint256 blockId,
         bytes[] calldata inputs
     ) external onlyFromEOA nonReentrant {
-        TaikoData.Config memory config = getConfig();
+        MXCData.Config memory config = getConfig();
         LibProving.proveBlock({
             state: state,
             config: config,
@@ -159,7 +159,7 @@ contract TaikoL1 is
         uint256 blockId,
         bytes[] calldata inputs
     ) external onlyFromEOA nonReentrant {
-        TaikoData.Config memory config = getConfig();
+        MXCData.Config memory config = getConfig();
 
         LibProving.proveBlockInvalid({
             state: state,
@@ -189,7 +189,7 @@ contract TaikoL1 is
     }
 
     function stake(uint256 amount) external nonReentrant {
-        TaikoData.Config memory config = getConfig();
+        MXCData.Config memory config = getConfig();
         LibVerifying.stake(state, AddressResolver(this), config, amount);
     }
 
@@ -246,7 +246,7 @@ contract TaikoL1 is
 
     function getProposedBlock(
         uint256 id
-    ) public view returns (TaikoData.ProposedBlock memory) {
+    ) public view returns (MXCData.ProposedBlock memory) {
         return
             LibProposing.getProposedBlock(state, getConfig().maxNumBlocks, id);
     }
@@ -283,11 +283,11 @@ contract TaikoL1 is
     function getForkChoice(
         uint256 id,
         bytes32 parentHash
-    ) public view returns (TaikoData.ForkChoice memory) {
+    ) public view returns (MXCData.ForkChoice memory) {
         return state.forkChoices[id][parentHash];
     }
 
-    function getConfig() public pure virtual returns (TaikoData.Config memory) {
+    function getConfig() public pure virtual returns (MXCData.Config memory) {
         return LibSharedConfig.getConfig();
     }
 }
