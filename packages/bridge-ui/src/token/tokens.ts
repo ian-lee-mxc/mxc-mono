@@ -28,7 +28,8 @@ export const ETHToken: Token = {
   symbol: 'MXC',
   logoComponent: Mxc,
   logoUrl: MxcIcon,
-  isETHToken: true
+  isETHToken: true,
+  tokenFaucet: 10000
 };
 
 // export const ETHToken: Token = {

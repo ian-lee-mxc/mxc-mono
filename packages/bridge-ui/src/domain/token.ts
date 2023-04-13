@@ -13,6 +13,8 @@ export type Token = {
   logoUrl?: string;
   // 是否是原生代币
   isETHToken?: boolean;
+  // faucet get number
+  tokenFaucet?: number;
   logoComponent: ComponentType;
 };
 

@@ -15,7 +15,7 @@
       });
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       await provider.send('eth_requestAccounts', []);
-
+      
       fromChain.set(chain);
       toChain.set(chain === mainnetChain ? taikoChain : mainnetChain);
 
@@ -23,7 +23,7 @@
       successToast('Successfully changed chain');
     } catch (e) {
       console.error(e);
-      errorToast('Error switching chain');
+      errorToast('Error Switching Chain. Try Switching Manually On Your Wallet');
     }
   };
 </script>

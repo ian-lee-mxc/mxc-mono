@@ -72,13 +72,6 @@
 </script>
 
 <div class="my-4 md:px-4">
-  <!-- <div class="max-w-lg mx-auto mb-5">
-    <div>Address</div>
-    <label
-      class="input-group relative rounded-lg bg-dark-2 justify-between items-center pr-4">
-      <div class="text-sm">{address}</div>
-    </label>
-  </div> -->
   <div class="pt-5">
     {#if loading}
     <Button type="accent" size="lg" class="w-6/12" disabled={true}>
