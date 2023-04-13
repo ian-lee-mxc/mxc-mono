@@ -28,7 +28,7 @@
   })
   // l2 => MXC is ethToken
   const l2Token = tokens.filter(item=>{
-    return !item.isETHToken && item.symbol!=='MXC'
+    return item.isETHToken && item.symbol=='MXC' ? false: true
   })
 
   function select(t: Token) {
