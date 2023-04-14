@@ -143,8 +143,6 @@
     </div>
   </label>
 
-  
-
   <ul
     role="listbox"
     tabindex="0"
@@ -181,8 +179,6 @@
         </li>
       {/each}
     {/if}
-
-    
 
     {#each $userTokens as t}
       <li class="cursor-pointer w-full hover:bg-dark-5">

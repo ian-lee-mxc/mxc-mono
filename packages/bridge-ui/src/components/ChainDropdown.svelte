@@ -8,21 +8,29 @@
   import { mainnetChain, taikoChain } from '../chain/chains';
   import MxcIcon from "../assets/token/mxc.png"
   import EthIcon from "../assets/ether.png"
+  import { errorToast, successToast } from './Toast.svelte';
 
   const changeChain = async (chain: Chain) => {
-    await switchNetwork({
-      chainId: chain.id,
-    });
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.send('eth_requestAccounts', []);
+    try {
+      await switchNetwork({
+        chainId: chain.id,
+      });
+      successToast('Successfully switched chain');
 
-    fromChain.set(chain);
-    if (chain === mainnetChain) {
-      toChain.set(taikoChain);
-    } else {
-      toChain.set(mainnetChain);
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send('eth_requestAccounts', []);
+
+      fromChain.set(chain);
+      if (chain === mainnetChain) {
+        toChain.set(taikoChain);
+      } else {
+        toChain.set(mainnetChain);
+      }
+      signer.set(provider.getSigner());
+    } catch (e) {
+      console.error(e);
+      errorToast('Error Switching Chain. Try Switching Manually On Your Wallet');
     }
-    signer.set(provider.getSigner());
   };
 </script>
 

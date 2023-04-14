@@ -76,6 +76,9 @@
     "buffer": "^6.0.3",
     "ethers": "^5.7.1",
     "identicon.js": "^2.3.3",
+    "ip": "^1.1.8",
+    "redis": "^4.6.5",
+    "request-ip": "^3.3.0",
     "svelte-i18n": "^3.5.1",
     "svelte-spa-router": "^3.2.0"
   }

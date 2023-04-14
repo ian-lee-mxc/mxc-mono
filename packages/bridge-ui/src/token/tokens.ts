@@ -83,7 +83,6 @@ export const testERC20Tokens: Token[] = TEST_ERC20.map(
   ({ name, address, symbol }) => ({
     name,
     symbol,
-
     addresses: [
       {
         chainId: L1_CHAIN_ID,
@@ -95,6 +94,7 @@ export const testERC20Tokens: Token[] = TEST_ERC20.map(
       },
     ],
     decimals: 18,
+    tokenFaucet: symbol == 'MXC' ? 10000 : 50,
     logoComponent: symbolToLogoComponent[symbol] || Unknown,
     logoUrl: symbolToLogoSvg[symbol],
   }),

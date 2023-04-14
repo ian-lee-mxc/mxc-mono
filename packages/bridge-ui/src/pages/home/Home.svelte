@@ -78,9 +78,7 @@
       <Tab name={tab2.name} href={tab2.href}>
         Transactions ({$transactions.length})
       </Tab>
-      {#if $fromChain && $fromChain.id==L2_CHAIN_ID}
-        <Tab name={tab3.name} href={tab3.href}>Faucet</Tab>
-      {/if}
+      <Tab name={tab3.name} href={tab3.href}>Faucet</Tab>
       {#if $fromChain && $fromChain.id==L1_CHAIN_ID}
         <Tab name={tab4.name} href={tab4.href}>Stake</Tab>
       {/if}

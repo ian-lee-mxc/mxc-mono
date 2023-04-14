@@ -87,7 +87,7 @@
     token: Token,
     fromChain: Chain,
   ) {
-    if (signer && token) {
+    if (signer && token && fromChain) {
       if (token.symbol == ETHToken.symbol && token.isETHToken && fromChain.id==L2_CHAIN_ID) {
         const userBalance = await signer.getBalance('latest');
         tokenBalance = ethers.utils.formatEther(userBalance);

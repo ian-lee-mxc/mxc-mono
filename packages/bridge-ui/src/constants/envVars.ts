@@ -22,6 +22,8 @@ export const L1_CHAIN_ID: ChainID = parseInt(
   import.meta.env?.VITE_MAINNET_CHAIN_ID,
 );
 
+export const SITE_KEY: string = import.meta.env?.VITE_RECAPTCHA_SITEKEY;
+
 export const L1_CHAIN_NAME: string = import.meta.env?.VITE_MAINNET_CHAIN_NAME;
 
 export const L1_EXPLORER_URL: string = import.meta.env?.VITE_L1_EXPLORER_URL;
