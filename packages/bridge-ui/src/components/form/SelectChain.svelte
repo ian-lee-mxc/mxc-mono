@@ -34,11 +34,11 @@
     {#if $fromChain}
       <!-- <svelte:component this={$fromChain.icon} /> -->
       <img src={$fromChain.logoUrl} height={30} width={30} alt="" >
-      <span class="ml-2">{$fromChain.name}</span>
+      <span class="chain-name ml-2">{$fromChain.name}</span>
     {:else}
       <!-- <svelte:component this={mainnetChain.icon} /> -->
       <img src={mainnetChain.logoUrl} height={30} width={30} alt="" >
-      <span class="ml-2">{mainnetChain.name}</span>
+      <span class="chain-name ml-2">{mainnetChain.name}</span>
     {/if}
   </div>
 
@@ -50,11 +50,11 @@
     {#if $toChain}
       <!-- <svelte:component this={$toChain.icon} /> -->
       <img src={$toChain.logoUrl} height={30} width={30} alt="" >
-      <span class="ml-2">{$toChain.name}</span>
+      <span class="chain-name ml-2">{$toChain.name}</span>
     {:else}
       <!-- <svelte:component this={taikoChain.icon} /> -->
       <img src={taikoChain.logoUrl} height={30} width={30} alt="" >
-      <span class="ml-2">{taikoChain.name}</span>
+      <span class="chain-name ml-2">{taikoChain.name}</span>
     {/if}
   </div>
 </div>

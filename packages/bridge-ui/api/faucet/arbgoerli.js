@@ -1,12 +1,15 @@
 import { ethers } from 'ethers';
 import requestIp from 'request-ip';
-
-import client from '../redis.js';
 import config from '../config.js';
-let { L1_RPC_URL, private_key } = config;
+import { Redis } from '@upstash/redis';
 
-const provider = new ethers.providers.JsonRpcProvider(L1_RPC_URL);
-const wallet = new ethers.Wallet(private_key, provider);
+const redis = new Redis({
+  url: config.upstash_redis_rest_url,
+  token: config.upstash_redis_rest_token,
+});
+
+const provider = new ethers.providers.JsonRpcProvider(config.L1_RPC_URL);
+const wallet = new ethers.Wallet(config.private_key, provider);
 const parseEther = ethers.utils.parseEther;
 const formatEther = ethers.utils.formatEther;
 
@@ -35,37 +38,31 @@ export default async function handler(req, res) {
     });
   }
 
-  try {
-    await client.connect();
-  } catch (error) {
-    return res
-      .status(200)
-      .send({ status: 80, msg: `Redis connection failed: ${error}` });
-  }
-
   // recaptcha check
-  let getToken = await client.get(token);
+  let getToken = await redis.get(token);
   if (!getToken) {
     return res
       .status(200)
       .send({ status: 13, msg: `This reCAPTCHA is not allowed.` });
   }
 
-  // ip check
-  const ipAddress = requestIp.getClientIp(req);
-  let ipHashVal = await client.HGET('ips', ipAddress);
-  if (ipHashVal == 1) {
-    return res
-      .status(200)
-      .send({ status: 11, msg: `This IP address has already received.` });
-  }
-
   // address check
-  let receHashVal = await client.HGET('received', address);
-  if (receHashVal == 1) {
+  let receHashVal = await redis.hget('address', address);
+  if (receHashVal == '1') {
+    await redis.del(token);
     return res
       .status(200)
       .send({ status: 12, msg: `This address has already received.` });
+  }
+
+  // ip check
+  const ipAddress = requestIp.getClientIp(req);
+  let ipVal = await redis.hget('ips', ipAddress);
+  if (ipVal == '1') {
+    await redis.del(token);
+    return res
+      .status(200)
+      .send({ status: 11, msg: `You has already received.` });
   }
 
   try {
@@ -74,16 +71,19 @@ export default async function handler(req, res) {
       value: parseEther('0.02'),
     });
   } catch (error) {
-    console.log(error);
+    await redis.del(token);
     return res
       .status(200)
-      .send({ status: 20, msg: `The transaction has failed.` });
+      .send({ status: 20, msg: `The transaction has failed: ${error}` });
   }
 
-  await client.hSet('received', address, 1);
-  await client.hSet('ips', ipAddress, 1);
-  await client.del(token);
-  await client.quit();
+  await redis.hset('address', {
+    [address]: '1',
+  });
+  await redis.hset('ips', {
+    [ipAddress]: '1',
+  });
+  await redis.del(token);
 
   return res.status(200).send({ status: 200, data: `Successful!` });
 }

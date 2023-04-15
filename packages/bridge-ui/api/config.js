@@ -1,9 +1,19 @@
 import * as dotenv from 'dotenv';
+dotenv.config();
 
-const config = dotenv.config().parsed;
+let {
+  PRIVATE_KEY,
+  RECAPTCHA_SECRET_KEY,
+  UPSTASH_REDIS_REST_URL,
+  UPSTASH_REDIS_REST_TOKEN,
+} = process.env;
 
 export default {
-  private_key: config.PRIVATE_KEY,
+  version: 7,
+  private_key: PRIVATE_KEY,
+  recaptcha_secret_key: RECAPTCHA_SECRET_KEY,
+  upstash_redis_rest_url: UPSTASH_REDIS_REST_URL,
+  upstash_redis_rest_token: UPSTASH_REDIS_REST_TOKEN,
 
   // address1: '0x4faBD45F69D907aC3a3941c34f466A6EFf44bAcA',
   // address2: '0xa8eF099f636AFe4210de699f546A37326820aaF7',
@@ -21,6 +31,4 @@ export default {
     'function requestMoon(address recipient) external',
     'function requestMXC(address recipient) external',
   ],
-
-  RECAPTCHA_SECRET_KEY: config.RECAPTCHA_SECRET_KEY,
 };

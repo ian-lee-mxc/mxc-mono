@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     address.trim() === '' ||
     !isEthereumAddress(address)
   ) {
-    return res.status(200).json({ status: 400, data: 'Invalid address' });
+    return res.status(200).json({ status: 400, msg: 'Invalid address' });
   }
 
   const contractFaucet = new ethers.Contract(c_faucet, abiFaucet, wallet);
@@ -30,9 +30,10 @@ export default async function handler(req, res) {
     });
   } catch (error) {
     console.log(error);
-    return res
-      .status(200)
-      .send({ status: 400, data: `Faucet Request MXC Token Fail!` });
+    return res.status(200).send({
+      status: 400,
+      msg: `The request for the MXC token faucet has failed. It's possible that you have already received the tokens.`,
+    });
   }
 
   let tx = await contractFaucet.requestMXC(address, {
@@ -40,7 +41,5 @@ export default async function handler(req, res) {
     gasLimit: 3000000,
   });
   await tx.wait();
-  return res
-    .status(200)
-    .send({ status: 200, data: `Faucet Request MXC Token Successful!` });
+  return res.status(200).send({ status: 200, msg: `Request successful!` });
 }

@@ -29,9 +29,10 @@ export default async function handler(req, res) {
       gasLimit: 3000000,
     });
   } catch (error) {
-    return res
-      .status(200)
-      .send({ status: 400, data: `Faucet Request Moon Token Fail!` });
+    return res.status(200).send({
+      status: 400,
+      msg: `The request for the Moon token faucet has failed. It's possible that you have already received the tokens.`,
+    });
   }
 
   let tx = await contractFaucet.requestMoon(address, {
@@ -39,7 +40,5 @@ export default async function handler(req, res) {
     gasLimit: 3000000,
   });
   await tx.wait();
-  return res
-    .status(200)
-    .send({ status: 200, data: `Faucet Request Moon Token Successful!` });
+  return res.status(200).send({ status: 200, data: `Request successful!` });
 }
