@@ -86,6 +86,9 @@ library LibBridgeSend {
                 ethVault.sendEther(expectedAmount);
             }
         }else {
+            if(msg.value != 0) {
+                revert B_WRONG_CHAIN_ID();
+            }
             address tokenVault = resolver.resolve("token_vault",true);
             if(tokenVault != address(0)) {
                 ERC20Upgradeable(resolver.resolve("mxc_token", false)).safeTransfer(tokenVault, expectedAmount);
