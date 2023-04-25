@@ -11,13 +11,18 @@ import {LibAddress} from "../../libs/LibAddress.sol";
 import {ISignalService} from "../../signal/ISignalService.sol";
 import {LibBridgeData} from "./LibBridgeData.sol";
 import {IBridge} from "../IBridge.sol";
-
+import {LibSharedConfig} from "../../libs/LibSharedConfig.sol";
+import {
+SafeERC20Upgradeable
+} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import {ERC20Upgradeable} from "../../thirdparty/ERC20Upgradeable.sol";
 /**
  * Entry point for starting a bridge transaction.
  *
  * @title LibBridgeSend
  */
 library LibBridgeSend {
+    using SafeERC20Upgradeable for ERC20Upgradeable;
     using LibAddress for address;
     using LibBridgeData for IBridge.Message;
 
@@ -66,16 +71,25 @@ library LibBridgeSend {
             message.callValue +
             message.processingFee;
 
-        if (expectedAmount != msg.value) {
+        // change(MXC): only check in mxc
+        if (expectedAmount != msg.value && block.chainid == LibSharedConfig.getConfig().chainId) {
             revert B_INCORRECT_VALUE();
         }
 
         // If on MXC, send the expectedAmount to the EtherVault. Otherwise,
         // store it here on the Bridge. Processing will release Ether from the
         // EtherVault or the Bridge on the destination chain.
-        address ethVault = resolver.resolve("ether_vault", true);
-        if (ethVault != address(0)) {
-            ethVault.sendEther(expectedAmount);
+        // change(MXC): send mxc to tokenVault if not mxc chain
+        if(block.chainid == LibSharedConfig.getConfig().chainId) {
+            address ethVault = resolver.resolve("ether_vault", true);
+            if (ethVault != address(0)) {
+                ethVault.sendEther(expectedAmount);
+            }
+        }else {
+            address tokenVault = resolver.resolve("token_vault",true);
+            if(tokenVault != address(0)) {
+                ERC20Upgradeable(resolver.resolve("mxc_token", false)).safeTransfer(tokenVault, expectedAmount);
+            }
         }
 
         message.id = state.nextMessageId++;

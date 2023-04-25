@@ -13,6 +13,8 @@ import {LibBridgeStatus} from "./LibBridgeStatus.sol";
 import {LibAddress} from "../../libs/LibAddress.sol";
 import {IBridge} from "../IBridge.sol";
 import {AddressResolver} from "../../common/AddressResolver.sol";
+import {LibSharedConfig} from "../../libs/LibSharedConfig.sol";
+import {TokenVault} from "../TokenVault.sol";
 
 /**
  * Retry bridge messages.
@@ -59,10 +61,11 @@ library LibBridgeRetry {
         ) {
             revert B_MSG_NON_RETRIABLE();
         }
-
         address ethVault = resolver.resolve("ether_vault", true);
-        if (ethVault != address(0)) {
-            EtherVault(payable(ethVault)).releaseEther(message.callValue);
+        address tokenVault = resolver.resolve("token_vault", true);
+        // message.srcChainId != LibSharedConfig.getConfig().chainId (target mxc)
+        if(message.srcChainId != LibSharedConfig.getConfig().chainId && ethVault != address(0)) {
+                EtherVault(payable(ethVault)).releaseEther(message.callValue);
         }
 
         // successful invocation
@@ -85,13 +88,17 @@ library LibBridgeRetry {
                 msgHash,
                 LibBridgeStatus.MessageStatus.FAILED
             );
-
+            state.etherReleased[msgHash] = true;
             address refundAddress = message.refundAddress == address(0)
                 ? message.owner
                 : message.refundAddress;
 
-            refundAddress.sendEther(message.callValue);
-        } else if (ethVault != address(0)) {
+            if(message.srcChainId != LibSharedConfig.getConfig().chainId) {
+                refundAddress.sendEther(message.callValue);
+            }else {
+                TokenVault(tokenVault).receiveMXC(refundAddress, message.callValue);
+            }
+        } else if (message.srcChainId != LibSharedConfig.getConfig().chainId && ethVault != address(0)) {
             ethVault.sendEther(message.callValue);
         }
     }
