@@ -130,7 +130,10 @@ describe("integrationbridge:Bridge", function () {
 
         await l2AddressManager
             .connect(l2Signer)
-            .setAddress(`${enabledDestChainId}.mxc_header_sync`, l2HeaderSync.address);
+            .setAddress(
+                `${enabledDestChainId}.mxc_header_sync`,
+                l2HeaderSync.address
+            );
 
         m = {
             id: 1,
@@ -171,14 +174,14 @@ describe("integrationbridge:Bridge", function () {
 
             expect(msgHash).not.to.be.eq(ethers.constants.HashZero);
 
-            txShouldRevertWithCustomError(
+            await txShouldRevertWithCustomError(
                 (
                     await l2Bridge
                         .connect(l2Signer)
                         .processMessage(m, ethers.constants.HashZero, {
                             gasLimit: 1000000,
                         })
-                ).wait(1),
+                ).wait(0),
                 l2Provider,
                 "B_FORBIDDEN()"
             );
@@ -230,11 +233,11 @@ describe("integrationbridge:Bridge", function () {
                     await l2Bridge
                         .connect(l2Signer)
                         .processMessage(message, signalProof, {
-                            gasLimit: 1000000,
+                            gasLimit: 6000000,
                         })
                 ).wait(1),
                 l2Provider,
-                "B_STATUS_MISMATCH()"
+                "B_STATUS_MISMTACH()"
             );
         });
 

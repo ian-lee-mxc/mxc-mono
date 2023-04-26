@@ -1,5 +1,4 @@
 import { task } from "hardhat/config";
-import sleep from "../test/utils/sleep";
 
 task("mock_transaction_L2").setAction(async (args, hre: any) => {
     await mockTransactionL2(hre);
