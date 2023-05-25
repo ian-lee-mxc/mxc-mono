@@ -33,7 +33,6 @@ library MxcConfig {
             // of a geth transaction, so using 120KB for the proposed
             // transactions list calldata, 8K for the remaining tx fields.
             maxBytesPerTxList: 120000,
-            minTxGasLimit: 21000,
             proofCooldownPeriod: 30 minutes,
             systemProofCooldownPeriod: 15 minutes,
             // Only need 1 real zkp per 10 blocks.

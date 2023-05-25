@@ -4,6 +4,7 @@ pragma solidity ^0.8.18;
 import {Test} from "forge-std/Test.sol";
 import {console2} from "forge-std/console2.sol";
 import {AddressManager} from "../contracts/common/AddressManager.sol";
+import {LibEthDepositing} from "../contracts/L1/libs/LibEthDepositing.sol";
 import {MxcConfig} from "../contracts/L1/MxcConfig.sol";
 import {MxcData} from "../contracts/L1/MxcData.sol";
 import {MxcL1} from "../contracts/L1/MxcL1.sol";
@@ -149,7 +150,6 @@ contract MxcL1Test is MxcL1TestBase {
 
         proposeBlock(Alice, 1000000, 1024);
         MxcData.BlockMetadata memory meta = proposeBlock(Alice, 1000000, 1024);
-        assertEq(meta.depositsRoot, emptyDepositsRoot);
         assertEq(meta.depositsProcessed.length, 0);
 
         uint256 count = conf.maxEthDepositsPerBlock;
@@ -164,11 +164,10 @@ contract MxcL1Test is MxcL1TestBase {
         uint256 gas = gasleft();
         meta = proposeBlock(Alice, 1000000, 1024);
         uint256 gasUsedWithDeposits = gas - gasleft();
-
         console2.log("gas used with eth deposits:", gasUsedWithDeposits);
 
         printVariables("after processing send-ethers");
-        assertTrue(meta.depositsRoot != emptyDepositsRoot);
+        assertTrue(LibEthDepositing.hashEthDeposits(meta.depositsProcessed) != emptyDepositsRoot);
         assertEq(meta.depositsProcessed.length, count + 1);
 
         gas = gasleft();
@@ -290,7 +289,8 @@ contract MxcL1Test is MxcL1TestBase {
         // Expected: 0x8117066d69ff650d78f0d7383a10cc802c2b8c0eedd932d70994252e2438c636  (pre calculated with these values)
         //console2.logBytes32(meta.depositsRoot);
         assertEq(
-            meta.depositsRoot, 0x8117066d69ff650d78f0d7383a10cc802c2b8c0eedd932d70994252e2438c636
+            LibEthDepositing.hashEthDeposits(meta.depositsProcessed),
+            0x8117066d69ff650d78f0d7383a10cc802c2b8c0eedd932d70994252e2438c636
         );
     }
 }

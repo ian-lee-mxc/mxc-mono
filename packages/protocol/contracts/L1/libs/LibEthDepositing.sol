@@ -48,7 +48,7 @@ library LibEthDepositing {
         MxcData.State storage state,
         MxcData.Config memory config,
         address beneficiary
-    ) internal returns (bytes32 depositsRoot, MxcData.EthDeposit[] memory depositsProcessed) {
+    ) internal returns (MxcData.EthDeposit[] memory depositsProcessed) {
         // Allocate one extra slot for collecting fees on L2
         depositsProcessed = new MxcData.EthDeposit[](
             config.maxEthDepositsPerBlock + 1
@@ -104,8 +104,6 @@ library LibEthDepositing {
         assembly {
             mstore(depositsProcessed, j)
         }
-
-        depositsRoot = _hashEthDeposits(depositsProcessed);
     }
 
     function _hashEthDeposits(MxcData.EthDeposit[] memory deposits)
