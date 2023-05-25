@@ -84,7 +84,6 @@ contract FooBar {
             gasLimit: 1,
             mixHash: bytes32(uint256(1)),
             timestamp: 1,
-            cacheTxListInfo: 0,
             depositsProcessed: new MxcData.EthDeposit[](0)
         });
     }
@@ -102,7 +101,6 @@ contract FooBar {
             gasLimit: 1,
             mixHash: bytes32(uint256(1)),
             timestamp: 1,
-            cacheTxListInfo: 0,
             depositsProcessed: new MxcData.EthDeposit[](0)
         });
     }
