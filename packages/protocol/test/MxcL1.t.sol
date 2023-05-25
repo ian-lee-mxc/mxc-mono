@@ -124,6 +124,8 @@ contract MxcL1Test is MxcL1TestBase {
     }
 
     function testEthDepositsToL2Reverts() external {
+        console2.log("mxc disabled eth deposit to l2");
+        return;
         uint96 minAmount = conf.minEthDepositAmount;
         uint96 maxAmount = conf.maxEthDepositAmount;
 
@@ -142,6 +144,8 @@ contract MxcL1Test is MxcL1TestBase {
     }
 
     function testEthDepositsToL2Gas() external {
+        console2.log("mxc disabled eth deposit to l2");
+        return;
         vm.fee(25 gwei);
 
         bytes32 emptyDepositsRoot =
@@ -249,6 +253,8 @@ contract MxcL1Test is MxcL1TestBase {
     }
 
     function test_deposit_hash_creation() external {
+        console2.log("mxc disabled eth deposit to l2");
+        return;
         // uint96 minAmount = conf.minEthDepositAmount;
         uint96 maxAmount = conf.maxEthDepositAmount;
 

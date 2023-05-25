@@ -407,8 +407,8 @@ contract MxcL1LibTokenomicsTestnet is MxcL1TestBase {
 
         uint256 deposits = Alice_start_balance - L1.getMxcTokenBalance(Alice);
         uint256 withdrawals = L1.getMxcTokenBalance(Bob) - Bob_start_balance;
-        // console2.log("Deposits:", deposits);
-        // console2.log("withdrawals:", withdrawals);
+        console2.log("Deposits:", deposits);
+        console2.log("withdrawals:", withdrawals);
         assertEq(deposits, withdrawals);
     }
 

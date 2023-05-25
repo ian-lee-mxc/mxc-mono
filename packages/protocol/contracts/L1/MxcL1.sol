@@ -166,7 +166,8 @@ contract MxcL1 is EssentialContract, ICrossChainSync, MxcEvents, MxcErrors {
     }
 
     function depositEtherToL2() public payable {
-        LibEthDepositing.depositEtherToL2(state, getConfig(), AddressResolver(this));
+        // CHANGE(MXC): not allow deposit ether to L2
+        // LibEthDepositing.depositEtherToL2(state, getConfig(), AddressResolver(this));
     }
 
     function getMxcTokenBalance(address addr) public view returns (uint256) {

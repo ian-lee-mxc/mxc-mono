@@ -5,6 +5,8 @@ import {AddressManager} from "../contracts/common/AddressManager.sol";
 import {IBridge, Bridge} from "../contracts/bridge/Bridge.sol";
 import {BridgeErrors} from "../contracts/bridge/BridgeErrors.sol";
 import {EtherVault} from "../contracts/bridge/EtherVault.sol";
+import {TokenVault} from "../contracts/bridge/TokenVault.sol";
+import {MxcToken} from "../contracts/L1/MxcToken.sol";
 import {console2} from "forge-std/console2.sol";
 import {LibBridgeStatus} from "../contracts/bridge/libs/LibBridgeStatus.sol";
 import {SignalService} from "../contracts/signal/SignalService.sol";
@@ -52,8 +54,10 @@ contract BridgeTest is Test {
     Bridge bridge;
     Bridge destChainBridge;
     EtherVault etherVault;
+    TokenVault tokenVault;
     SignalService signalService;
     PrankCrossChainSync crossChainSync;
+    MxcToken mxc;
     uint256 destChainId = 19389;
 
     address public constant Alice = 0x10020FCb72e27650651B05eD2CEcA493bC807Ba4;
@@ -78,6 +82,17 @@ contract BridgeTest is Test {
         etherVault = new EtherVault();
         etherVault.init(address(addressManager));
 
+        tokenVault = new TokenVault();
+        tokenVault.init(address(addressManager));
+
+        mxc = new MxcToken();
+        addressManager.setAddress(block.chainid, "mxc_token", address(mxc));
+        address[] memory premintRecipients = new address[](1);
+        premintRecipients[0] = Alice;
+        uint256[] memory premintAmounts = new uint256[](1);
+        premintAmounts[0] = 1e9 * 1e18;
+        mxc.init(address(addressManager), "MXCToken", "MXC", premintRecipients, premintAmounts);
+
         crossChainSync = new PrankCrossChainSync();
 
         addressManager.setAddress(block.chainid, "signal_service", address(signalService));
@@ -98,8 +113,8 @@ contract BridgeTest is Test {
             processingFee: 0,
             destChain: destChainId
         });
-
-        vm.expectRevert(BridgeErrors.B_INCORRECT_VALUE.selector);
+        // CHANGE(MXC): only check on MXC L2, L1 allow msg.value = 0 but safeTransfer MXCToken
+        // vm.expectRevert(BridgeErrors.B_INCORRECT_VALUE.selector);
         bridge.sendMessage(message);
     }
 
@@ -179,7 +194,9 @@ contract BridgeTest is Test {
             destChain: destChainId
         });
 
-        bytes32 msgHash = bridge.sendMessage{value: amount}(message);
+        // CHANGE(MXC): only check send msg.value on MXC L1.  MXC L1 replace with safeTransfer MXCToken
+        // bytes32 msgHash = bridge.sendMessage{value: amount}(message);
+        bytes32 msgHash = bridge.sendMessage(message);
 
         bool isMessageSent = bridge.isMessageSent(msgHash);
         assertEq(isMessageSent, true);
@@ -197,8 +214,9 @@ contract BridgeTest is Test {
             processingFee: processingFee,
             destChain: destChainId
         });
-
-        bytes32 msgHash = bridge.sendMessage{value: amount + processingFee}(message);
+        // CHANGE(MXC): only check send msg.value on MXC L1.  MXC L1 replace with safeTransfer MXCToken
+        // bytes32 msgHash = bridge.sendMessage{value: amount + processingFee}(message);
+        bytes32 msgHash = bridge.sendMessage(message);
 
         bool isMessageSent = bridge.isMessageSent(msgHash);
         assertEq(isMessageSent, true);
@@ -216,9 +234,10 @@ contract BridgeTest is Test {
             processingFee: processingFee,
             destChain: destChainId
         });
-
-        vm.expectRevert(BridgeErrors.B_INCORRECT_VALUE.selector);
-        bridge.sendMessage{value: amount}(message);
+        // CHANGE(MXC): only check send msg.value on MXC L1.  MXC L1 replace with safeTransfer MXCToken
+        // vm.expectRevert(BridgeErrors.B_INCORRECT_VALUE.selector);
+        // bridge.sendMessage{value: amount}(message);
+        bridge.sendMessage(message);
     }
 
     // test with a known good merkle proof / message since we cant generate proofs via rpc
@@ -318,6 +337,8 @@ contract BridgeTest is Test {
         addressManager.setAddress(dest, "bridge", address(destChainBridge));
 
         addressManager.setAddress(dest, "ether_vault", address(etherVault));
+
+        addressManager.setAddress(dest, "token_vault", address(tokenVault));
 
         etherVault.authorize(address(destChainBridge), true);
 

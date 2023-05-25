@@ -201,7 +201,10 @@ contract TokenVault is EssentialContract {
         );
         message.gasLimit = gasLimit;
         message.processingFee = processingFee;
-        message.depositValue = msg.value - processingFee;
+        // CHANGE(MXC): MXCL1 not set msg.value. replace with safeTransfer MXCToken
+        if (msg.value > processingFee) {
+            message.depositValue = msg.value - processingFee;
+        }
         message.refundAddress = refundAddress;
         message.memo = memo;
 
@@ -259,6 +262,15 @@ contract TokenVault is EssentialContract {
         }
 
         emit ERC20Released({msgHash: msgHash, from: message.owner, token: token, amount: amount});
+    }
+
+    /**
+     * @dev This function can only be called by the bridge contract while receiving L2 eth
+     * @param to The destination address.
+     * @param amount The amount of tokens to be sent. 0 is a valid value.
+     */
+    function receiveMXC(address to, uint256 amount) external nonReentrant onlyFromNamed("bridge") {
+        ERC20Upgradeable(resolve("mxc_token", false)).safeTransfer(to, amount);
     }
 
     /**
