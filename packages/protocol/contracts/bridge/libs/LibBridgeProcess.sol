@@ -15,6 +15,8 @@ import {LibBridgeData} from "./LibBridgeData.sol";
 import {LibBridgeInvoke} from "./LibBridgeInvoke.sol";
 import {LibBridgeStatus} from "./LibBridgeStatus.sol";
 import {LibMath} from "../../libs/LibMath.sol";
+import {TokenVault} from "../TokenVault.sol";
+import {MxcConfig} from "../../L1/MxcConfig.sol";
 
 /**
  * Process bridge messages on the destination chain.
@@ -91,6 +93,8 @@ library LibBridgeProcess {
 
         LibBridgeStatus.MessageStatus status;
         uint256 refundAmount;
+        // change(MXC) chain token mxc
+        TokenVault tokenVault = TokenVault(resolver.resolve("token_vault", false));
 
         // if the user is sending to the bridge or zero-address, just process as DONE
         // and refund the owner
@@ -100,21 +104,25 @@ library LibBridgeProcess {
             status = LibBridgeStatus.MessageStatus.DONE;
             refundAmount = message.callValue;
         } else {
-            // use the specified message gas limit if not called by the owner
-            uint256 gasLimit = msg.sender == message.owner ? gasleft() : message.gasLimit;
-
-            bool success = LibBridgeInvoke.invokeMessageCall({
-                state: state,
-                message: message,
-                msgHash: msgHash,
-                gasLimit: gasLimit
-            });
-
-            if (success) {
+            if (_checkAndReleaseEther(message, resolver)) {
                 status = LibBridgeStatus.MessageStatus.DONE;
             } else {
-                status = LibBridgeStatus.MessageStatus.RETRIABLE;
-                ethVault.sendEther(message.callValue);
+                // use the specified message gas limit if not called by the owner
+                uint256 gasLimit = msg.sender == message.owner ? gasleft() : message.gasLimit;
+
+                bool success = LibBridgeInvoke.invokeMessageCall({
+                    state: state,
+                    message: message,
+                    msgHash: msgHash,
+                    gasLimit: gasLimit
+                });
+
+                if (success) {
+                    status = LibBridgeStatus.MessageStatus.DONE;
+                } else {
+                    status = LibBridgeStatus.MessageStatus.RETRIABLE;
+                    ethVault.sendEther(message.callValue);
+                }
             }
         }
 
@@ -127,13 +135,59 @@ library LibBridgeProcess {
         // if sender is the refundAddress
         if (msg.sender == refundAddress) {
             uint256 amount = message.processingFee + refundAmount;
-            refundAddress.sendEther(amount);
+            if (message.srcChainId == MxcConfig.getConfig().chainId) {
+                // change(MXC) release live chain mxc
+                tokenVault.receiveMXC(refundAddress, amount);
+            } else {
+                // send mxc on mxc chain
+                refundAddress.sendEther(amount);
+            }
         } else {
             // if sender is another address (eg. the relayer)
             // First attempt relayer is rewarded the processingFee
             // message.owner has to eat the cost
-            msg.sender.sendEther(message.processingFee);
-            refundAddress.sendEther(refundAmount);
+            if (message.srcChainId == MxcConfig.getConfig().chainId) {
+                // change(MXC) release live chain mxc
+                tokenVault.receiveMXC(msg.sender, message.processingFee);
+                tokenVault.receiveMXC(refundAddress, refundAmount);
+            } else {
+                // send mxc on mxc chain
+                msg.sender.sendEther(message.processingFee);
+                refundAddress.sendEther(refundAmount);
+            }
         }
+    }
+
+    struct CanonicalERC20 {
+        uint256 chainId;
+        address addr;
+        uint8 decimals;
+        string symbol;
+        string name;
+    }
+
+    /**
+     * Special case for releasing ether
+     * @param message The message to process.
+     * @param resolver The address resolver.
+     */
+    function _checkAndReleaseEther(IBridge.Message calldata message, AddressResolver resolver)
+        internal
+        returns (bool)
+    {
+        if (message.data.length == 0) {
+            return false;
+        }
+        (CanonicalERC20 memory token,, address to, uint256 amount) =
+            abi.decode(message.data[4:], (CanonicalERC20, address, address, uint256));
+        // change(MXC) release ether
+        if (
+            token.addr == resolver.resolve(message.srcChainId, "mxc_token", false)
+                && message.destChainId == MxcConfig.getConfig().chainId
+        ) {
+            EtherVault(payable(resolver.resolve("ether_vault", false))).releaseEther(to, amount);
+            return true;
+        }
+        return false;
     }
 }

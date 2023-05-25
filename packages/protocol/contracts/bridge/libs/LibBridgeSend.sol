@@ -11,6 +11,11 @@ import {IBridge} from "../IBridge.sol";
 import {ISignalService} from "../../signal/ISignalService.sol";
 import {LibAddress} from "../../libs/LibAddress.sol";
 import {LibBridgeData} from "./LibBridgeData.sol";
+import {MxcConfig} from "../../L1/MxcConfig.sol";
+import {SafeERC20Upgradeable} from
+    "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import {IERC20Upgradeable} from
+    "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
 /**
  * Entry point for starting a bridge transaction.
@@ -18,6 +23,7 @@ import {LibBridgeData} from "./LibBridgeData.sol";
  * @title LibBridgeSend
  */
 library LibBridgeSend {
+    using SafeERC20Upgradeable for IERC20Upgradeable;
     using LibAddress for address;
     using LibBridgeData for IBridge.Message;
 
@@ -62,15 +68,30 @@ library LibBridgeSend {
 
         uint256 expectedAmount = message.depositValue + message.callValue + message.processingFee;
 
-        if (expectedAmount != msg.value) {
+        // change(MXC): only check in mxc
+        if (expectedAmount != msg.value && block.chainid == MxcConfig.getConfig().chainId) {
             revert B_INCORRECT_VALUE();
         }
 
-        // If on Taiko, send the expectedAmount to the EtherVault. Otherwise,
+        // If on MXC, send the expectedAmount to the EtherVault. Otherwise,
         // store it here on the Bridge. Processing will release Ether from the
         // EtherVault or the Bridge on the destination chain.
-        address ethVault = resolver.resolve("ether_vault", true);
-        ethVault.sendEther(expectedAmount);
+        if (block.chainid == MxcConfig.getConfig().chainId) {
+            address ethVault = resolver.resolve("ether_vault", true);
+            if (ethVault != address(0)) {
+                ethVault.sendEther(expectedAmount);
+            }
+        } else {
+            if (msg.value != 0) {
+                revert B_WRONG_CHAIN_ID();
+            }
+            address tokenVault = resolver.resolve("token_vault", true);
+            if (tokenVault != address(0)) {
+                IERC20Upgradeable(resolver.resolve("mxc_token", false)).safeTransferFrom(
+                    message.owner, tokenVault, expectedAmount
+                );
+            }
+        }
 
         message.id = state.nextMessageId++;
         message.sender = msg.sender;

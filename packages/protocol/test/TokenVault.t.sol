@@ -10,6 +10,8 @@ import {FreeMintERC20} from "../contracts/test/erc20/FreeMintERC20.sol";
 import {SignalService} from "../contracts/signal/SignalService.sol";
 import {Test} from "forge-std/Test.sol";
 import {TokenVault} from "../contracts/bridge/TokenVault.sol";
+import {EtherVault} from "../contracts/bridge/EtherVault.sol";
+import {MxcToken} from "../contracts/L1/MxcToken.sol";
 
 // PrankDestBridge lets us simulate a transaction to the TokenVault
 // from a named Bridge, without having to test/run through the real Bridge code,
@@ -62,9 +64,12 @@ contract TestTokenVault is Test {
     Bridge bridge;
     TokenVault tokenVault;
     TokenVault destChainIdTokenVault;
+    EtherVault etherVault;
+    EtherVault destChainIdEtherVault;
     PrankDestBridge destChainIdBridge;
     FreeMintERC20 erc20;
     SignalService signalService;
+    MxcToken mxc;
     uint256 destChainId = 7;
 
     address public constant Alice = 0x10020FCb72e27650651B05eD2CEcA493bC807Ba4;
@@ -80,8 +85,25 @@ contract TestTokenVault is Test {
 
         tokenVault = new TokenVault();
         tokenVault.init(address(addressManager));
+
+        etherVault = new EtherVault();
+        etherVault.init(address(addressManager));
+
         destChainIdTokenVault = new TokenVault();
         destChainIdTokenVault.init(address(addressManager));
+
+        destChainIdEtherVault = new EtherVault();
+        destChainIdEtherVault.init(address(addressManager));
+
+        mxc = new MxcToken();
+        address[] memory premintRecipients = new address[](1);
+        premintRecipients[0] = Alice;
+        uint256[] memory premintAmounts = new uint256[](1);
+        premintAmounts[0] = 1e9 * 1e18;
+        mxc.init(address(addressManager), "MXCToken", "MXC", premintRecipients, premintAmounts);
+
+        etherVault = new EtherVault();
+        etherVault.init(address(addressManager));
 
         erc20 = new FreeMintERC20("ERC20", "ERC20");
         erc20.mint(Alice);
@@ -94,11 +116,17 @@ contract TestTokenVault is Test {
         signalService = new SignalService();
         signalService.init(address(addressManager));
 
+        addressManager.setAddress(block.chainid, "mxc_token", address(mxc));
+
         addressManager.setAddress(block.chainid, "bridge", address(bridge));
 
         addressManager.setAddress(block.chainid, "signal_service", address(signalService));
 
+        addressManager.setAddress(block.chainid, "ether_value", address(etherVault));
+
         addressManager.setAddress(block.chainid, "token_vault", address(tokenVault));
+
+        addressManager.setAddress(destChainId, "ether_vault", address(destChainIdEtherVault));
 
         addressManager.setAddress(destChainId, "token_vault", address(destChainIdTokenVault));
 
@@ -148,12 +176,17 @@ contract TestTokenVault is Test {
         uint256 amount = 2 wei;
         erc20.approve(address(tokenVault), amount);
 
+        // CHANGE(MXC): approve bridge to transfer MXCToken
+        mxc.approve(address(bridge), amount);
+
         uint256 aliceBalanceBefore = erc20.balanceOf(Alice);
         uint256 tokenVaultBalanceBefore = erc20.balanceOf(address(tokenVault));
 
-        tokenVault.sendERC20{value: amount}(
-            destChainId, Bob, address(erc20), amount, 1000000, amount - 1, Bob, ""
-        );
+        // CHANGE(MXC): only check send msg.value on MXC L1.  MXC L1 replace with safeTransfer MXCToken
+        // tokenVault.sendERC20{value: amount}(
+        //     destChainId, Bob, address(erc20), amount, 1000000, amount - 1, Bob, ""
+        // );
+        tokenVault.sendERC20(destChainId, Bob, address(erc20), amount, 1000000, amount - 1, Bob, "");
 
         uint256 aliceBalanceAfter = erc20.balanceOf(Alice);
         uint256 tokenVaultBalanceAfter = erc20.balanceOf(address(tokenVault));

@@ -106,6 +106,14 @@ library LibEthDepositing {
         }
     }
 
+    function hashEthDeposits(MxcData.EthDeposit[] memory deposits)
+        internal
+        pure
+        returns (bytes32)
+    {
+        return _hashEthDeposits(deposits);
+    }
+
     function _hashEthDeposits(MxcData.EthDeposit[] memory deposits)
         private
         pure
