@@ -10,11 +10,11 @@ import {AddressResolver} from "../../common/AddressResolver.sol";
 import {LibMath} from "../../libs/LibMath.sol";
 import {LibTokenomics} from "./LibTokenomics.sol";
 import {LibUtils} from "./LibUtils.sol";
-import {TaikoData} from "../../L1/TaikoData.sol";
+import {MxcData} from "../../L1/MxcData.sol";
 
 library LibProving {
     using LibMath for uint256;
-    using LibUtils for TaikoData.State;
+    using LibUtils for MxcData.State;
 
     event BlockProven(
         uint256 indexed id,
@@ -39,11 +39,11 @@ library LibProving {
     error L1_SYSTEM_PROVER_PROHIBITED();
 
     function proveBlock(
-        TaikoData.State storage state,
-        TaikoData.Config memory config,
+        MxcData.State storage state,
+        MxcData.Config memory config,
         AddressResolver resolver,
         uint256 blockId,
-        TaikoData.BlockEvidence memory evidence
+        MxcData.BlockEvidence memory evidence
     ) internal {
         if (
             evidence.parentHash == 0 || evidence.blockHash == 0
@@ -55,7 +55,7 @@ library LibProving {
             revert L1_BLOCK_ID();
         }
 
-        TaikoData.Block storage blk = state.blocks[blockId % config.ringBufferSize];
+        MxcData.Block storage blk = state.blocks[blockId % config.ringBufferSize];
 
         // Check the metadata hash matches the proposed block's. This is
         // necessary to handle chain reorgs.
@@ -105,7 +105,7 @@ library LibProving {
             }
         }
 
-        TaikoData.ForkChoice storage fc;
+        MxcData.ForkChoice storage fc;
 
         uint256 fcId =
             LibUtils.getForkChoiceId(state, blk, evidence.parentHash, evidence.parentGasUsed);
@@ -162,7 +162,8 @@ library LibProving {
             inputs[0] = uint256(uint160(address(resolver.resolve("signal_service", false))));
             inputs[1] =
                 uint256(uint160(address(resolver.resolve(config.chainId, "signal_service", false))));
-            inputs[2] = uint256(uint160(address(resolver.resolve(config.chainId, "taiko", false))));
+            inputs[2] =
+                uint256(uint160(address(resolver.resolve(config.chainId, "mxczkevm", false))));
 
             inputs[3] = uint256(blk.metaHash);
             inputs[4] = uint256(evidence.parentHash);
@@ -189,7 +190,7 @@ library LibProving {
                 )
             );
 
-            if (!verified || ret.length != 32 || bytes32(ret) != keccak256("taiko")) {
+            if (!verified || ret.length != 32 || bytes32(ret) != keccak256("mxczkevm")) {
                 revert L1_INVALID_PROOF();
             }
         }
@@ -205,13 +206,13 @@ library LibProving {
     }
 
     function getForkChoice(
-        TaikoData.State storage state,
-        TaikoData.Config memory config,
+        MxcData.State storage state,
+        MxcData.Config memory config,
         uint256 blockId,
         bytes32 parentHash,
         uint32 parentGasUsed
-    ) internal view returns (TaikoData.ForkChoice storage fc) {
-        TaikoData.Block storage blk = state.blocks[blockId % config.ringBufferSize];
+    ) internal view returns (MxcData.ForkChoice storage fc) {
+        MxcData.Block storage blk = state.blocks[blockId % config.ringBufferSize];
         if (blk.blockId != blockId) revert L1_BLOCK_ID();
 
         uint256 fcId = LibUtils.getForkChoiceId(state, blk, parentHash, parentGasUsed);

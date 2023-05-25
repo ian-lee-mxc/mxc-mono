@@ -6,11 +6,11 @@
 
 pragma solidity ^0.8.18;
 
-import {TaikoData} from "./TaikoData.sol";
+import {MxcData} from "./MxcData.sol";
 
-abstract contract TaikoEvents {
+abstract contract MxcEvents {
     // The following events must match the definitions in corresponding L1 libraries.
-    event BlockProposed(uint256 indexed id, TaikoData.BlockMetadata meta);
+    event BlockProposed(uint256 indexed id, MxcData.BlockMetadata meta);
 
     event BlockProven(
         uint256 indexed id,
@@ -23,7 +23,7 @@ abstract contract TaikoEvents {
 
     event BlockVerified(uint256 indexed id, bytes32 blockHash);
 
-    event EthDeposited(TaikoData.EthDeposit deposit);
+    event EthDeposited(MxcData.EthDeposit deposit);
 
     event ProofTimeTargetChanged(uint64 proofTimeTarget);
 }

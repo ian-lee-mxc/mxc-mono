@@ -22,12 +22,12 @@ import {ERC20VotesUpgradeable} from
 import {EssentialContract} from "../common/EssentialContract.sol";
 import {Proxied} from "../common/Proxied.sol";
 
-library LibTaikoTokenConfig {
-    uint8 public constant DECIMALS = uint8(8);
+library LibMxcTokenConfig {
+    uint8 public constant DECIMALS = uint8(18);
 }
 
-/// @custom:security-contact hello@taiko.xyz
-contract TaikoToken is
+/// @custom:security-contact luanxu@mxc.org
+contract MxcToken is
     EssentialContract,
     ERC20Upgradeable,
     ERC20BurnableUpgradeable,
@@ -39,9 +39,9 @@ contract TaikoToken is
     event Mint(address account, uint256 amount);
     event Burn(address account, uint256 amount);
 
-    error TKO_INVALID_ADDR();
-    error TKO_INVALID_PREMINT_PARAMS();
-    error TKO_MINT_DISALLOWED();
+    error MXC_INVALID_ADDR();
+    error MXC_INVALID_PREMINT_PARAMS();
+    error MXC_MINT_DISALLOWED();
 
     /*//////////////////////////////////////////////////////////////
                          USER-FACING FUNCTIONS
@@ -88,7 +88,7 @@ contract TaikoToken is
     }
 
     function transfer(address to, uint256 amount) public override returns (bool) {
-        if (to == address(this)) revert TKO_INVALID_ADDR();
+        if (to == address(this)) revert MXC_INVALID_ADDR();
         return ERC20Upgradeable.transfer(to, amount);
     }
 
@@ -97,12 +97,12 @@ contract TaikoToken is
         override
         returns (bool)
     {
-        if (to == address(this)) revert TKO_INVALID_ADDR();
+        if (to == address(this)) revert MXC_INVALID_ADDR();
         return ERC20Upgradeable.transferFrom(from, to, amount);
     }
 
     function decimals() public pure override returns (uint8) {
-        return LibTaikoTokenConfig.DECIMALS;
+        return LibMxcTokenConfig.DECIMALS;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -132,7 +132,7 @@ contract TaikoToken is
         super._mint(to, amount);
 
         // TODO: do we need the following check at all?
-        if (totalSupply() > type(uint64).max) revert TKO_MINT_DISALLOWED();
+        if (totalSupply() > type(uint256).max) revert MXC_MINT_DISALLOWED();
         emit Mint(to, amount);
     }
 
@@ -145,4 +145,4 @@ contract TaikoToken is
     }
 }
 
-contract ProxiedTaikoToken is Proxied, TaikoToken {}
+contract ProxiedMxcToken is Proxied, MxcToken {}

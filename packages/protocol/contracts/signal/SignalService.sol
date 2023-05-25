@@ -12,7 +12,7 @@ import {ISignalService} from "./ISignalService.sol";
 import {ICrossChainSync} from "../common/ICrossChainSync.sol";
 import {LibSecureMerkleTrie} from "../thirdparty/LibSecureMerkleTrie.sol";
 
-/// @custom:security-contact hello@taiko.xyz
+/// @custom:security-contact luanxu@mxc.org
 contract SignalService is ISignalService, EssentialContract {
     struct SignalProof {
         uint256 height;
@@ -67,9 +67,9 @@ contract SignalService is ISignalService, EssentialContract {
 
         SignalProof memory sp = abi.decode(proof, (SignalProof));
 
-        // Resolve the TaikoL1 or TaikoL2 contract if on Ethereum or Taiko.
+        // Resolve the MxcL1 or MxcL2 contract if on Ethereum or Taiko.
         bytes32 syncedSignalRoot =
-            ICrossChainSync(resolve("taiko", false)).getCrossChainSignalRoot(sp.height);
+            ICrossChainSync(resolve("mxczkevm", false)).getCrossChainSignalRoot(sp.height);
 
         return LibSecureMerkleTrie.verifyInclusionProof(
             bytes.concat(getSignalSlot(app, signal)), hex"01", sp.proof, syncedSignalRoot

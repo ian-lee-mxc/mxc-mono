@@ -6,19 +6,19 @@
 
 pragma solidity ^0.8.18;
 
-import {TaikoL1} from "../../L1/TaikoL1.sol";
-import {TaikoData} from "../../L1/TaikoData.sol";
+import {MxcL1} from "../../L1/MxcL1.sol";
+import {MxcData} from "../../L1/MxcData.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
-contract TestTaikoL1EnableTokenomics is TaikoL1 {
-    function getConfig() public pure override returns (TaikoData.Config memory config) {
-        config.chainId = 167;
+contract TestMxcL1 is MxcL1 {
+    function getConfig() public pure override returns (MxcData.Config memory config) {
+        config.chainId = 5167003;
         // up to 2048 pending blocks
-        config.maxNumProposedBlocks = 6;
-        config.ringBufferSize = 8;
+        config.maxNumProposedBlocks = 4;
+        config.ringBufferSize = 6;
         // This number is calculated from maxNumProposedBlocks to make
         // the 'the maximum value of the multiplier' close to 20.0
-        config.maxVerificationsPerTx = 0; // dont verify blocks automatically
+        config.maxVerificationsPerTx = 0;
         config.blockMaxGasLimit = 30000000;
         config.maxTransactionsPerBlock = 20;
         config.maxBytesPerTxList = 120000;

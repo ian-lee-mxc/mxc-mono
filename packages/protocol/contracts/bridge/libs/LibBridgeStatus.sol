@@ -64,7 +64,7 @@ library LibBridgeStatus {
 
         LibBridgeData.StatusProof memory sp = abi.decode(proof, (LibBridgeData.StatusProof));
 
-        bytes32 syncedHeaderHash = ICrossChainSync(resolver.resolve("taiko", false))
+        bytes32 syncedHeaderHash = ICrossChainSync(resolver.resolve("mxczkevm", false))
             .getCrossChainBlockHash(sp.header.height);
 
         if (syncedHeaderHash == 0 || syncedHeaderHash != sp.header.hashBlockHeader()) {

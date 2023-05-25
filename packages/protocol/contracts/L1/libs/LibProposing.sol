@@ -13,15 +13,15 @@ import {LibTokenomics} from "./LibTokenomics.sol";
 import {LibUtils} from "./LibUtils.sol";
 import {SafeCastUpgradeable} from
     "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
-import {TaikoData} from "../TaikoData.sol";
+import {MxcData} from "../MxcData.sol";
 
 library LibProposing {
     using SafeCastUpgradeable for uint256;
     using LibAddress for address;
     using LibAddress for address payable;
-    using LibUtils for TaikoData.State;
+    using LibUtils for MxcData.State;
 
-    event BlockProposed(uint256 indexed id, TaikoData.BlockMetadata meta);
+    event BlockProposed(uint256 indexed id, MxcData.BlockMetadata meta);
 
     error L1_BLOCK_ID();
     error L1_INSUFFICIENT_TOKEN();
@@ -33,17 +33,17 @@ library LibProposing {
     error L1_TX_LIST();
 
     function proposeBlock(
-        TaikoData.State storage state,
-        TaikoData.Config memory config,
+        MxcData.State storage state,
+        MxcData.Config memory config,
         AddressResolver resolver,
-        TaikoData.BlockMetadataInput memory input,
+        MxcData.BlockMetadataInput memory input,
         bytes calldata txList
-    ) internal returns (TaikoData.BlockMetadata memory meta) {
+    ) internal returns (MxcData.BlockMetadata memory meta) {
         uint8 cacheTxListInfo =
             _validateBlock({state: state, config: config, input: input, txList: txList});
 
         if (cacheTxListInfo != 0) {
-            state.txListInfo[input.txListHash] = TaikoData.TxListInfo({
+            state.txListInfo[input.txListHash] = MxcData.TxListInfo({
                 validSince: uint64(block.timestamp),
                 size: uint24(txList.length)
             });
@@ -68,12 +68,12 @@ library LibProposing {
 
         unchecked {
             meta.timestamp = uint64(block.timestamp);
-            meta.l1Height = uint64(block.number - 1);
-            meta.l1Hash = blockhash(block.number - 1);
+            meta.l1Height = uint64(LibUtils.getBlockNumber() - 1);
+            meta.l1Hash = LibUtils.getBlockHash(LibUtils.getBlockNumber() - 1);
             meta.mixHash = bytes32(block.difficulty * state.numBlocks);
         }
 
-        TaikoData.Block storage blk = state.blocks[state.numBlocks % config.ringBufferSize];
+        MxcData.Block storage blk = state.blocks[state.numBlocks % config.ringBufferSize];
 
         blk.blockId = state.numBlocks;
         blk.proposedAt = meta.timestamp;
@@ -82,12 +82,12 @@ library LibProposing {
         blk.metaHash = LibUtils.hashMetadata(meta);
         blk.proposer = msg.sender;
 
-        if (state.taikoTokenBalances[msg.sender] < state.blockFee) {
+        if (state.mxcTokenBalances[msg.sender] < state.blockFee) {
             revert L1_INSUFFICIENT_TOKEN();
         }
 
         unchecked {
-            state.taikoTokenBalances[msg.sender] -= state.blockFee;
+            state.mxcTokenBalances[msg.sender] -= state.blockFee;
             state.accBlockFees += state.blockFee;
             state.accProposedAt += meta.timestamp;
         }
@@ -98,19 +98,19 @@ library LibProposing {
         }
     }
 
-    function getBlock(
-        TaikoData.State storage state,
-        TaikoData.Config memory config,
-        uint256 blockId
-    ) internal view returns (TaikoData.Block storage blk) {
+    function getBlock(MxcData.State storage state, MxcData.Config memory config, uint256 blockId)
+        internal
+        view
+        returns (MxcData.Block storage blk)
+    {
         blk = state.blocks[blockId % config.ringBufferSize];
         if (blk.blockId != blockId) revert L1_BLOCK_ID();
     }
 
     function _validateBlock(
-        TaikoData.State storage state,
-        TaikoData.Config memory config,
-        TaikoData.BlockMetadataInput memory input,
+        MxcData.State storage state,
+        MxcData.Config memory config,
+        MxcData.BlockMetadataInput memory input,
         bytes calldata txList
     ) private view returns (uint8 cacheTxListInfo) {
         if (
@@ -141,7 +141,7 @@ library LibProposing {
                 // caching is enabled
                 if (size == 0) {
                     // This blob shall have been submitted earlier
-                    TaikoData.TxListInfo memory info = state.txListInfo[input.txListHash];
+                    MxcData.TxListInfo memory info = state.txListInfo[input.txListHash];
 
                     if (input.txListByteEnd > info.size) {
                         revert L1_TX_LIST_RANGE();

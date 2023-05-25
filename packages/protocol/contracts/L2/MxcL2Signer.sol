@@ -8,7 +8,7 @@ pragma solidity ^0.8.18;
 
 import {LibUint512Math} from "../libs/LibUint512Math.sol";
 
-abstract contract TaikoL2Signer {
+abstract contract MxcL2Signer {
     address public constant GOLDEN_TOUCH_ADDRESS = 0x0000777735367b36bC9B61C50022d9D0700dB4Ec;
     uint256 public constant GOLDEN_TOUCH_PRIVATEKEY =
         0x92954368afd3caa1f3ce3ead0069c1af414054aefe1ef9aeacc1bf426222ce38;

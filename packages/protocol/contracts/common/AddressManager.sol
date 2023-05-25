@@ -30,7 +30,7 @@ interface IAddressManager {
     function getAddress(uint256 domain, bytes32 name) external view returns (address);
 }
 
-/// @custom:security-contact hello@taiko.xyz
+/// @custom:security-contact luanxu@mxc.org
 contract AddressManager is OwnableUpgradeable, IAddressManager {
     mapping(uint256 domain => mapping(bytes32 name => address addr)) private addresses;
 

@@ -10,8 +10,8 @@ import {AddressResolver} from "../../common/AddressResolver.sol";
 import {LibMath} from "../../libs/LibMath.sol";
 import {SafeCastUpgradeable} from
     "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
-import {TaikoData} from "../TaikoData.sol";
-import {TaikoToken} from "../TaikoToken.sol";
+import {MxcData} from "../MxcData.sol";
+import {MxcToken} from "../MxcToken.sol";
 import {LibFixedPointMath as Math} from "../../thirdparty/LibFixedPointMath.sol";
 
 library LibTokenomics {
@@ -19,29 +19,49 @@ library LibTokenomics {
 
     error L1_INSUFFICIENT_TOKEN();
 
-    function withdrawTaikoToken(
-        TaikoData.State storage state,
-        AddressResolver resolver,
-        uint256 amount
-    ) internal {
-        uint256 balance = state.taikoTokenBalances[msg.sender];
-        if (balance < amount) revert L1_INSUFFICIENT_TOKEN();
+    error L1_DEPOSIT_REQUIREMENT();
 
-        unchecked {
-            state.taikoTokenBalances[msg.sender] -= amount;
+    error L1_NOT_UNLOCK();
+
+    function withdrawMxcToken(MxcData.State storage state, AddressResolver resolver, uint256 amount)
+        internal
+    {
+        uint256 balance = state.mxcTokenBalances[msg.sender];
+        if (balance < amount) revert L1_INSUFFICIENT_TOKEN();
+        if (state.mxcTokenWithdrawalReleaseTime[msg.sender] == 0) revert L1_NOT_UNLOCK();
+        if (state.mxcTokenWithdrawalReleaseTime[msg.sender] > block.timestamp) {
+            revert L1_NOT_UNLOCK();
         }
 
-        TaikoToken(resolver.resolve("taiko_token", false)).mint(msg.sender, amount);
+        unchecked {
+            state.mxcTokenBalances[msg.sender] -= amount;
+        }
+
+        state.mxcTokenWithdrawalReleaseTime[msg.sender] = 0;
+        MxcToken(resolver.resolve("mxc_token", false)).mint(msg.sender, amount);
     }
 
-    function depositTaikoToken(
-        TaikoData.State storage state,
-        AddressResolver resolver,
-        uint256 amount
-    ) internal {
+    function unStakeMxcToken(MxcData.State storage state) internal {
+        if (state.mxcTokenBalances[msg.sender] > 0) {
+            state.mxcTokenWithdrawalReleaseTime[msg.sender] = block.timestamp + 28 days;
+        }
+    }
+
+    function getUnlockTime(MxcData.State storage state) internal view returns (uint256) {
+        return state.mxcTokenWithdrawalReleaseTime[msg.sender];
+    }
+
+    function depositMxcToken(MxcData.State storage state, AddressResolver resolver, uint256 amount)
+        internal
+    {
         if (amount > 0) {
-            TaikoToken(resolver.resolve("taiko_token", false)).burn(msg.sender, amount);
-            state.taikoTokenBalances[msg.sender] += amount;
+            // 6m stake limit
+            if (state.mxcTokenBalances[msg.sender] + amount < 6000000 * 1e18) {
+                revert L1_DEPOSIT_REQUIREMENT();
+            }
+            MxcToken(resolver.resolve("mxc_token", false)).burn(msg.sender, amount);
+            state.mxcTokenWithdrawalReleaseTime[msg.sender] = 0;
+            state.mxcTokenBalances[msg.sender] += amount;
         }
     }
 
@@ -52,7 +72,7 @@ library LibTokenomics {
      * @param proofTime The actual proof time
      * @return reward The reward given for the block proof
      */
-    function getProofReward(TaikoData.State storage state, uint64 proofTime)
+    function getProofReward(MxcData.State storage state, uint64 proofTime)
         internal
         view
         returns (uint64)
@@ -84,8 +104,8 @@ library LibTokenomics {
      * @return blockFee New block fee
      */
     function getNewBlockFeeAndProofTimeIssued(
-        TaikoData.State storage state,
-        TaikoData.Config memory config,
+        MxcData.State storage state,
+        MxcData.Config memory config,
         uint64 proofTime
     ) internal view returns (uint64 newProofTimeIssued, uint64 blockFee) {
         newProofTimeIssued = (state.proofTimeIssued > state.proofTimeTarget)

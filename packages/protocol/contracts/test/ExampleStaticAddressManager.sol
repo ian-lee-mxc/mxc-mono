@@ -33,8 +33,8 @@ contract ExampleStaticAddressManager is AddressManager {
     {
         if (domain == 1) {
             if (nameHash == "ether_vault") addr = address(0x123);
-        } else if (domain == 167) {
-            if (nameHash == "taiko") addr = address(0x456);
+        } else if (domain == 5167003) {
+            if (nameHash == "mxczkevm") addr = address(0x456);
         }
     }
 }

@@ -5,22 +5,22 @@ pragma solidity ^0.8.18;
 import {Test} from "forge-std/Test.sol";
 import {console2} from "forge-std/console2.sol";
 import {AddressManager} from "../contracts/common/AddressManager.sol";
-import {TaikoConfig} from "../contracts/L1/TaikoConfig.sol";
-import {TaikoData} from "../contracts/L1/TaikoData.sol";
-import {TaikoL1} from "../contracts/L1/TaikoL1.sol";
-import {TaikoToken} from "../contracts/L1/TaikoToken.sol";
+import {MxcConfig} from "../contracts/L1/MxcConfig.sol";
+import {MxcData} from "../contracts/L1/MxcData.sol";
+import {MxcL1} from "../contracts/L1/MxcL1.sol";
+import {MxcToken} from "../contracts/L1/MxcToken.sol";
 import {SignalService} from "../contracts/signal/SignalService.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {TaikoL1TestBase} from "./TaikoL1TestBase.t.sol";
+import {MxcL1TestBase} from "./MxcL1TestBase.t.sol";
 import {LibLn} from "./LibLn.sol";
 
 /// @dev Tweak this if you iwhs to set - the config and the calculation of the proofTimeIssued
 /// @dev also originates from this
 uint16 constant INITIAL_PROOF_TIME_TARGET = 2160; //sec. Approx mainnet scenario
 
-contract TaikoL1MainnetMockConfig is TaikoL1 {
-    function getConfig() public pure override returns (TaikoData.Config memory config) {
-        config = TaikoConfig.getConfig();
+contract MxcL1MainnetMockConfig is MxcL1 {
+    function getConfig() public pure override returns (MxcData.Config memory config) {
+        config = MxcConfig.getConfig();
 
         config.txListCacheExpiry = 5 minutes;
         config.maxVerificationsPerTx = 1;
@@ -30,7 +30,7 @@ contract TaikoL1MainnetMockConfig is TaikoL1 {
     }
 }
 
-contract TaikoL1LibTokenomicsMainnet is TaikoL1TestBase {
+contract MxcL1LibTokenomicsMainnet is MxcL1TestBase {
     // To avoid stack too deep error
     // Can play to adjust
     uint32 iterationCnt = 5000;
@@ -39,8 +39,8 @@ contract TaikoL1LibTokenomicsMainnet is TaikoL1TestBase {
     uint256 Alice_start_balance;
     uint256 Bob_start_balance;
 
-    function deployTaikoL1() internal override returns (TaikoL1 taikoL1) {
-        taikoL1 = new TaikoL1MainnetMockConfig();
+    function deployMxcL1() internal override returns (MxcL1 mxcL1) {
+        mxcL1 = new MxcL1MainnetMockConfig();
     }
 
     function setUp() public override {
@@ -50,14 +50,14 @@ contract TaikoL1LibTokenomicsMainnet is TaikoL1TestBase {
         initProofTimeIssued =
             LibLn.calcInitProofTimeIssued(feeBase, proofTimeTarget, ADJUSTMENT_QUOTIENT);
 
-        TaikoL1TestBase.setUp();
+        MxcL1TestBase.setUp();
 
-        depositTaikoToken(Alice, 1e8 * 1e8, 100 ether);
-        depositTaikoToken(Bob, 1e8 * 1e8, 100 ether);
-        depositTaikoToken(Carol, 1e8 * 1e8, 100 ether);
+        depositMxcToken(Alice, 1e8 * 1e18, 100 ether);
+        depositMxcToken(Bob, 1e8 * 1e18, 100 ether);
+        depositMxcToken(Carol, 1e8 * 1e18, 100 ether);
 
-        Alice_start_balance = L1.getTaikoTokenBalance(Alice);
-        Bob_start_balance = L1.getTaikoTokenBalance(Bob);
+        Alice_start_balance = L1.getMxcTokenBalance(Alice);
+        Bob_start_balance = L1.getMxcTokenBalance(Bob);
     }
 
     /// @dev A possible (close to) mainnet scenarios is the following:
@@ -68,18 +68,18 @@ contract TaikoL1LibTokenomicsMainnet is TaikoL1TestBase {
         vm.pauseGasMetering();
         mine(1);
 
-        depositTaikoToken(Alice, 1e8 * 1e8, 1000 ether);
-        depositTaikoToken(Bob, 1e8 * 1e8, 1000 ether);
-        depositTaikoToken(Carol, 1e8 * 1e8, 1000 ether);
+        depositMxcToken(Alice, 1e8 * 1e18, 1000 ether);
+        depositMxcToken(Bob, 1e8 * 1e18, 1000 ether);
+        depositMxcToken(Carol, 1e8 * 1e18, 1000 ether);
 
         // Check balances
-        Alice_start_balance = L1.getTaikoTokenBalance(Alice);
-        Bob_start_balance = L1.getTaikoTokenBalance(Bob);
+        Alice_start_balance = L1.getMxcTokenBalance(Alice);
+        Bob_start_balance = L1.getMxcTokenBalance(Bob);
 
         // Can play to adjust
         proofTime = 179; // When proofs are coming, 179 means 1790 sec
 
-        TaikoData.BlockMetadata[] memory meta = new TaikoData.BlockMetadata[](
+        MxcData.BlockMetadata[] memory meta = new MxcData.BlockMetadata[](
             iterationCnt
         );
         uint64[] memory proposedAt = new uint64[](iterationCnt);
@@ -126,12 +126,12 @@ contract TaikoL1LibTokenomicsMainnet is TaikoL1TestBase {
         }
 
         //Check end balances
-        uint256 deposits = Alice_start_balance - L1.getTaikoTokenBalance(Alice);
-        uint256 withdrawals = L1.getTaikoTokenBalance(Bob) - Bob_start_balance;
+        uint256 deposits = Alice_start_balance - L1.getMxcTokenBalance(Alice);
+        uint256 withdrawals = L1.getMxcTokenBalance(Bob) - Bob_start_balance;
 
         //Check end balances
-        deposits = Alice_start_balance - L1.getTaikoTokenBalance(Alice);
-        withdrawals = L1.getTaikoTokenBalance(Bob) - Bob_start_balance;
+        deposits = Alice_start_balance - L1.getMxcTokenBalance(Alice);
+        withdrawals = L1.getMxcTokenBalance(Bob) - Bob_start_balance;
 
         console2.log("Deposits:", deposits);
         console2.log("withdrawals:", withdrawals);
@@ -148,7 +148,7 @@ contract TaikoL1LibTokenomicsMainnet is TaikoL1TestBase {
         vm.pauseGasMetering();
         mine(1);
 
-        TaikoData.BlockMetadata[] memory meta = new TaikoData.BlockMetadata[](
+        MxcData.BlockMetadata[] memory meta = new MxcData.BlockMetadata[](
             iterationCnt
         );
         uint64[] memory proposedAt = new uint64[](iterationCnt);
@@ -194,12 +194,12 @@ contract TaikoL1LibTokenomicsMainnet is TaikoL1TestBase {
             }
         }
         //Check end balances
-        uint256 deposits = Alice_start_balance - L1.getTaikoTokenBalance(Alice);
-        uint256 withdrawals = L1.getTaikoTokenBalance(Bob) - Bob_start_balance;
+        uint256 deposits = Alice_start_balance - L1.getMxcTokenBalance(Alice);
+        uint256 withdrawals = L1.getMxcTokenBalance(Bob) - Bob_start_balance;
 
         //Check end balances
-        deposits = Alice_start_balance - L1.getTaikoTokenBalance(Alice);
-        withdrawals = L1.getTaikoTokenBalance(Bob) - Bob_start_balance;
+        deposits = Alice_start_balance - L1.getMxcTokenBalance(Alice);
+        withdrawals = L1.getMxcTokenBalance(Bob) - Bob_start_balance;
 
         console2.log("Deposits:", deposits);
         console2.log("withdrawals:", withdrawals);
@@ -218,7 +218,7 @@ contract TaikoL1LibTokenomicsMainnet is TaikoL1TestBase {
 
         proofTime = 181; // When proofs are coming, 181 means 1810 sec
 
-        TaikoData.BlockMetadata[] memory meta = new TaikoData.BlockMetadata[](
+        MxcData.BlockMetadata[] memory meta = new MxcData.BlockMetadata[](
             iterationCnt
         );
         uint64[] memory proposedAt = new uint64[](iterationCnt);
@@ -264,12 +264,12 @@ contract TaikoL1LibTokenomicsMainnet is TaikoL1TestBase {
 
         //Check end balances
         //Check end balances
-        uint256 deposits = Alice_start_balance - L1.getTaikoTokenBalance(Alice);
-        uint256 withdrawals = L1.getTaikoTokenBalance(Bob) - Bob_start_balance;
+        uint256 deposits = Alice_start_balance - L1.getMxcTokenBalance(Alice);
+        uint256 withdrawals = L1.getMxcTokenBalance(Bob) - Bob_start_balance;
 
         //Check end balances
-        deposits = Alice_start_balance - L1.getTaikoTokenBalance(Alice);
-        withdrawals = L1.getTaikoTokenBalance(Bob) - Bob_start_balance;
+        deposits = Alice_start_balance - L1.getMxcTokenBalance(Alice);
+        withdrawals = L1.getMxcTokenBalance(Bob) - Bob_start_balance;
 
         console2.log("Deposits:", deposits);
         console2.log("withdrawals:", withdrawals);

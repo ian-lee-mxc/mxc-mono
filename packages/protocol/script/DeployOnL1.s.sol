@@ -10,8 +10,8 @@ import "forge-std/Script.sol";
 import "forge-std/console2.sol";
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
-import "../contracts/L1/TaikoToken.sol";
-import "../contracts/L1/TaikoL1.sol";
+import "../contracts/L1/MxcToken.sol";
+import "../contracts/L1/MxcL1.sol";
 import "../contracts/bridge/Bridge.sol";
 import "../contracts/bridge/TokenVault.sol";
 import "../contracts/signal/SignalService.sol";
@@ -27,7 +27,7 @@ contract DeployOnL1 is Script {
 
     uint256 public deployerPrivateKey = vm.envUint("PRIVATE_KEY");
 
-    address public taikoL2Address = vm.envAddress("TAIKO_L2_ADDRESS");
+    address public mxcL2Address = vm.envAddress("MXC_L2_ADDRESS");
 
     address public l2SignalService = vm.envAddress("L2_SIGNAL_SERVICE");
 
@@ -40,9 +40,9 @@ contract DeployOnL1 is Script {
 
     address public treasury = vm.envAddress("TREASURY");
 
-    address public taikoTokenPremintRecipient = vm.envAddress("TAIKO_TOKEN_PREMINT_RECIPIENT");
+    address public mxcTokenPremintRecipient = vm.envAddress("MXC_TOKEN_PREMINT_RECIPIENT");
 
-    uint256 public taikoTokenPremintAmount = vm.envUint("TAIKO_TOKEN_PREMINT_AMOUNT");
+    uint256 public mxcTokenPremintAmount = vm.envUint("MXC_TOKEN_PREMINT_AMOUNT");
 
     // Change it based on 'consensus' / experience / expected result
     // Based in seconds. Please set carefully.
@@ -51,7 +51,7 @@ contract DeployOnL1 is Script {
     // Can be adjusted later with setters
     uint64 public INITIAL_PROOF_TIME_TARGET = uint64(vm.envUint("INITIAL_PROOF_TIME_TARGET"));
 
-    TaikoL1 taikoL1;
+    MxcL1 mxcL1;
     address public addressManagerProxy;
 
     error FAILED_TO_DEPLOY_PLONK_VERIFIER(string contractPath);
@@ -59,11 +59,11 @@ contract DeployOnL1 is Script {
 
     function run() external {
         require(owner != address(0), "owner is zero");
-        require(taikoL2Address != address(0), "taikoL2Address is zero");
+        require(mxcL2Address != address(0), "mxcL2Address is zero");
         require(l2SignalService != address(0), "l2SignalService is zero");
         require(treasury != address(0), "treasury is zero");
-        require(taikoTokenPremintRecipient != address(0), "taikoTokenPremintRecipient is zero");
-        require(taikoTokenPremintAmount < type(uint64).max, "premint too large");
+        require(mxcTokenPremintRecipient != address(0), "mxcTokenPremintRecipient is zero");
+        require(mxcTokenPremintAmount < type(uint64).max, "premint too large");
 
         vm.startBroadcast(deployerPrivateKey);
 
@@ -73,32 +73,32 @@ contract DeployOnL1 is Script {
             "address_manager", address(addressManager), bytes.concat(addressManager.init.selector)
         );
 
-        // TaikoL1
-        taikoL1 = new ProxiedTaikoL1();
-        uint256 l2ChainId = taikoL1.getConfig().chainId;
+        // MxcL1
+        mxcL1 = new ProxiedMxcL1();
+        uint256 l2ChainId = mxcL1.getConfig().chainId;
         require(l2ChainId != block.chainid, "same chainid");
 
-        setAddress(l2ChainId, "taiko", taikoL2Address);
+        setAddress(l2ChainId, "mxczkevm", mxcL2Address);
         setAddress(l2ChainId, "signal_service", l2SignalService);
         setAddress("oracle_prover", oracleProver);
         setAddress("system_prover", systemProver);
         setAddress(l2ChainId, "treasury", treasury);
 
-        // TaikoToken
-        TaikoToken taikoToken = new ProxiedTaikoToken();
+        // MxcToken
+        MxcToken mxcToken = new ProxiedMxcToken();
 
         address[] memory premintRecipients = new address[](1);
         uint256[] memory premintAmounts = new uint256[](1);
-        premintRecipients[0] = taikoTokenPremintRecipient;
-        premintAmounts[0] = taikoTokenPremintAmount;
+        premintRecipients[0] = mxcTokenPremintRecipient;
+        premintAmounts[0] = mxcTokenPremintAmount;
 
         deployProxy(
-            "taiko_token",
-            address(taikoToken),
+            "mxc_token",
+            address(mxcToken),
             bytes.concat(
-                taikoToken.init.selector,
+                mxcToken.init.selector,
                 abi.encode(
-                    addressManagerProxy, "Taiko Token", "TKO", premintRecipients, premintAmounts
+                    addressManagerProxy, "MXC Token", "MXC", premintRecipients, premintAmounts
                 )
             )
         );
@@ -110,7 +110,7 @@ contract DeployOnL1 is Script {
         address bullToken = address(new MayFailFreeMintERC20("Bull Token", "BLL"));
         console2.log("BullToken", bullToken);
 
-        uint64 feeBase = uint64(1) ** taikoToken.decimals();
+        uint64 feeBase = uint64(1) ** mxcToken.decimals();
 
         // Calculating it for our needs based on testnet/mainnet. We need it in
         // order to make the fees on the same level - in ideal circumstences.
@@ -120,16 +120,14 @@ contract DeployOnL1 is Script {
         }
 
         uint64 initProofTimeIssued = LibLn.calcInitProofTimeIssued(
-            feeBase,
-            uint16(INITIAL_PROOF_TIME_TARGET),
-            uint8(taikoL1.getConfig().adjustmentQuotient)
+            feeBase, uint16(INITIAL_PROOF_TIME_TARGET), uint8(mxcL1.getConfig().adjustmentQuotient)
         );
 
-        address taikoL1Proxy = deployProxy(
-            "taiko",
-            address(taikoL1),
+        address mxcL1Proxy = deployProxy(
+            "mxczkevm",
+            address(mxcL1),
             bytes.concat(
-                taikoL1.init.selector,
+                mxcL1.init.selector,
                 abi.encode(
                     addressManagerProxy,
                     genesisHash,
@@ -139,8 +137,8 @@ contract DeployOnL1 is Script {
                 )
             )
         );
-        setAddress("taiko", taikoL1Proxy);
-        setAddress("proto_broker", taikoL1Proxy);
+        setAddress("mxczkevm", mxcL1Proxy);
+        setAddress("proto_broker", mxcL1Proxy);
 
         // Bridge
         Bridge bridge = new ProxiedBridge();
@@ -182,7 +180,7 @@ contract DeployOnL1 is Script {
         plonkVerifiers[0] = deployYulContract("contracts/libs/yul/PlonkVerifier.yulp");
 
         for (uint16 i = 0; i < plonkVerifiers.length; ++i) {
-            setAddress(taikoL1.getVerifierName(i), plonkVerifiers[i]);
+            setAddress(mxcL1.getVerifierName(i), plonkVerifiers[i]);
         }
     }
 

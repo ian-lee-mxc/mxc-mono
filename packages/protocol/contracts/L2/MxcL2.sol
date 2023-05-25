@@ -12,12 +12,12 @@ import {ICrossChainSync} from "../common/ICrossChainSync.sol";
 import {LibL2Consts} from "./LibL2Consts.sol";
 import {LibMath} from "../libs/LibMath.sol";
 import {Lib1559Math} from "../libs/Lib1559Math.sol";
-import {TaikoL2Signer} from "./TaikoL2Signer.sol";
+import {MxcL2Signer} from "./MxcL2Signer.sol";
 import {SafeCastUpgradeable} from
     "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
-/// @custom:security-contact hello@taiko.xyz
-contract TaikoL2 is EssentialContract, TaikoL2Signer, ICrossChainSync {
+/// @custom:security-contact luanxu@mxc.org
+contract MxcL2 is EssentialContract, MxcL2Signer, ICrossChainSync {
     using SafeCastUpgradeable for uint256;
     using LibMath for uint256;
 
@@ -300,4 +300,4 @@ contract TaikoL2 is EssentialContract, TaikoL2Signer, ICrossChainSync {
     }
 }
 
-contract ProxiedTaikoL2 is Proxied, TaikoL2 {}
+contract ProxiedMxcL2 is Proxied, MxcL2 {}

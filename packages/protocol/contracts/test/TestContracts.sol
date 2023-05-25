@@ -12,7 +12,7 @@ import {TokenVault} from "../bridge/TokenVault.sol";
 import {EtherVault} from "../bridge/EtherVault.sol";
 import {BridgedERC20} from "../bridge/BridgedERC20.sol";
 import {Bridge} from "../bridge/Bridge.sol";
-import {TaikoToken} from "../L1/TaikoToken.sol";
+import {MxcToken} from "../L1/MxcToken.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 // The old implementation that is also used in hardhat tests.
@@ -33,7 +33,7 @@ contract TestBridgedERC20 is BridgedERC20 {}
 
 contract TestBridge is Bridge {}
 
-contract TestTaikoToken is TaikoToken {
+contract TestMxcToken is MxcToken {
     function mintAnyone(address account, uint256 amount) public {
         _mint(account, amount);
     }

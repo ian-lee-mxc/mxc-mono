@@ -6,22 +6,23 @@
 
 pragma solidity ^0.8.18;
 
-import {TaikoData} from "../L1/TaikoData.sol";
+import {MxcData} from "../L1/MxcData.sol";
 
-library TaikoConfig {
-    function getConfig() internal pure returns (TaikoData.Config memory) {
-        return TaikoData.Config({
-            chainId: 167,
-            // Two weeks if avg block time is 10 seconds
-            maxNumProposedBlocks: 120960,
-            ringBufferSize: 120960 + 10,
+library MxcConfig {
+    function getConfig() internal pure returns (MxcData.Config memory) {
+        return MxcData.Config({
+            chainId: 5167003,
+            // Two weeks if avg block time is 2 seconds
+            maxNumProposedBlocks: 604800,
+            ringBufferSize: 604800 + 10,
             // Each time one more block is verified, there will be ~20k
             // more gas cost.
             maxVerificationsPerTx: 10,
             // Set it to 6M, since its the upper limit of the Alpha-2
             // testnet's circuits.
-            blockMaxGasLimit: 6000000,
-            // Set it to 79  (+1 TaikoL2.anchor transaction = 80),
+            // MXC update this to 15M
+            blockMaxGasLimit: 15000000,
+            // Set it to 79  (+1 MxcL2.anchor transaction = 80),
             // and 80 is the upper limit of the Alpha-2 testnet's circuits.
             maxTransactionsPerBlock: 79,
             minEthDepositsPerBlock: 8,

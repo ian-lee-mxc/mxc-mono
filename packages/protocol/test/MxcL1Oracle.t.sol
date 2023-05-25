@@ -5,18 +5,18 @@ import {Test} from "forge-std/Test.sol";
 import {console2} from "forge-std/console2.sol";
 import {AddressManager} from "../contracts/common/AddressManager.sol";
 import {LibUtils} from "../contracts/L1/libs/LibUtils.sol";
-import {TaikoConfig} from "../contracts/L1/TaikoConfig.sol";
-import {TaikoData} from "../contracts/L1/TaikoData.sol";
-import {TaikoErrors} from "../contracts/L1/TaikoErrors.sol";
-import {TaikoL1} from "../contracts/L1/TaikoL1.sol";
-import {TaikoToken} from "../contracts/L1/TaikoToken.sol";
+import {MxcConfig} from "../contracts/L1/MxcConfig.sol";
+import {MxcData} from "../contracts/L1/MxcData.sol";
+import {MxcErrors} from "../contracts/L1/MxcErrors.sol";
+import {MxcL1} from "../contracts/L1/MxcL1.sol";
+import {MxcToken} from "../contracts/L1/MxcToken.sol";
 import {SignalService} from "../contracts/signal/SignalService.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {TaikoL1TestBase} from "./TaikoL1TestBase.t.sol";
+import {MxcL1TestBase} from "./MxcL1TestBase.t.sol";
 
-contract TaikoL1Oracle is TaikoL1 {
-    function getConfig() public pure override returns (TaikoData.Config memory config) {
-        config = TaikoConfig.getConfig();
+contract MxcL1Oracle is MxcL1 {
+    function getConfig() public pure override returns (MxcData.Config memory config) {
+        config = MxcConfig.getConfig();
 
         config.txListCacheExpiry = 5 minutes;
         config.maxVerificationsPerTx = 0;
@@ -29,27 +29,27 @@ contract TaikoL1Oracle is TaikoL1 {
 
 contract Verifier {
     fallback(bytes calldata) external returns (bytes memory) {
-        return bytes.concat(keccak256("taiko"));
+        return bytes.concat(keccak256("mxczkevm"));
     }
 }
 
-contract TaikoL1OracleTest is TaikoL1TestBase {
-    function deployTaikoL1() internal override returns (TaikoL1 taikoL1) {
-        taikoL1 = new TaikoL1Oracle();
+contract MxcL1OracleTest is MxcL1TestBase {
+    function deployMxcL1() internal override returns (MxcL1 mxcL1) {
+        mxcL1 = new MxcL1Oracle();
     }
 
     function setUp() public override {
-        TaikoL1TestBase.setUp();
+        MxcL1TestBase.setUp();
         registerAddress(L1.getVerifierName(100), address(new Verifier()));
         registerAddress("oracle_prover", Alice);
         registerAddress("system_prover", Alice);
     }
 
     function testOracleProverWithSignature() external {
-        depositTaikoToken(Bob, 1e6 * 1e8, 100 ether);
-        depositTaikoToken(Carol, 1e6 * 1e8, 100 ether);
+        depositMxcToken(Bob, 1e6 * 1e18, 100 ether);
+        depositMxcToken(Carol, 1e6 * 1e18, 100 ether);
 
-        TaikoData.BlockMetadata memory meta = proposeBlock(Bob, 1000000, 1024);
+        MxcData.BlockMetadata memory meta = proposeBlock(Bob, 1000000, 1024);
         proveBlock(
             Bob,
             Bob,
@@ -60,7 +60,7 @@ contract TaikoL1OracleTest is TaikoL1TestBase {
             bytes32(uint256(0x11)),
             bytes32(uint256(0x12))
         );
-        TaikoData.BlockEvidence memory evidence = TaikoData.BlockEvidence({
+        MxcData.BlockEvidence memory evidence = MxcData.BlockEvidence({
             metaHash: LibUtils.hashMetadata(meta),
             parentHash: GENESIS_BLOCK_HASH,
             blockHash: bytes32(uint256(0x11)),
@@ -79,7 +79,7 @@ contract TaikoL1OracleTest is TaikoL1TestBase {
 
         vm.prank(Carol, Carol);
         L1.proveBlock(meta.id, abi.encode(evidence));
-        TaikoData.ForkChoice memory fc = L1.getForkChoice(1, GENESIS_BLOCK_HASH, 10000);
+        MxcData.ForkChoice memory fc = L1.getForkChoice(1, GENESIS_BLOCK_HASH, 10000);
 
         assertEq(fc.blockHash, bytes32(uint256(0x11)));
         assertEq(fc.signalRoot, bytes32(uint256(0x12)));
@@ -93,13 +93,13 @@ contract TaikoL1OracleTest is TaikoL1TestBase {
         registerAddress("oracle_prover", Carol);
         registerAddress("system_prover", Carol);
 
-        depositTaikoToken(Alice, 1e6 * 1e8, 100 ether);
-        depositTaikoToken(Bob, 1e6 * 1e8, 100 ether);
-        depositTaikoToken(Carol, 1e6 * 1e8, 100 ether);
+        depositMxcToken(Alice, 1e6 * 1e18, 100 ether);
+        depositMxcToken(Bob, 1e6 * 1e18, 100 ether);
+        depositMxcToken(Carol, 1e6 * 1e18, 100 ether);
 
         bytes32 parentHash = GENESIS_BLOCK_HASH;
         uint256 blockId = 1;
-        TaikoData.BlockMetadata memory meta = proposeBlock(Alice, 1000000, 1024);
+        MxcData.BlockMetadata memory meta = proposeBlock(Alice, 1000000, 1024);
 
         for (uint256 i = 0; i < 5; ++i) {
             uint32 parentGasUsed = uint32(10000 + i);
@@ -118,7 +118,7 @@ contract TaikoL1OracleTest is TaikoL1TestBase {
 
             uint256 provenAt = block.timestamp;
 
-            TaikoData.ForkChoice memory fc = L1.getForkChoice(blockId, parentHash, parentGasUsed);
+            MxcData.ForkChoice memory fc = L1.getForkChoice(blockId, parentHash, parentGasUsed);
 
             if (i == 0) {
                 assertFalse(fc.key == 0);
@@ -162,13 +162,13 @@ contract TaikoL1OracleTest is TaikoL1TestBase {
     }
 
     function testOracleProverCannotOverwriteIfSameProof() external {
-        depositTaikoToken(Alice, 1e6 * 1e8, 100 ether);
-        depositTaikoToken(Bob, 1e6 * 1e8, 100 ether);
-        depositTaikoToken(Carol, 1e6 * 1e8, 100 ether);
+        depositMxcToken(Alice, 1e6 * 1e18, 100 ether);
+        depositMxcToken(Bob, 1e6 * 1e18, 100 ether);
+        depositMxcToken(Carol, 1e6 * 1e18, 100 ether);
 
         bytes32 parentHash = GENESIS_BLOCK_HASH;
         uint256 blockId = 1;
-        TaikoData.BlockMetadata memory meta = proposeBlock(Alice, 1000000, 1024);
+        MxcData.BlockMetadata memory meta = proposeBlock(Alice, 1000000, 1024);
 
         for (uint256 i = 0; i < 5; ++i) {
             uint32 parentGasUsed = uint32(10000 + i);
@@ -187,7 +187,7 @@ contract TaikoL1OracleTest is TaikoL1TestBase {
 
             uint256 provenAt = block.timestamp;
 
-            TaikoData.ForkChoice memory fc = L1.getForkChoice(blockId, parentHash, parentGasUsed);
+            MxcData.ForkChoice memory fc = L1.getForkChoice(blockId, parentHash, parentGasUsed);
 
             if (i == 0) {
                 assertFalse(fc.key == 0);
@@ -217,7 +217,7 @@ contract TaikoL1OracleTest is TaikoL1TestBase {
             // Alice, the oracle prover,  cannot overwrite with same parameters
             vm.warp(block.timestamp + 10 seconds);
 
-            vm.expectRevert(TaikoErrors.L1_SAME_PROOF.selector);
+            vm.expectRevert(MxcErrors.L1_SAME_PROOF.selector);
             proveBlock(
                 Alice,
                 address(0),
@@ -250,9 +250,9 @@ contract TaikoL1OracleTest is TaikoL1TestBase {
 
     /// @dev Test we can propose, prove, then verify more blocks than 'maxNumProposedBlocks'
     function test_cooldown_more_blocks_than_ring_buffer_size() external {
-        depositTaikoToken(Alice, 1e6 * 1e8, 100 ether);
-        depositTaikoToken(Bob, 1e6 * 1e8, 100 ether);
-        depositTaikoToken(Carol, 1e6 * 1e8, 100 ether);
+        depositMxcToken(Alice, 1e6 * 1e18, 100 ether);
+        depositMxcToken(Bob, 1e6 * 1e18, 100 ether);
+        depositMxcToken(Carol, 1e6 * 1e18, 100 ether);
 
         bytes32 parentHash = GENESIS_BLOCK_HASH;
         uint32 parentGasUsed = 0;
@@ -260,7 +260,7 @@ contract TaikoL1OracleTest is TaikoL1TestBase {
 
         for (uint256 blockId = 1; blockId < conf.maxNumProposedBlocks * 10; blockId++) {
             printVariables("before propose");
-            TaikoData.BlockMetadata memory meta = proposeBlock(Alice, 1000000, 1024);
+            MxcData.BlockMetadata memory meta = proposeBlock(Alice, 1000000, 1024);
             printVariables("after propose");
             mine(1);
 
@@ -293,16 +293,16 @@ contract TaikoL1OracleTest is TaikoL1TestBase {
         registerAddress("oracle_prover", address(0));
         registerAddress("system_prover", address(0));
 
-        depositTaikoToken(Alice, 1e6 * 1e8, 100 ether);
-        depositTaikoToken(Bob, 1e6 * 1e8, 100 ether);
-        depositTaikoToken(Carol, 1e6 * 1e8, 100 ether);
+        depositMxcToken(Alice, 1e6 * 1e18, 100 ether);
+        depositMxcToken(Bob, 1e6 * 1e18, 100 ether);
+        depositMxcToken(Carol, 1e6 * 1e18, 100 ether);
 
         bytes32 parentHash = GENESIS_BLOCK_HASH;
         uint32 parentGasUsed = 0;
         uint32 gasUsed = 1000000;
 
         for (uint256 blockId = 1; blockId < conf.maxNumProposedBlocks * 10; blockId++) {
-            TaikoData.BlockMetadata memory meta = proposeBlock(Alice, 1000000, 1024);
+            MxcData.BlockMetadata memory meta = proposeBlock(Alice, 1000000, 1024);
             printVariables("after propose");
             mine(1);
 
@@ -342,16 +342,16 @@ contract TaikoL1OracleTest is TaikoL1TestBase {
         registerAddress("oracle_prover", Bob);
         registerAddress("system_prover", Bob);
 
-        depositTaikoToken(Alice, 1e6 * 1e8, 100 ether);
-        depositTaikoToken(Bob, 1e6 * 1e8, 100 ether);
-        depositTaikoToken(Carol, 1e6 * 1e8, 100 ether);
+        depositMxcToken(Alice, 1e6 * 1e18, 100 ether);
+        depositMxcToken(Bob, 1e6 * 1e18, 100 ether);
+        depositMxcToken(Carol, 1e6 * 1e18, 100 ether);
 
         bytes32 parentHash = GENESIS_BLOCK_HASH;
         uint32 parentGasUsed = 0;
         uint32 gasUsed = 1000000;
 
         for (uint256 blockId = 1; blockId < conf.maxNumProposedBlocks * 10; blockId++) {
-            TaikoData.BlockMetadata memory meta = proposeBlock(Alice, 1000000, 1024);
+            MxcData.BlockMetadata memory meta = proposeBlock(Alice, 1000000, 1024);
             printVariables("after propose");
             mine(1);
 
@@ -395,16 +395,16 @@ contract TaikoL1OracleTest is TaikoL1TestBase {
     function test_if_prover_is_system_prover_cooldown_is_systemProofCooldownPeriod() external {
         registerAddress("system_prover", Bob);
 
-        depositTaikoToken(Alice, 1e6 * 1e8, 100 ether);
-        depositTaikoToken(Bob, 1e6 * 1e8, 100 ether);
-        depositTaikoToken(Carol, 1e6 * 1e8, 100 ether);
+        depositMxcToken(Alice, 1e6 * 1e18, 100 ether);
+        depositMxcToken(Bob, 1e6 * 1e18, 100 ether);
+        depositMxcToken(Carol, 1e6 * 1e18, 100 ether);
 
         bytes32 parentHash = GENESIS_BLOCK_HASH;
         uint32 parentGasUsed = 0;
         uint32 gasUsed = 1000000;
 
         for (uint256 blockId = 1; blockId < conf.maxNumProposedBlocks * 10; blockId++) {
-            TaikoData.BlockMetadata memory meta = proposeBlock(Alice, 1000000, 1024);
+            MxcData.BlockMetadata memory meta = proposeBlock(Alice, 1000000, 1024);
             printVariables("after propose");
             mine(1);
 
@@ -460,16 +460,16 @@ contract TaikoL1OracleTest is TaikoL1TestBase {
     function test_if_system_proofs_can_be_verified_without_regular_proofs() external {
         registerAddress("system_prover", Bob);
 
-        depositTaikoToken(Alice, 1e6 * 1e8, 100 ether);
-        depositTaikoToken(Bob, 1e6 * 1e8, 100 ether);
-        depositTaikoToken(Carol, 1e6 * 1e8, 100 ether);
+        depositMxcToken(Alice, 1e6 * 1e18, 100 ether);
+        depositMxcToken(Bob, 1e6 * 1e18, 100 ether);
+        depositMxcToken(Carol, 1e6 * 1e18, 100 ether);
 
         bytes32 parentHash = GENESIS_BLOCK_HASH;
         uint32 parentGasUsed = 0;
         uint32 gasUsed = 1000000;
 
         for (uint256 blockId = 1; blockId < conf.maxNumProposedBlocks * 10; blockId++) {
-            TaikoData.BlockMetadata memory meta = proposeBlock(Alice, 1000000, 1024);
+            MxcData.BlockMetadata memory meta = proposeBlock(Alice, 1000000, 1024);
             printVariables("after propose");
             mine(1);
 
@@ -499,16 +499,16 @@ contract TaikoL1OracleTest is TaikoL1TestBase {
     function test_if_systemProver_can_prove_but_regular_provers_can_overwrite() external {
         registerAddress("system_prover", Bob);
 
-        depositTaikoToken(Alice, 1e6 * 1e8, 100 ether);
-        depositTaikoToken(Bob, 1e6 * 1e8, 100 ether);
-        depositTaikoToken(Carol, 1e6 * 1e8, 100 ether);
+        depositMxcToken(Alice, 1e6 * 1e18, 100 ether);
+        depositMxcToken(Bob, 1e6 * 1e18, 100 ether);
+        depositMxcToken(Carol, 1e6 * 1e18, 100 ether);
 
         bytes32 parentHash = GENESIS_BLOCK_HASH;
         uint32 parentGasUsed = 0;
         uint32 gasUsed = 1000000;
 
         for (uint256 blockId = 1; blockId < conf.maxNumProposedBlocks * 10; blockId++) {
-            TaikoData.BlockMetadata memory meta = proposeBlock(Alice, 1000000, 1024);
+            MxcData.BlockMetadata memory meta = proposeBlock(Alice, 1000000, 1024);
             printVariables("after propose");
             mine(1);
 
@@ -539,7 +539,7 @@ contract TaikoL1OracleTest is TaikoL1TestBase {
             vm.warp(block.timestamp + 1 seconds);
             vm.warp(block.timestamp + 5 minutes);
 
-            TaikoData.ForkChoice memory fc = L1.getForkChoice(blockId, parentHash, parentGasUsed);
+            MxcData.ForkChoice memory fc = L1.getForkChoice(blockId, parentHash, parentGasUsed);
 
             if (realProof != 0) assertEq(fc.prover, Carol);
 
@@ -562,16 +562,16 @@ contract TaikoL1OracleTest is TaikoL1TestBase {
         registerAddress("system_prover", address(0));
         registerAddress("oracle_prover", address(0));
 
-        depositTaikoToken(Alice, 1e6 * 1e8, 100 ether);
-        depositTaikoToken(Bob, 1e6 * 1e8, 100 ether);
-        depositTaikoToken(Carol, 1e6 * 1e8, 100 ether);
+        depositMxcToken(Alice, 1e6 * 1e18, 100 ether);
+        depositMxcToken(Bob, 1e6 * 1e18, 100 ether);
+        depositMxcToken(Carol, 1e6 * 1e18, 100 ether);
 
         bytes32 parentHash = GENESIS_BLOCK_HASH;
         uint32 parentGasUsed = 0;
         uint32 gasUsed = 1000000;
 
         for (uint256 blockId = 1; blockId < conf.maxNumProposedBlocks * 10; blockId++) {
-            TaikoData.BlockMetadata memory meta = proposeBlock(Alice, 1000000, 1024);
+            MxcData.BlockMetadata memory meta = proposeBlock(Alice, 1000000, 1024);
             printVariables("after propose");
             mine(1);
 
@@ -582,7 +582,7 @@ contract TaikoL1OracleTest is TaikoL1TestBase {
             uint256 lastVerifiedBlockId = L1.getStateVariables().lastVerifiedBlockId;
 
             // Carol could not overwrite it
-            vm.expectRevert(TaikoErrors.L1_ALREADY_PROVEN.selector);
+            vm.expectRevert(MxcErrors.L1_ALREADY_PROVEN.selector);
             proveBlock(
                 Carol, Carol, meta, parentHash, parentGasUsed, gasUsed, blockHash, signalRoot
             );

@@ -5,22 +5,22 @@ import {Test} from "forge-std/Test.sol";
 import {console2} from "forge-std/console2.sol";
 import {LibL2Consts} from "../contracts/L2/LibL2Consts.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {TaikoL2} from "../contracts/L2/TaikoL2.sol";
+import {MxcL2} from "../contracts/L2/MxcL2.sol";
 import {SafeCastUpgradeable} from
     "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
-contract TestTaikoL2 is Test {
+contract TestMxcL2 is Test {
     using SafeCastUpgradeable for uint256;
 
     uint64 public constant BLOCK_GAS_LIMIT = 30000000; // same as `block_gas_limit` in foundry.toml
 
-    TaikoL2 public L2;
+    MxcL2 public L2;
     uint256 private logIndex;
     uint64 private ANCHOR_GAS_COST = LibL2Consts.ANCHOR_GAS_COST;
 
     function setUp() public {
         uint16 rand = 2;
-        TaikoL2.EIP1559Params memory param1559 = TaikoL2.EIP1559Params({
+        MxcL2.EIP1559Params memory param1559 = MxcL2.EIP1559Params({
             basefee: (uint256(BLOCK_GAS_LIMIT * 10) * rand).toUint64(),
             gasIssuedPerSecond: 1000000,
             gasExcessMax: (uint256(15000000) * 256 * rand).toUint64(),
@@ -28,7 +28,7 @@ contract TestTaikoL2 is Test {
             ratio2x1x: 11177
         });
 
-        L2 = new TaikoL2();
+        L2 = new MxcL2();
         L2.init(address(1), param1559); // Dummy address manager address.
 
         vm.roll(block.number + 1);
@@ -108,7 +108,7 @@ contract TestTaikoL2 is Test {
     }
 
     // calling anchor in the same block more than once should fail
-    function testAnchorTxsFailByNonTaikoL2Signer() external {
+    function testAnchorTxsFailByNonMxcL2Signer() external {
         uint256 expectedBasefee = _getBasefeeAndPrint(0, BLOCK_GAS_LIMIT);
         vm.fee(expectedBasefee);
         vm.expectRevert();

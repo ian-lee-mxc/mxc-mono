@@ -15,7 +15,7 @@ import {SafeERC20Upgradeable} from
 import {Create2Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/Create2Upgradeable.sol";
 import {EssentialContract} from "../common/EssentialContract.sol";
 import {Proxied} from "../common/Proxied.sol";
-import {TaikoToken} from "../L1/TaikoToken.sol";
+import {MxcToken} from "../L1/MxcToken.sol";
 import {BridgedERC20} from "./BridgedERC20.sol";
 import {IBridge} from "./IBridge.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
@@ -26,7 +26,7 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
  * tokens.
  * @dev Ether is held by Bridges on L1 and by the EtherVault on L2,
  *      not TokenVaults.
- * @custom:security-contact hello@taiko.xyz
+ * @custom:security-contact luanxu@mxc.org
  */
 contract TokenVault is EssentialContract {
     using SafeERC20Upgradeable for ERC20Upgradeable;

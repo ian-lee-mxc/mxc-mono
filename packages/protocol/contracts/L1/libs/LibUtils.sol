@@ -10,7 +10,17 @@ import {LibMath} from "../../libs/LibMath.sol";
 import {LibTokenomics} from "./LibTokenomics.sol";
 import {SafeCastUpgradeable} from
     "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
-import {TaikoData} from "../TaikoData.sol";
+import {MxcData} from "../MxcData.sol";
+
+interface ArbSys {
+    /**
+     * @notice Get Arbitrum block number (distinct from L1 block number; Arbitrum genesis block has block number 0)
+     * @return block number as int
+     */
+    function arbBlockNumber() external view returns (uint256);
+
+    function arbBlockHash(uint256 blockNumber) external view returns (bytes32);
+}
 
 library LibUtils {
     using LibMath for uint256;
@@ -18,18 +28,18 @@ library LibUtils {
     error L1_BLOCK_ID();
 
     function getL2ChainData(
-        TaikoData.State storage state,
-        TaikoData.Config memory config,
+        MxcData.State storage state,
+        MxcData.Config memory config,
         uint256 blockId
-    ) internal view returns (bool found, TaikoData.Block storage blk) {
+    ) internal view returns (bool found, MxcData.Block storage blk) {
         uint256 id = blockId == 0 ? state.lastVerifiedBlockId : blockId;
         blk = state.blocks[id % config.ringBufferSize];
         found = (blk.blockId == id && blk.verifiedForkChoiceId != 0);
     }
 
     function getForkChoiceId(
-        TaikoData.State storage state,
-        TaikoData.Block storage blk,
+        MxcData.State storage state,
+        MxcData.Block storage blk,
         bytes32 parentHash,
         uint32 parentGasUsed
     ) internal view returns (uint256 fcId) {
@@ -44,12 +54,12 @@ library LibUtils {
         }
     }
 
-    function getStateVariables(TaikoData.State storage state)
+    function getStateVariables(MxcData.State storage state)
         internal
         view
-        returns (TaikoData.StateVariables memory)
+        returns (MxcData.StateVariables memory)
     {
-        return TaikoData.StateVariables({
+        return MxcData.StateVariables({
             blockFee: state.blockFee,
             accBlockFees: state.accBlockFees,
             genesisHeight: state.genesisHeight,
@@ -76,11 +86,7 @@ library LibUtils {
         return _ma > 0 ? _ma : maValue;
     }
 
-    function hashMetadata(TaikoData.BlockMetadata memory meta)
-        internal
-        pure
-        returns (bytes32 hash)
-    {
+    function hashMetadata(MxcData.BlockMetadata memory meta) internal pure returns (bytes32 hash) {
         uint256[7] memory inputs;
 
         inputs[0] = (uint256(meta.id) << 192) | (uint256(meta.timestamp) << 128)
@@ -121,5 +127,13 @@ library LibUtils {
 
     function getVerifierName(uint16 id) internal pure returns (bytes32) {
         return bytes32(uint256(0x1000000) + id);
+    }
+
+    function getBlockNumber() internal view returns (uint256 blockNumber) {
+        blockNumber = ArbSys(address(100)).arbBlockNumber();
+    }
+
+    function getBlockHash(uint256 blockNumber) internal view returns (bytes32 L1BlockHash) {
+        L1BlockHash = ArbSys(address(100)).arbBlockHash(blockNumber);
     }
 }

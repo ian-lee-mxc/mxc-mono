@@ -7,7 +7,7 @@ import "../../contracts/bridge/IBridge.sol";
 import "../../contracts/common/AddressResolver.sol";
 import {Test} from "forge-std/Test.sol";
 import {console2} from "forge-std/console2.sol";
-import {TaikoL2} from "../../contracts/L2/TaikoL2.sol";
+import {MxcL2} from "../../contracts/L2/MxcL2.sol";
 import {AddressManager} from "../../contracts/common/AddressManager.sol";
 import {Bridge} from "../../contracts/bridge/Bridge.sol";
 import {TokenVault} from "../../contracts/bridge/TokenVault.sol";
@@ -32,9 +32,9 @@ contract TestGenerateGenesis is Test, AddressResolver {
     uint64 public constant BLOCK_GAS_LIMIT = 30000000;
 
     function testContractDeployment() public {
-        assertEq(block.chainid, 167);
+        assertEq(block.chainid, 5167003);
 
-        checkDeployedCode("ProxiedTaikoL2");
+        checkDeployedCode("ProxiedMxcL2");
         checkDeployedCode("ProxiedTokenVault");
         checkDeployedCode("ProxiedEtherVault");
         checkDeployedCode("ProxiedBridge");
@@ -43,7 +43,7 @@ contract TestGenerateGenesis is Test, AddressResolver {
         checkDeployedCode("ProxiedSignalService");
 
         // check proxy implementations
-        checkProxyImplementation("TaikoL2Proxy", "ProxiedTaikoL2");
+        checkProxyImplementation("MxcL2Proxy", "ProxiedMxcL2");
         checkProxyImplementation("TokenVaultProxy", "ProxiedTokenVault");
         checkProxyImplementation("EtherVaultProxy", "ProxiedEtherVault");
         checkProxyImplementation("BridgeProxy", "ProxiedBridge");
@@ -51,7 +51,7 @@ contract TestGenerateGenesis is Test, AddressResolver {
         checkProxyImplementation("SignalServiceProxy", "ProxiedSignalService");
 
         // check proxies
-        checkDeployedCode("TaikoL2Proxy");
+        checkDeployedCode("MxcL2Proxy");
         checkDeployedCode("TokenVaultProxy");
         checkDeployedCode("EtherVaultProxy");
         checkDeployedCode("BridgeProxy");
@@ -68,7 +68,7 @@ contract TestGenerateGenesis is Test, AddressResolver {
         checkSavedAddress(addressManager, "BridgeProxy", "bridge");
         checkSavedAddress(addressManager, "TokenVaultProxy", "token_vault");
         checkSavedAddress(addressManager, "EtherVaultProxy", "ether_vault");
-        checkSavedAddress(addressManager, "TaikoL2Proxy", "taiko");
+        checkSavedAddress(addressManager, "MxcL2Proxy", "mxczkevm");
         checkSavedAddress(addressManager, "SignalServiceProxy", "signal_service");
 
         TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(
@@ -85,18 +85,18 @@ contract TestGenerateGenesis is Test, AddressResolver {
         vm.stopPrank();
     }
 
-    function testTaikoL2() public {
-        TaikoL2 taikoL2 = TaikoL2(getPredeployedContractAddress("TaikoL2Proxy"));
+    function testMxcL2() public {
+        MxcL2 mxcL2 = MxcL2(getPredeployedContractAddress("MxcL2Proxy"));
 
-        vm.startPrank(taikoL2.GOLDEN_TOUCH_ADDRESS());
+        vm.startPrank(mxcL2.GOLDEN_TOUCH_ADDRESS());
         for (uint64 i = 0; i < 300; i++) {
             vm.roll(block.number + 1);
-            vm.warp(taikoL2.parentTimestamp() + 12);
-            vm.fee(taikoL2.getBasefee(12, BLOCK_GAS_LIMIT, i + LibL2Consts.ANCHOR_GAS_COST));
+            vm.warp(mxcL2.parentTimestamp() + 12);
+            vm.fee(mxcL2.getBasefee(12, BLOCK_GAS_LIMIT, i + LibL2Consts.ANCHOR_GAS_COST));
 
             uint256 gasLeftBefore = gasleft();
 
-            taikoL2.anchor(
+            mxcL2.anchor(
                 bytes32(block.difficulty),
                 bytes32(block.difficulty),
                 i,
@@ -105,7 +105,7 @@ contract TestGenerateGenesis is Test, AddressResolver {
 
             if (i == 299) {
                 console2.log(
-                    "TaikoL2.anchor gas cost after 256 L2 blocks:", gasLeftBefore - gasleft()
+                    "MxcL2.anchor gas cost after 256 L2 blocks:", gasLeftBefore - gasleft()
                 );
             }
         }
@@ -114,13 +114,13 @@ contract TestGenerateGenesis is Test, AddressResolver {
         vm.startPrank(admin);
 
         TransparentUpgradeableProxy proxy =
-            TransparentUpgradeableProxy(payable(getPredeployedContractAddress("TaikoL2Proxy")));
+            TransparentUpgradeableProxy(payable(getPredeployedContractAddress("MxcL2Proxy")));
 
-        TaikoL2 newTaikoL2 = new TaikoL2();
+        MxcL2 newMxcL2 = new MxcL2();
 
-        proxy.upgradeTo(address(newTaikoL2));
+        proxy.upgradeTo(address(newMxcL2));
 
-        assertEq(proxy.implementation(), address(newTaikoL2));
+        assertEq(proxy.implementation(), address(newMxcL2));
         vm.stopPrank();
     }
 
@@ -136,7 +136,7 @@ contract TestGenerateGenesis is Test, AddressResolver {
                 id: 0,
                 sender: address(0),
                 srcChainId: 1,
-                destChainId: 167,
+                destChainId: 5167003,
                 owner: address(0),
                 to: address(0),
                 refundAddress: address(0),

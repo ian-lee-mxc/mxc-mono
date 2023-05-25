@@ -7,7 +7,7 @@
 pragma solidity ^0.8.18;
 
 /**
- * Interface implemented by both the TaikoL1 and TaikoL2 contracts. It exposes
+ * Interface implemented by both the MxcL1 and MxcL2 contracts. It exposes
  * the methods needed to access the block hashes of the other chain.
  */
 

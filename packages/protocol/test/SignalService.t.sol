@@ -67,7 +67,7 @@ contract TestSignalService is Test {
 
         addressManager.setAddress(block.chainid, "signal_service", address(signalService));
 
-        addressManager.setAddress(destChainId, "taiko", address(crossChainSync));
+        addressManager.setAddress(destChainId, "mxczkevm", address(crossChainSync));
 
         vm.stopPrank();
     }

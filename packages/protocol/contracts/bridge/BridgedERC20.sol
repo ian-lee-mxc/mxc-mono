@@ -17,7 +17,7 @@ import {EssentialContract} from "../common/EssentialContract.sol";
 import {Proxied} from "../common/Proxied.sol";
 import {BridgeErrors} from "./BridgeErrors.sol";
 
-/// @custom:security-contact hello@taiko.xyz
+/// @custom:security-contact luanxu@mxc.org
 contract BridgedERC20 is
     EssentialContract,
     IERC20Upgradeable,

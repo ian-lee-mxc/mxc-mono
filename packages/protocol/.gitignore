@@ -21,12 +21,14 @@ cache
 cache_forge
 cache_hardhat
 out
+**/.deps
 
 # Foundry
 broadcast
 
 # Editors
 .vscode
+.idea
 
 #coverage
 lcov.info

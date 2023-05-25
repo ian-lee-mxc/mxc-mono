@@ -4,14 +4,14 @@ pragma solidity ^0.8.18;
 import {Test} from "forge-std/Test.sol";
 import {console2} from "forge-std/console2.sol";
 import {Lib1559Math as T} from "../contracts/libs/Lib1559Math.sol";
-import {TaikoL2} from "../contracts/L2/TaikoL2.sol";
+import {MxcL2} from "../contracts/L2/MxcL2.sol";
 import {SafeCastUpgradeable} from
     "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
-contract TestTaiko1559Params is Test {
+contract TestMxc1559Params is Test {
     using SafeCastUpgradeable for uint256;
 
-    function testAndVerifyTaiko1559Params() external {
+    function testAndVerifyMxc1559Params() external {
         // Assume we scale L1 throughput by 10 times.
         uint64 scaleFactor = 10;
 
@@ -34,7 +34,7 @@ contract TestTaiko1559Params is Test {
 
         uint64 initialBasefee = ethereumBasefeeNow / costFactor;
 
-        TaikoL2.EIP1559Params memory param1559 = TaikoL2.EIP1559Params({
+        MxcL2.EIP1559Params memory param1559 = MxcL2.EIP1559Params({
             basefee: initialBasefee,
             gasIssuedPerSecond: gasIssuedPerSecond,
             gasExcessMax: gasExcessMax,
@@ -54,7 +54,7 @@ contract TestTaiko1559Params is Test {
         // gasTarget         : 150000000
         // ratio2x1x         : 11250
 
-        TaikoL2 L2 = new TaikoL2();
+        MxcL2 L2 = new MxcL2();
         L2.init(address(1), param1559); // Dummy address manager address.
     }
 }

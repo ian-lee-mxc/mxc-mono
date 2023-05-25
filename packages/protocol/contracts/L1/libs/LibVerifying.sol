@@ -12,11 +12,11 @@ import {LibTokenomics} from "./LibTokenomics.sol";
 import {LibUtils} from "./LibUtils.sol";
 import {SafeCastUpgradeable} from
     "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
-import {TaikoData} from "../../L1/TaikoData.sol";
+import {MxcData} from "../../L1/MxcData.sol";
 
 library LibVerifying {
     using SafeCastUpgradeable for uint256;
-    using LibUtils for TaikoData.State;
+    using LibUtils for MxcData.State;
 
     event BlockVerified(uint256 indexed id, bytes32 blockHash);
 
@@ -25,8 +25,8 @@ library LibVerifying {
     error L1_INVALID_CONFIG();
 
     function init(
-        TaikoData.State storage state,
-        TaikoData.Config memory config,
+        MxcData.State storage state,
+        MxcData.Config memory config,
         bytes32 genesisBlockHash,
         uint64 initBlockFee,
         uint64 initProofTimeTarget,
@@ -49,7 +49,7 @@ library LibVerifying {
         ) revert L1_INVALID_CONFIG();
 
         uint64 timeNow = uint64(block.timestamp);
-        state.genesisHeight = uint64(block.number);
+        state.genesisHeight = uint64(LibUtils.getBlockNumber());
         state.genesisTimestamp = timeNow;
 
         state.blockFee = initBlockFee;
@@ -57,12 +57,12 @@ library LibVerifying {
         state.proofTimeTarget = initProofTimeTarget;
         state.numBlocks = 1;
 
-        TaikoData.Block storage blk = state.blocks[0];
+        MxcData.Block storage blk = state.blocks[0];
         blk.proposedAt = timeNow;
         blk.nextForkChoiceId = 2;
         blk.verifiedForkChoiceId = 1;
 
-        TaikoData.ForkChoice storage fc = state.blocks[0].forkChoices[1];
+        MxcData.ForkChoice storage fc = state.blocks[0].forkChoices[1];
         fc.blockHash = genesisBlockHash;
         fc.provenAt = timeNow;
 
@@ -70,13 +70,13 @@ library LibVerifying {
     }
 
     function verifyBlocks(
-        TaikoData.State storage state,
-        TaikoData.Config memory config,
+        MxcData.State storage state,
+        MxcData.Config memory config,
         AddressResolver resolver,
         uint256 maxBlocks
     ) internal {
         uint256 i = state.lastVerifiedBlockId;
-        TaikoData.Block storage blk = state.blocks[i % config.ringBufferSize];
+        MxcData.Block storage blk = state.blocks[i % config.ringBufferSize];
 
         uint256 fcId = blk.verifiedForkChoiceId;
         assert(fcId > 0);
@@ -98,7 +98,7 @@ library LibVerifying {
 
             if (fcId == 0) break;
 
-            TaikoData.ForkChoice storage fc = blk.forkChoices[fcId];
+            MxcData.ForkChoice storage fc = blk.forkChoices[fcId];
 
             if (fc.prover == address(0)) break;
 
@@ -133,9 +133,9 @@ library LibVerifying {
             }
 
             if (config.relaySignalRoot) {
-                // Send the L2's signal root to the signal service so other TaikoL1
+                // Send the L2's signal root to the signal service so other MxcL1
                 // deployments, if they share the same signal service, can relay the
-                // signal to their corresponding TaikoL2 contract.
+                // signal to their corresponding MxcL2 contract.
                 ISignalService(resolver.resolve("signal_service", false)).sendSignal(signalRoot);
             }
             emit CrossChainSynced(state.lastVerifiedBlockId, blockHash, signalRoot);
@@ -143,10 +143,10 @@ library LibVerifying {
     }
 
     function _markBlockVerified(
-        TaikoData.State storage state,
-        TaikoData.Config memory config,
-        TaikoData.Block storage blk,
-        TaikoData.ForkChoice storage fc,
+        MxcData.State storage state,
+        MxcData.Config memory config,
+        MxcData.Block storage blk,
+        MxcData.ForkChoice storage fc,
         uint24 fcId,
         address systemProver
     ) private {
@@ -171,12 +171,12 @@ library LibVerifying {
 
             // systemProver may become address(0) after a block is proven
             if (prover != address(0)) {
-                if (state.taikoTokenBalances[prover] == 0) {
+                if (state.mxcTokenBalances[prover] == 0) {
                     // Reduce refund to 1 wei as a penalty if the proposer
                     // has 0 TKO outstanding balance.
-                    state.taikoTokenBalances[prover] = 1;
+                    state.mxcTokenBalances[prover] = 1;
                 } else {
-                    state.taikoTokenBalances[prover] += reward;
+                    state.mxcTokenBalances[prover] += reward;
                 }
             }
         }

@@ -5,34 +5,58 @@ import {Test} from "forge-std/Test.sol";
 import {console2} from "forge-std/console2.sol";
 import {AddressManager} from "../contracts/common/AddressManager.sol";
 import {LibUtils} from "../contracts/L1/libs/LibUtils.sol";
-import {TaikoConfig} from "../contracts/L1/TaikoConfig.sol";
-import {TaikoData} from "../contracts/L1/TaikoData.sol";
-import {TaikoL1} from "../contracts/L1/TaikoL1.sol";
-import {TaikoToken} from "../contracts/L1/TaikoToken.sol";
+import {MxcConfig} from "../contracts/L1/MxcConfig.sol";
+import {MxcData} from "../contracts/L1/MxcData.sol";
+import {MxcL1} from "../contracts/L1/MxcL1.sol";
+import {MxcToken} from "../contracts/L1/MxcToken.sol";
 import {SignalService} from "../contracts/signal/SignalService.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 contract Verifier {
     fallback(bytes calldata) external returns (bytes memory) {
-        return bytes.concat(keccak256("taiko"));
+        return bytes.concat(keccak256("mxczkevm"));
     }
 }
 
-abstract contract TaikoL1TestBase is Test {
+interface ArbSys {
+    /**
+     * @notice Get Arbitrum block number (distinct from L1 block number; Arbitrum genesis block has block number 0)
+     * @return block number as int
+     */
+    function arbBlockNumber() external view returns (uint256);
+
+    function arbBlockHash(uint256 blockNumber) external view returns (bytes32);
+}
+
+contract ArbSysTest is ArbSys {
+    /**
+     * @notice Get Arbitrum block number (distinct from L1 block number; Arbitrum genesis block has block number 0)
+     * @return block number as int
+     */
+    function arbBlockNumber() external view returns (uint256) {
+        return block.number;
+    }
+
+    function arbBlockHash(uint256 blockNumber) external view returns (bytes32) {
+        return blockhash(blockNumber);
+    }
+}
+
+abstract contract MxcL1TestBase is Test {
     AddressManager public addressManager;
-    TaikoToken public tko;
+    MxcToken public mxc;
     SignalService public ss;
-    TaikoL1 public L1;
-    TaikoData.Config conf;
+    MxcL1 public L1;
+    MxcData.Config conf;
     uint256 internal logCount;
 
     bytes32 public constant GENESIS_BLOCK_HASH = keccak256("GENESIS_BLOCK_HASH");
-    uint64 feeBase = 1e8; // 1 TKO
+    uint64 feeBase = 1e18; // 1 TKO
     uint64 l2GasExcess = 1e18;
 
     address public constant L2Treasury = 0x859d74b52762d9ed07D1b2B8d7F93d26B1EA78Bb;
     address public constant L2SS = 0xa008AE5Ba00656a3Cc384de589579e3E52aC030C;
-    address public constant TaikoL2 = 0x0082D90249342980d011C58105a03b35cCb4A315;
+    address public constant MxcL2 = 0x0082D90249342980d011C58105a03b35cCb4A315;
     address public constant L1EthVault = 0xDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5;
 
     address public constant Alice = 0xa9bcF99f5eb19277f48b71F9b14f5960AEA58a89;
@@ -52,10 +76,17 @@ abstract contract TaikoL1TestBase is Test {
     uint16 proofTimeTarget;
     uint8 public constant ADJUSTMENT_QUOTIENT = 16;
 
-    function deployTaikoL1() internal virtual returns (TaikoL1 taikoL1);
+    function deployMxcL1() internal virtual returns (MxcL1 mxcL1);
+
+    function deployArbSysTest() internal {
+        ArbSys arbSysTest = new ArbSysTest();
+        vm.etch(address(100), address(arbSysTest).code);
+        console2.log(ArbSys(arbSysTest).arbBlockNumber());
+    }
 
     function setUp() public virtual {
-        L1 = deployTaikoL1();
+        deployArbSysTest();
+        L1 = deployMxcL1();
         conf = L1.getConfig();
 
         addressManager = new AddressManager();
@@ -67,21 +98,21 @@ abstract contract TaikoL1TestBase is Test {
         registerAddress("signal_service", address(ss));
         registerAddress("ether_vault", address(L1EthVault));
         registerL2Address("treasury", L2Treasury);
-        registerL2Address("taiko", address(TaikoL2));
+        registerL2Address("mxczkevm", address(MxcL2));
         registerL2Address("signal_service", address(L2SS));
-        registerL2Address("taiko_l2", address(TaikoL2));
+        registerL2Address("mxczkevm_l2", address(MxcL2));
         registerAddress(L1.getVerifierName(100), address(new Verifier()));
         registerAddress(L1.getVerifierName(0), address(new Verifier()));
 
-        tko = new TaikoToken();
-        registerAddress("taiko_token", address(tko));
+        mxc = new MxcToken();
+        registerAddress("mxc_token", address(mxc));
         address[] memory premintRecipients;
         uint256[] memory premintAmounts;
-        tko.init(address(addressManager), "TaikoToken", "TKO", premintRecipients, premintAmounts);
+        mxc.init(address(addressManager), "MXCToken", "MXC", premintRecipients, premintAmounts);
 
         // Set protocol broker
         registerAddress("proto_broker", address(this));
-        tko.mint(address(this), 1e9 * 1e8);
+        mxc.mint(address(this), 1e9 * 1e18);
         registerAddress("proto_broker", address(L1));
 
         // Lastly, init L1
@@ -104,10 +135,10 @@ abstract contract TaikoL1TestBase is Test {
 
     function proposeBlock(address proposer, uint32 gasLimit, uint24 txListSize)
         internal
-        returns (TaikoData.BlockMetadata memory meta)
+        returns (MxcData.BlockMetadata memory meta)
     {
         bytes memory txList = new bytes(txListSize);
-        TaikoData.BlockMetadataInput memory input = TaikoData.BlockMetadataInput({
+        MxcData.BlockMetadataInput memory input = MxcData.BlockMetadataInput({
             beneficiary: proposer,
             gasLimit: gasLimit,
             txListHash: keccak256(txList),
@@ -116,7 +147,7 @@ abstract contract TaikoL1TestBase is Test {
             cacheTxListInfo: 0
         });
 
-        TaikoData.StateVariables memory variables = L1.getStateVariables();
+        MxcData.StateVariables memory variables = L1.getStateVariables();
 
         uint256 _mixHash;
         unchecked {
@@ -125,8 +156,8 @@ abstract contract TaikoL1TestBase is Test {
 
         meta.id = variables.numBlocks;
         meta.timestamp = uint64(block.timestamp);
-        meta.l1Height = uint64(block.number - 1);
-        meta.l1Hash = blockhash(block.number - 1);
+        meta.l1Height = uint64(LibUtils.getBlockNumber() - 1);
+        meta.l1Hash = LibUtils.getBlockHash(LibUtils.getBlockNumber() - 1);
         meta.mixHash = bytes32(_mixHash);
         meta.txListHash = keccak256(txList);
         meta.txListByteStart = 0;
@@ -142,14 +173,14 @@ abstract contract TaikoL1TestBase is Test {
     function proveBlock(
         address msgSender,
         address prover,
-        TaikoData.BlockMetadata memory meta,
+        MxcData.BlockMetadata memory meta,
         bytes32 parentHash,
         uint32 parentGasUsed,
         uint32 gasUsed,
         bytes32 blockHash,
         bytes32 signalRoot
     ) internal {
-        TaikoData.BlockEvidence memory evidence = TaikoData.BlockEvidence({
+        MxcData.BlockEvidence memory evidence = MxcData.BlockEvidence({
             metaHash: LibUtils.hashMetadata(meta),
             parentHash: parentHash,
             blockHash: blockHash,
@@ -181,15 +212,15 @@ abstract contract TaikoL1TestBase is Test {
         console2.log(conf.chainId, uint256(nameHash), unicode"→", addr);
     }
 
-    function depositTaikoToken(address who, uint256 amountTko, uint256 amountEth) internal {
+    function depositMxcToken(address who, uint256 amountMxc, uint256 amountEth) internal {
         vm.deal(who, amountEth);
-        tko.transfer(who, amountTko);
+        mxc.transfer(who, amountMxc + 6000000 ether);
         vm.prank(who, who);
-        L1.depositTaikoToken(amountTko);
+        L1.depositMxcToken(amountMxc + 6000000 ether);
     }
 
     function printVariables(string memory comment) internal {
-        TaikoData.StateVariables memory vars = L1.getStateVariables();
+        MxcData.StateVariables memory vars = L1.getStateVariables();
 
         uint256 fee = L1.getBlockFee();
 

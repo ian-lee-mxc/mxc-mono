@@ -15,8 +15,8 @@ const IMPLEMENTATION_SLOT =
 const ADMIN_SLOT =
     "0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103";
 
-// deployTaikoL2 generates a L2 genesis alloc of the TaikoL2 contract.
-export async function deployTaikoL2(
+// deployMxcL2 generates a L2 genesis alloc of the MxcL2 contract.
+export async function deployMxcL2(
     config: Config,
     result: Result
 ): Promise<Result> {
@@ -139,9 +139,9 @@ async function generateContractConfigs(
             ARTIFACTS_PATH,
             "./AddressManager.sol/ProxiedAddressManager.json"
         )),
-        ProxiedTaikoL2: require(path.join(
+        ProxiedMxcL2: require(path.join(
             ARTIFACTS_PATH,
-            "./TaikoL2.sol/ProxiedTaikoL2.json"
+            "./MxcL2.sol/ProxiedMxcL2.json"
         )),
         ProxiedBridge: require(path.join(
             ARTIFACTS_PATH,
@@ -165,7 +165,7 @@ async function generateContractConfigs(
         ARTIFACTS_PATH,
         "./TransparentUpgradeableProxy.sol/TransparentUpgradeableProxy.json"
     ));
-    contractArtifacts.TaikoL2Proxy = proxy;
+    contractArtifacts.MxcL2Proxy = proxy;
     contractArtifacts.BridgeProxy = proxy;
     contractArtifacts.TokenVaultProxy = proxy;
     contractArtifacts.EtherVaultProxy = proxy;
@@ -178,9 +178,9 @@ async function generateContractConfigs(
         let bytecode = (artifact as any).bytecode;
 
         switch (contractName) {
-            case "ProxiedTaikoL2":
+            case "ProxiedMxcL2":
                 bytecode = linkContractLibs(
-                    contractArtifacts.ProxiedTaikoL2,
+                    contractArtifacts.ProxiedMxcL2,
                     addressMap
                 );
                 break;
@@ -284,8 +284,8 @@ async function generateContractConfigs(
                 addresses: {
                     [chainId]: {
                         [ethers.utils.hexlify(
-                            ethers.utils.toUtf8Bytes("taiko")
-                        )]: addressMap.TaikoL2Proxy,
+                            ethers.utils.toUtf8Bytes("mxczkevm")
+                        )]: addressMap.MxcL2Proxy,
                         [ethers.utils.hexlify(
                             ethers.utils.toUtf8Bytes("bridge")
                         )]: addressMap.BridgeProxy,
@@ -307,19 +307,19 @@ async function generateContractConfigs(
             },
             isProxy: true,
         },
-        ProxiedTaikoL2: {
-            address: addressMap.ProxiedTaikoL2,
+        ProxiedMxcL2: {
+            address: addressMap.ProxiedMxcL2,
             deployedBytecode: linkContractLibs(
-                contractArtifacts.ProxiedTaikoL2,
+                contractArtifacts.ProxiedMxcL2,
                 addressMap
             ),
         },
-        TaikoL2Proxy: {
-            address: addressMap.TaikoL2Proxy,
+        MxcL2Proxy: {
+            address: addressMap.MxcL2Proxy,
             deployedBytecode:
-                contractArtifacts.TaikoL2Proxy.deployedBytecode.object,
+                contractArtifacts.MxcL2Proxy.deployedBytecode.object,
             variables: {
-                // TaikoL2
+                // MxcL2
                 // keccak256(abi.encodePacked(block.chainid, basefee, ancestors))
                 publicInputHash: `${ethers.utils.solidityKeccak256(
                     ["bytes32[256]"],
@@ -346,7 +346,7 @@ async function generateContractConfigs(
             },
             slots: {
                 [ADMIN_SLOT]: contractAdmin,
-                [IMPLEMENTATION_SLOT]: addressMap.ProxiedTaikoL2,
+                [IMPLEMENTATION_SLOT]: addressMap.ProxiedMxcL2,
             },
             isProxy: true,
         },

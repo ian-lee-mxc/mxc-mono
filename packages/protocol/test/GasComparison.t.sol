@@ -3,7 +3,7 @@ pragma solidity ^0.8.18;
 
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
-import "../contracts/L1/TaikoData.sol";
+import "../contracts/L1/MxcData.sol";
 import "../contracts/libs/LibAddress.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
@@ -71,8 +71,8 @@ contract FooBar {
         meta.timestamp = uint64(uint256((a << (128 + 64)) >> (128 + 64)));
     }
 
-    function return_1() public view returns (TaikoData.BlockMetadata memory meta) {
-        meta = TaikoData.BlockMetadata({
+    function return_1() public view returns (MxcData.BlockMetadata memory meta) {
+        meta = MxcData.BlockMetadata({
             id: 1,
             l1Height: 1,
             l1Hash: bytes32(uint256(1)),
@@ -86,12 +86,12 @@ contract FooBar {
             depositsRoot: 0,
             timestamp: 1,
             cacheTxListInfo: 0,
-            depositsProcessed: new TaikoData.EthDeposit[](0)
+            depositsProcessed: new MxcData.EthDeposit[](0)
         });
     }
 
     function return_2() public view {
-        TaikoData.BlockMetadata({
+        MxcData.BlockMetadata({
             id: 1,
             l1Height: 1,
             l1Hash: bytes32(uint256(1)),
@@ -105,7 +105,7 @@ contract FooBar {
             depositsRoot: 0,
             timestamp: 1,
             cacheTxListInfo: 0,
-            depositsProcessed: new TaikoData.EthDeposit[](0)
+            depositsProcessed: new MxcData.EthDeposit[](0)
         });
     }
 

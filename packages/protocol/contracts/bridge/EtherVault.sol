@@ -15,7 +15,7 @@ import {LibAddress} from "../libs/LibAddress.sol";
 import {BridgeErrors} from "./BridgeErrors.sol";
 
 /**
- * @custom:security-contact hello@taiko.xyz
+ * @custom:security-contact luanxu@mxc.org
  * EtherVault is a special vault contract that:
  * - Is initialized with 2^128 Ether.
  * - Allows the contract owner to authorize addresses.

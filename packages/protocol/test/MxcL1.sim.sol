@@ -3,11 +3,11 @@ pragma solidity ^0.8.18;
 
 import {Test} from "forge-std/Test.sol";
 import {console2} from "forge-std/console2.sol";
-import {TaikoConfig} from "../contracts/L1/TaikoConfig.sol";
-import {TaikoData} from "../contracts/L1/TaikoData.sol";
-import {TaikoL1} from "../contracts/L1/TaikoL1.sol";
+import {MxcConfig} from "../contracts/L1/MxcConfig.sol";
+import {MxcData} from "../contracts/L1/MxcData.sol";
+import {MxcL1} from "../contracts/L1/MxcL1.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {TaikoL1TestBase} from "./TaikoL1TestBase.t.sol";
+import {MxcL1TestBase} from "./MxcL1TestBase.t.sol";
 import {LibLn} from "./LibLn.sol";
 
 /// @dev Tweak this if you iwhs to set - the config and the calculation of the proofTimeIssued
@@ -16,9 +16,9 @@ uint16 constant INITIAL_PROOF_TIME_TARGET = 375; //sec. Approx mainnet scenario
 
 /// @dev Warning: this test will take 7-10 minutes and require 1GB memory.
 ///      `pnpm sim`
-contract TaikoL1_b is TaikoL1 {
-    function getConfig() public pure override returns (TaikoData.Config memory config) {
-        config = TaikoConfig.getConfig();
+contract MxcL1_b is MxcL1 {
+    function getConfig() public pure override returns (MxcData.Config memory config) {
+        config = MxcConfig.getConfig();
 
         config.txListCacheExpiry = 0;
         config.maxNumProposedBlocks = 1100;
@@ -31,11 +31,11 @@ contract TaikoL1_b is TaikoL1 {
 
 contract Verifier {
     fallback(bytes calldata) external returns (bytes memory) {
-        return bytes.concat(keccak256("taiko"));
+        return bytes.concat(keccak256("mxczkevm"));
     }
 }
 
-contract TaikoL1Simulation is TaikoL1TestBase {
+contract MxcL1Simulation is MxcL1TestBase {
     // Need to bring variable declaration here - to avoid stack too deep
     // Initial salt for semi-random generation
     uint256 salt = 2195684615435261315311;
@@ -80,8 +80,8 @@ contract TaikoL1Simulation is TaikoL1TestBase {
     uint32[] gasUsed = new uint32[](blocksToSimulate);
     uint32[] gasLimits = new uint32[](blocksToSimulate);
 
-    function deployTaikoL1() internal override returns (TaikoL1 taikoL1) {
-        taikoL1 = new TaikoL1_b();
+    function deployMxcL1() internal override returns (MxcL1 mxcL1) {
+        mxcL1 = new MxcL1_b();
     }
 
     function setUp() public override {
@@ -90,7 +90,7 @@ contract TaikoL1Simulation is TaikoL1TestBase {
         initProofTimeIssued =
             LibLn.calcInitProofTimeIssued(feeBase, proofTimeTarget, ADJUSTMENT_QUOTIENT);
 
-        TaikoL1TestBase.setUp();
+        MxcL1TestBase.setUp();
 
         registerAddress(L1.getVerifierName(100), address(new Verifier()));
     }
@@ -101,9 +101,9 @@ contract TaikoL1Simulation is TaikoL1TestBase {
 
         assertEq(time, 1);
 
-        depositTaikoToken(Alice, 1e6 * 1e8, 10000 ether);
+        depositMxcToken(Alice, 1e6 * 1e18, 10000 ether);
 
-        TaikoData.BlockMetadata[] memory metas = new TaikoData.BlockMetadata[](
+        MxcData.BlockMetadata[] memory metas = new MxcData.BlockMetadata[](
             blocksToSimulate
         );
 
@@ -264,9 +264,9 @@ contract TaikoL1Simulation is TaikoL1TestBase {
 
         assertEq(time, 1);
 
-        depositTaikoToken(Alice, 1e6 * 1e8, 10000 ether);
+        depositMxcToken(Alice, 1e6 * 1e18, 10000 ether);
 
-        TaikoData.BlockMetadata[] memory metas = new TaikoData.BlockMetadata[](
+        MxcData.BlockMetadata[] memory metas = new MxcData.BlockMetadata[](
             blocksToSimulate
         );
 
@@ -441,9 +441,9 @@ contract TaikoL1Simulation is TaikoL1TestBase {
 
         assertEq(time, 1);
 
-        depositTaikoToken(Alice, 1e6 * 1e8, 10000 ether);
+        depositMxcToken(Alice, 1e6 * 1e18, 10000 ether);
 
-        TaikoData.BlockMetadata[] memory metas = new TaikoData.BlockMetadata[](
+        MxcData.BlockMetadata[] memory metas = new MxcData.BlockMetadata[](
             blocksToSimulate
         );
 
@@ -631,7 +631,7 @@ contract TaikoL1Simulation is TaikoL1TestBase {
 
     // TODO(daniel|dani): log enough state variables for analysis.
     function printVariables() internal {
-        TaikoData.StateVariables memory vars = L1.getStateVariables();
+        MxcData.StateVariables memory vars = L1.getStateVariables();
         string memory str = string.concat(
             Strings.toString(logCount++),
             ";",

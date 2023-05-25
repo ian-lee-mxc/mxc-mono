@@ -6,7 +6,7 @@
 
 pragma solidity ^0.8.18;
 
-library TaikoData {
+library MxcData {
     struct Config {
         uint256 chainId;
         uint256 maxNumProposedBlocks;
@@ -71,7 +71,7 @@ library TaikoData {
         address beneficiary;
         uint8 cacheTxListInfo;
         address treasury;
-        TaikoData.EthDeposit[] depositsProcessed;
+        MxcData.EthDeposit[] depositsProcessed;
     }
 
     struct BlockEvidence {
@@ -132,7 +132,7 @@ library TaikoData {
                     bytes32 parentHash => mapping(uint32 parentGasUsed => uint256 forkChoiceId)
                 )
             ) forkChoiceIds;
-        mapping(address account => uint256 balance) taikoTokenBalances;
+        mapping(address account => uint256 balance) mxcTokenBalances;
         mapping(bytes32 txListHash => TxListInfo) txListInfo;
         EthDeposit[] ethDeposits;
         // Never or rarely changed
@@ -152,6 +152,7 @@ library TaikoData {
         uint64 lastVerifiedBlockId;
         uint64 proofTimeTarget;
         // Reserved
-        uint256[42] __gap;
+        mapping(address account => uint256 unlockTime) mxcTokenWithdrawalReleaseTime;
+        uint256[41] __gap;
     }
 }

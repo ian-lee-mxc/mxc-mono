@@ -15,7 +15,7 @@
     "snapshot": "forge snapshot --match-path test/**/*.t.sol",
     "test:coverage": "forge coverage --report lcov",
     "sim": "forge test -vvv --gas-report --fuzz-seed $(date +%s) --match-path test/**/*.sim.sol --block-gas-limit 3000000000000000000",
-    "sim:export": "pnpm test:sim > simulation/exports/simulation_data_$(date +%s).txt",
+    "sim:export": "pnpm sim > simulation/exports/simulation_data_$(date +%s).txt",
     "generate:genesis": "ts-node ./utils/generate_genesis/main.ts",
     "test:genesis": "./test/genesis/generate_genesis.test.sh",
     "deploy:foundry": "./script/download_solc.sh && ./script/test_deploy_on_l1.sh",

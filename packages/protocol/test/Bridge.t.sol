@@ -311,7 +311,7 @@ contract BridgeTest is Test {
         badReceiver = new BadReceiver();
 
         uint256 dest = 1337;
-        addressManager.setAddress(dest, "taiko", address(crossChainSync));
+        addressManager.setAddress(dest, "mxczkevm", address(crossChainSync));
 
         addressManager.setAddress(1336, "bridge", 0x564540a26Fb667306b3aBdCB4ead35BEb88698ab);
 

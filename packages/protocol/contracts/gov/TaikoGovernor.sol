@@ -29,11 +29,11 @@ import {
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-import {LibTaikoTokenConfig} from "../L1/TaikoToken.sol";
+import {LibMxcTokenConfig} from "../L1/MxcToken.sol";
 import {EssentialContract} from "../common/EssentialContract.sol";
 import {Proxied} from "../common/Proxied.sol";
 
-/// @custom:security-contact hello@taiko.xyz
+/// @custom:security-contact luanxu@mxc.org
 contract TaikoGovernor is
     EssentialContract,
     GovernorUpgradeable,
@@ -55,7 +55,7 @@ contract TaikoGovernor is
         EssentialContract._init(_addressManager);
 
         __Governor_init("TaikoGovernor");
-        __GovernorSettings_init(1, /* 1 block */ 100800, /* 2 week */ LibTaikoTokenConfig.DECIMALS);
+        __GovernorSettings_init(1, /* 1 block */ 100800, /* 2 week */ LibMxcTokenConfig.DECIMALS);
         __GovernorCountingSimple_init();
         __GovernorVotes_init(_token);
         __GovernorVotesQuorumFraction_init(5);
