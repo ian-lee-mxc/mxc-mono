@@ -10,7 +10,7 @@ import {MxcData} from "./MxcData.sol";
 
 abstract contract MxcEvents {
     // The following events must match the definitions in corresponding L1 libraries.
-    event BlockProposed(uint256 indexed id, MxcData.BlockMetadata meta);
+    event BlockProposed(uint256 indexed id, MxcData.BlockMetadata meta, uint64 blockFee);
 
     event BlockProven(
         uint256 indexed id,
@@ -21,9 +21,11 @@ abstract contract MxcEvents {
         uint32 parentGasUsed
     );
 
-    event BlockVerified(uint256 indexed id, bytes32 blockHash);
+    event BlockVerified(uint256 indexed id, bytes32 blockHash, uint64 reward);
 
     event EthDeposited(MxcData.EthDeposit deposit);
 
-    event ProofTimeTargetChanged(uint64 proofTimeTarget);
+    event ProofParamsChanged(
+        uint64 proofTimeTarget, uint64 proofTimeIssued, uint64 blockFee, uint16 adjustmentQuotient
+    );
 }
