@@ -7,12 +7,11 @@
   import { activeBridge, bridgeType } from '../../store/bridge';
   import { signer } from '../../store/signer';
   import { BigNumber, Contract, ethers, Signer } from 'ethers';
-  import ProcessingFee from './ProcessingFee';
+  // import ProcessingFee from './ProcessingFee';
   import SelectToken from '../buttons/SelectToken.svelte';
 
   import type { Token } from '../../domain/token';
   import type { BridgeOpts, BridgeType } from '../../domain/bridge';
-
   import type { Chain } from '../../domain/chain';
   import { truncateString } from '../../utils/truncateString';
   import {
@@ -28,7 +27,7 @@
   import { Funnel } from 'svelte-heros-v2';
   import FaucetModal from '../modals/FaucetModal.svelte';
   import { errorToast, successToast } from '../Toast.svelte';
-  import { L1_CHAIN_ID } from '../../constants/envVars';
+  import { L1_CHAIN_ID, L2_CHAIN_ID } from '../../constants/envVars';
   import { fetchFeeData } from '@wagmi/core';
   import { checkIfTokenIsDeployedCrossChain } from '../../utils/checkIfTokenIsDeployedCrossChain';
   import To from './To.svelte';
@@ -51,7 +50,8 @@
   let memoError: string;
   let to: string = '';
   let showTo: boolean = false;
-  let feeMethod: ProcessingFeeMethod = ProcessingFeeMethod.RECOMMENDED;
+  // let feeMethod: ProcessingFeeMethod = ProcessingFeeMethod.RECOMMENDED;
+  let feeMethod: ProcessingFeeMethod = ProcessingFeeMethod.NONE;
   let feeAmount: string = '0';
 
   // TODO: too much going on here. We need to extract
@@ -87,8 +87,8 @@
     token: Token,
     fromChain: Chain,
   ) {
-    if (signer && token) {
-      if (token.symbol == ETHToken.symbol) {
+    if (signer && token && fromChain) {
+      if (token.symbol == ETHToken.symbol && token.isETHToken && fromChain.id==L2_CHAIN_ID) {
         const userBalance = await signer.getBalance('latest');
         tokenBalance = ethers.utils.formatEther(userBalance);
       } else {
@@ -201,8 +201,8 @@
       const userBalance = await $signer.getBalance('latest');
 
       let balanceAvailableForTx = userBalance;
-
-      if ($token.symbol === ETHToken.symbol) {
+      // in l2
+      if ($token.symbol === ETHToken.symbol && $fromChain.id==L2_CHAIN_ID) {
         balanceAvailableForTx = userBalance.sub(
           ethers.utils.parseEther(amount),
         );
@@ -210,6 +210,7 @@
 
       return balanceAvailableForTx.gte(requiredGas);
     } catch (e) {
+      console.log(e,"error")
       return false;
     }
   }
@@ -267,7 +268,6 @@
       }
 
       const tx = await $activeBridge.Bridge(bridgeOpts);
-
       // tx.chainId is not set immediately but we need it later. set it
       // manually.
       tx.chainId = $fromChain.id;
@@ -393,7 +393,7 @@
   $: showFaucet =
     $fromChain && // chain selected?
     $fromChain.id === L1_CHAIN_ID && // are we in L1?
-    $token.symbol !== ETHToken.symbol && // bridging ERC20?
+    // $token.symbol == ETHToken.symbol && // bridging ERC20?
     $signer && // wallet connected?
     tokenBalance &&
     ethers.utils
@@ -454,7 +454,7 @@
 
 <To bind:showTo bind:to />
 
-<ProcessingFee bind:method={feeMethod} bind:amount={feeAmount} />
+<!-- <ProcessingFee bind:method={feeMethod} bind:amount={feeAmount} /> -->
 
 <Memo bind:memo bind:memoError />
 
@@ -499,7 +499,7 @@
     -moz-appearance: textfield !important;
   }
 
-  .btn.btn-accent.approve-btn {
+  /* .btn.btn-accent.approve-btn {
     background-color: #4c1d95;
     border-color: #4c1d95;
     color: #ffffff;
@@ -508,5 +508,5 @@
   .btn.btn-accent.approve-btn:hover {
     background-color: #5b21b6;
     border-color: #5b21b6;
-  }
+  } */
 </style>

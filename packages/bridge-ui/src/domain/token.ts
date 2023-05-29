@@ -11,6 +11,10 @@ export type Token = {
   symbol: string;
   decimals: number;
   logoUrl?: string;
+  // 是否是原生代币
+  isETHToken?: boolean;
+  // faucet get number
+  tokenFaucet?: number;
   logoComponent: ComponentType;
 };
 

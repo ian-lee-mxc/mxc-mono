@@ -1,7 +1,7 @@
 // import Bull from '../components/icons/Bull.svelte';
 // import Horse from '../components/icons/Horse.svelte';
 // import Tko from '../components/icons/TKO.svelte';
-import Eth from '../components/icons/ETH.svelte';
+// import Eth from '../components/icons/ETH.svelte';
 import Mxc from '../components/icons/MXC.svelte';
 import Unknown from '../components/icons/Unknown.svelte';
 import { L1_CHAIN_ID, L2_CHAIN_ID, TEST_ERC20 } from '../constants/envVars';
@@ -13,28 +13,11 @@ import RideIcon from "../assets/token/bicycle.svg"
 import MoonIcon from "../assets/token/moon.svg"
 
 export const ETHToken: Token = {
-  name: 'Ethereum',
-  addresses: [
-    {
-      chainId: L1_CHAIN_ID,
-      address: '0x00',
-    },
-    {
-      chainId: L2_CHAIN_ID,
-      address: '0x00',
-    },
-  ],
-  decimals: 18,
-  symbol: 'ETH',
-  logoComponent: Eth,
-};
-
-export const MXCToken: Token = {
   name: 'MXC',
   addresses: [
     {
       chainId: L1_CHAIN_ID,
-      address: '0x00',
+      address: '0x7Ab0Bd16f86Bc84A97387F204A962C9df79b420A',
     },
     {
       chainId: L2_CHAIN_ID,
@@ -44,8 +27,27 @@ export const MXCToken: Token = {
   decimals: 18,
   symbol: 'MXC',
   logoComponent: Mxc,
-  logoUrl: MxcIcon
+  logoUrl: MxcIcon,
+  isETHToken: true,
+  tokenFaucet: 10000
 };
+
+// export const ETHToken: Token = {
+//   name: 'Ethereum',
+//   addresses: [
+//     {
+//       chainId: L1_CHAIN_ID,
+//       address: '0x00',
+//     },
+//     {
+//       chainId: L2_CHAIN_ID,
+//       address: '0x00',
+//     },
+//   ],
+//   decimals: 18,
+//   symbol: 'ETH',
+//   logoComponent: Eth,
+// };
 
 // export const TKOToken: Token = {
 //   name: 'Taiko',
@@ -71,16 +73,16 @@ const symbolToLogoComponent = {
 };
 
 const symbolToLogoSvg = {
-  RIDE: RideIcon,
-  PARK: ParkIcon,
-  MOON: MoonIcon
+  MXC: MxcIcon,
+  Ride: RideIcon,
+  Park: ParkIcon,
+  Moon: MoonIcon
 };
 
 export const testERC20Tokens: Token[] = TEST_ERC20.map(
   ({ name, address, symbol }) => ({
     name,
     symbol,
-
     addresses: [
       {
         chainId: L1_CHAIN_ID,
@@ -92,9 +94,10 @@ export const testERC20Tokens: Token[] = TEST_ERC20.map(
       },
     ],
     decimals: 18,
+    tokenFaucet: symbol == 'MXC' ? 10000 : 50,
     logoComponent: symbolToLogoComponent[symbol] || Unknown,
     logoUrl: symbolToLogoSvg[symbol],
   }),
 );
-
-export const tokens = [MXCToken, ETHToken, ...testERC20Tokens];
+// 
+export const tokens = [ETHToken, ...testERC20Tokens];

@@ -8,6 +8,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+database/
 dist
 dist-ssr
 *.local
@@ -27,3 +28,4 @@ dist-ssr
 
 # vite
 vite.config.ts.timestamp-*.mjs
+.vercel

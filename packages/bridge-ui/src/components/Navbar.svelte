@@ -1,6 +1,6 @@
 <script lang="ts">
   import Connect from './buttons/Connect.svelte';
-  import TaikoLogo from './icons/TaikoLogo.svelte';
+  // import TaikoLogo from './icons/TaikoLogo.svelte';
   import TaikoLight from './icons/TaikoLight.svelte';
   import { signer } from '../store/signer';
   import AddressDropdown from './AddressDropdown.svelte';
@@ -8,6 +8,7 @@
   import TaikoLogoFluo from './icons/TaikoLogoFluo.svelte';
   import { Sun, Moon } from 'svelte-heros-v2';
   import { fly } from 'svelte/transition';
+  import Logo from '../assets/mxc-logo.svg'
 
   let isDarkMode = localStorage.getItem('theme') === 'dark';
 
@@ -32,20 +33,25 @@
 
 <div class="navbar bg-base-100">
   <div class="flex-1">
-    <span class="taiko-light-logo">
-      <TaikoLight width={120} />
+    <span class="taiko-light-logo w-120px">
+      <!-- <TaikoLight width={120} /> -->
+      <img src="{Logo}"  alt="">
     </span>
-    <span class="taiko-logo">
-      <TaikoLogo width={120} />
+    <span class="taiko-logo w-120px">
+      <!-- <TaikoLogo width={120} /> -->
+      <img src="{Logo}"  alt="">
+      
     </span>
     <span class="md:hidden">
-      <TaikoLogoFluo width={50} />
+      <!-- <TaikoLogoFluo width={50} /> -->
+      <img src="{Logo}" width="50"  alt="">
     </span>
     <a
       class="pl-3 font-medium hover:text-[#fc0fc0]"
       href="https://taiko.xyz/docs/guides/use-the-bridge"
       target="_blank"
       rel="noreferrer">Guide</a>
+    
   </div>
   <div class="flex-none">
     {#if $signer}

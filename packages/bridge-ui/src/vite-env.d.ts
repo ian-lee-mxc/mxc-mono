@@ -23,6 +23,7 @@ interface ImportMetaEnv {
   readonly VITE_MAINNET_SIGNAL_SERVICE_ADDRESS: string;
   readonly VITE_TAIKO_SIGNAL_SERVICE_ADDRESS: string;
   readonly VITE_TEST_ERC20: string;
+  readonly VITE_RECAPTCHA_SITEKEY: string;
 }
 
 interface ImportMeta {

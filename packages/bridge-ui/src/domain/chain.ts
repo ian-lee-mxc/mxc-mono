@@ -10,6 +10,7 @@ export type Chain = {
   rpc: string;
   enabled?: boolean;
   icon?: ComponentType;
+  logoUrl?: string;
   bridgeAddress: Address;
   headerSyncAddress: Address;
   explorerUrl: string;

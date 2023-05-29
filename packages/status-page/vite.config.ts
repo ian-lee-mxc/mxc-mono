@@ -1,5 +1,7 @@
 import { defineConfig } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import resolve from '@rollup/plugin-node-resolve'
+import commonjs from '@rollup/plugin-commonjs'
 import polyfillNode from "rollup-plugin-polyfill-node";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 
@@ -13,6 +15,8 @@ export default defineConfig({
   },
   plugins: [
     svelte(),
+    resolve(),
+    commonjs(),
     polyfillNode(),
     viteStaticCopy({
       targets: [

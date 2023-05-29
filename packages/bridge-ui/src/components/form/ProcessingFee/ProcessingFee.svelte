@@ -9,14 +9,15 @@
   import { processingFees } from '../../../fee/processingFees';
   import GeneralTooltip from './ProcessingFeeTooltip.svelte';
   import NoticeModal from '../../modals/NoticeModal.svelte';
+  import { L2_CHAIN_ID } from '../../../constants/envVars';
 
-  export let method: ProcessingFeeMethod = ProcessingFeeMethod.RECOMMENDED;
+  // export let method: ProcessingFeeMethod = ProcessingFeeMethod.RECOMMENDED;
+  export let method: ProcessingFeeMethod = ProcessingFeeMethod.NONE;
   export let amount: string = '0';
 
   let showProcessingFeeTooltip: boolean = false;
   let showNoneFeeTooltip: boolean = false;
-  const MXC_ID = 167004
-  // let $fromChain.id && $fromChain.id==MXC_ID = $fromChain.id==167004;
+  // let $fromChain.id && $fromChain.id==L2_CHAIN_ID = $fromChain.id==167004;
   $: recommendProcessingFee($toChain, $fromChain, method, $token, $signer)
     .then((recommendedFee) => (amount = recommendedFee))
     .catch((e) => console.error(e));
@@ -64,11 +65,11 @@
         on:input={updateAmount}
         class="input input-primary bg-dark-2 border-dark-2 input-md md:input-lg w-full focus:ring-0 !rounded-r-none"
         name="amount" />
-      <span class="!rounded-r-lg bg-dark-2">{$fromChain && $fromChain.id==MXC_ID ? 'MXC': 'ETH'}</span>
+      <span class="!rounded-r-lg bg-dark-2">{$fromChain && $fromChain.id==L2_CHAIN_ID ? 'MXC': 'ETH'}</span>
     </label>
   {:else if method === ProcessingFeeMethod.RECOMMENDED}
     <div class="flex flex-row">
-      <span class="mt-2 text-sm">{amount} {$fromChain  && $fromChain.id==MXC_ID ? 'MXC': 'ETH'}</span>
+      <span class="mt-2 text-sm">{amount} {$fromChain  && $fromChain.id==L2_CHAIN_ID ? 'MXC': 'ETH'}</span>
     </div>
   {/if}
 
