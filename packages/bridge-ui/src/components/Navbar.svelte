@@ -40,15 +40,18 @@
     <span class="taiko-logo w-120px">
       <!-- <TaikoLogo width={120} /> -->
       <img src="{Logo}"  alt="">
+      
     </span>
     <span class="md:hidden">
-      <TaikoLogoFluo width={50} />
+      <!-- <TaikoLogoFluo width={50} /> -->
+      <img src="{Logo}" width="50"  alt="">
     </span>
     <a
       class="pl-3 font-medium hover:text-[#fc0fc0]"
       href="https://taiko.xyz/docs/guides/use-the-bridge"
       target="_blank"
       rel="noreferrer">Guide</a>
+    
   </div>
   <div class="flex-none">
     {#if $signer}

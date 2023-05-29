@@ -62,7 +62,7 @@ export default async function handler(req, res) {
     await redis.del(token);
     return res
       .status(200)
-      .send({ status: 11, msg: `You has already received.` });
+      .send({ status: 11, msg: `Try to use your mobile data to claim the faucet.` });
   }
 
   try {
