@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { SimpleChannel } from "channel-ts";
 import { BigNumber, ethers as ethersLib } from "ethers";
 import { ethers } from "hardhat";
-import { TaikoL1, TestTaikoToken } from "../../typechain";
+import { MXCL1, TestMXCToken } from "../../typechain";
 import blockListener from "../utils/blockListener";
 import { BlockMetadata } from "../utils/block_metadata";
 import {
@@ -25,26 +25,26 @@ import { getBlockHeader } from "../utils/rpc";
 import { seedTko, sendTinyEtherToZeroAddress } from "../utils/seed";
 import { commitProposeProveAndVerify, verifyBlocks } from "../utils/verify";
 
-describe("integration:TaikoL1", function () {
-    let taikoL1: TaikoL1;
+describe("integration:MXCL1", function () {
+    let MXCL1: MXCL1;
     let l1Provider: ethersLib.providers.JsonRpcProvider;
     let l2Provider: ethersLib.providers.JsonRpcProvider;
     let l1Signer: any;
     let proposerSigner: any;
     let genesisHeight: number;
-    let taikoTokenL1: TestTaikoToken;
+    let MXCTokenL1: TestMXCToken;
     let chan: SimpleChannel<number>;
     let interval: any;
     let proverSigner: any;
     let proposer: Proposer;
     let prover: Prover;
     /* eslint-disable-next-line */
-    let config: Awaited<ReturnType<TaikoL1["getConfig"]>>;
+    let config: Awaited<ReturnType<MXCL1["getConfig"]>>;
 
     beforeEach(async function () {
         ({
             l1Provider,
-            taikoL1,
+            MXCL1,
             l2Provider,
             l1Signer,
             genesisHeight,
@@ -53,10 +53,10 @@ describe("integration:TaikoL1", function () {
             interval,
             chan,
             config,
-            taikoTokenL1,
+            MXCTokenL1,
         } = await initIntegrationFixture(false, false));
         proposer = new Proposer(
-            taikoL1.connect(proposerSigner),
+            MXCL1.connect(proposerSigner),
             l2Provider,
             config.commitConfirmations.toNumber(),
             config.maxNumBlocks.toNumber(),
@@ -64,7 +64,7 @@ describe("integration:TaikoL1", function () {
             proposerSigner
         );
 
-        prover = new Prover(taikoL1, l2Provider, proverSigner);
+        prover = new Prover(MXCL1, l2Provider, proverSigner);
     });
 
     afterEach(() => {
@@ -78,11 +78,7 @@ describe("integration:TaikoL1", function () {
             const block = await l2Provider.getBlock("latest");
             const commit = generateCommitHash(block);
 
-            const isCommitValid = await taikoL1.isCommitValid(
-                1,
-                1,
-                commit.hash
-            );
+            const isCommitValid = await MXCL1.isCommitValid(1, 1, commit.hash);
 
             expect(isCommitValid).to.be.false;
         });
@@ -91,7 +87,7 @@ describe("integration:TaikoL1", function () {
             const block = await l2Provider.getBlock("latest");
             const commitSlot = 0;
             const { commit, blockCommittedEvent } = await commitBlock(
-                taikoL1,
+                MXCL1,
                 block,
                 commitSlot
             );
@@ -101,7 +97,7 @@ describe("integration:TaikoL1", function () {
                 await sendTinyEtherToZeroAddress(l1Signer);
             }
 
-            const isCommitValid = await taikoL1.isCommitValid(
+            const isCommitValid = await MXCL1.isCommitValid(
                 commitSlot,
                 blockCommittedEvent!.blockNumber,
                 commit.hash
@@ -114,7 +110,7 @@ describe("integration:TaikoL1", function () {
     describe("getProposedBlock()", function () {
         it("should revert if block is out of range and not a valid proposed block", async function () {
             await readShouldRevertWithCustomError(
-                taikoL1.getProposedBlock(123),
+                MXCL1.getProposedBlock(123),
                 "L1_ID()"
             );
         });
@@ -122,7 +118,7 @@ describe("integration:TaikoL1", function () {
         it("should return valid block if it's been commmited and proposed", async function () {
             const commitSlot = 0;
             const { proposedEvent } = await commitAndProposeLatestBlock(
-                taikoL1,
+                MXCL1,
                 l1Signer,
                 l2Provider,
                 commitSlot
@@ -130,7 +126,7 @@ describe("integration:TaikoL1", function () {
             expect(proposedEvent).not.to.be.undefined;
             expect(proposedEvent.args.meta.commitSlot).to.be.eq(commitSlot);
 
-            const proposedBlock = await taikoL1.getProposedBlock(
+            const proposedBlock = await MXCL1.getProposedBlock(
                 proposedEvent.args.meta.id
             );
             expect(proposedBlock).not.to.be.undefined;
@@ -142,7 +138,7 @@ describe("integration:TaikoL1", function () {
 
     describe("getForkChoice", function () {
         it("returns no empty fork choice for un-proposed, un-proven and un-verified block", async function () {
-            const forkChoice = await taikoL1.getForkChoice(
+            const forkChoice = await MXCL1.getForkChoice(
                 1,
                 ethers.constants.HashZero
             );
@@ -152,7 +148,7 @@ describe("integration:TaikoL1", function () {
 
         it("returns populated data for submitted fork choice", async function () {
             const { proposedEvent, block } = await commitAndProposeLatestBlock(
-                taikoL1,
+                MXCL1,
                 l1Signer,
                 l2Provider,
                 0
@@ -160,7 +156,7 @@ describe("integration:TaikoL1", function () {
 
             expect(proposedEvent).not.to.be.undefined;
             const proveEvent = await proveBlock(
-                taikoL1,
+                MXCL1,
                 l2Provider,
                 await l1Signer.getAddress(),
                 proposedEvent.args.id.toNumber(),
@@ -169,7 +165,7 @@ describe("integration:TaikoL1", function () {
             );
             expect(proveEvent).not.to.be.undefined;
 
-            const forkChoice = await taikoL1.getForkChoice(
+            const forkChoice = await MXCL1.getForkChoice(
                 proposedEvent.args.id.toNumber(),
                 block.parentHash
             );
@@ -178,7 +174,7 @@ describe("integration:TaikoL1", function () {
         });
 
         it("returns empty after a block is verified", async function () {
-            await seedTko([prover], taikoTokenL1.connect(l1Signer));
+            await seedTko([prover], MXCTokenL1.connect(l1Signer));
 
             const blockNumber = genesisHeight + 1;
             /* eslint-disable-next-line */
@@ -195,7 +191,7 @@ describe("integration:TaikoL1", function () {
                 proposedEvent.args.meta as any as BlockMetadata
             );
 
-            let forkChoice = await taikoL1.getForkChoice(
+            let forkChoice = await MXCL1.getForkChoice(
                 proposedEvent.args.id.toNumber(),
                 block.parentHash
             );
@@ -204,10 +200,10 @@ describe("integration:TaikoL1", function () {
                 ethers.constants.AddressZero
             );
 
-            const verifiedEvent = await verifyBlocks(taikoL1, 1);
+            const verifiedEvent = await verifyBlocks(MXCL1, 1);
             expect(verifiedEvent).not.to.be.undefined;
 
-            forkChoice = await taikoL1.getForkChoice(
+            forkChoice = await MXCL1.getForkChoice(
                 proposedEvent.args.id.toNumber(),
                 block.parentHash
             );
@@ -219,11 +215,7 @@ describe("integration:TaikoL1", function () {
         it("should fail if a proposed block's placeholder field values are not default", async function () {
             const block = await l2Provider.getBlock("latest");
             const commitSlot = 0;
-            const { tx, commit } = await commitBlock(
-                taikoL1,
-                block,
-                commitSlot
-            );
+            const { tx, commit } = await commitBlock(MXCL1, block, commitSlot);
 
             const receipt = await tx.wait(1);
 
@@ -243,7 +235,7 @@ describe("integration:TaikoL1", function () {
 
             const inputs = buildProposeBlockInputs(block, meta);
             const txPromise = (
-                await taikoL1.proposeBlock(inputs, { gasLimit: 500000 })
+                await MXCL1.proposeBlock(inputs, { gasLimit: 500000 })
             ).wait(1);
             await txShouldRevertWithCustomError(
                 txPromise,
@@ -255,10 +247,10 @@ describe("integration:TaikoL1", function () {
 
         it("should revert with invalid gasLimit", async function () {
             const block = await l2Provider.getBlock("latest");
-            const config = await taikoL1.getConfig();
+            const config = await MXCL1.getConfig();
             const gasLimit = config.blockMaxGasLimit;
 
-            const { tx, commit } = await commitBlock(taikoL1, block);
+            const { tx, commit } = await commitBlock(MXCL1, block);
 
             const receipt = await tx.wait(1);
             const meta: BlockMetadata = {
@@ -278,7 +270,7 @@ describe("integration:TaikoL1", function () {
             const inputs = buildProposeBlockInputs(block, meta);
 
             const txPromise = (
-                await taikoL1.proposeBlock(inputs, { gasLimit: 250000 })
+                await MXCL1.proposeBlock(inputs, { gasLimit: 250000 })
             ).wait(1);
             await txShouldRevertWithCustomError(
                 txPromise,
@@ -289,7 +281,7 @@ describe("integration:TaikoL1", function () {
 
         it("should revert with invalid extraData", async function () {
             const block = await l2Provider.getBlock("latest");
-            const { tx, commit } = await commitBlock(taikoL1, block);
+            const { tx, commit } = await commitBlock(MXCL1, block);
 
             const meta: BlockMetadata = {
                 id: 0,
@@ -308,7 +300,7 @@ describe("integration:TaikoL1", function () {
             const inputs = buildProposeBlockInputs(block, meta);
 
             const txPromise = (
-                await taikoL1.proposeBlock(inputs, { gasLimit: 500000 })
+                await MXCL1.proposeBlock(inputs, { gasLimit: 500000 })
             ).wait(1);
             await txShouldRevertWithCustomError(
                 txPromise,
@@ -318,11 +310,11 @@ describe("integration:TaikoL1", function () {
         });
 
         it("should commit and be able to propose", async function () {
-            await commitAndProposeLatestBlock(taikoL1, l1Signer, l2Provider, 0);
+            await commitAndProposeLatestBlock(MXCL1, l1Signer, l2Provider, 0);
 
-            const stateVariables = await taikoL1.getStateVariables();
+            const stateVariables = await MXCL1.getStateVariables();
             const nextBlockId = stateVariables.nextBlockId;
-            const proposedBlock = await taikoL1.getProposedBlock(
+            const proposedBlock = await MXCL1.getProposedBlock(
                 nextBlockId.sub(1)
             );
 
@@ -340,15 +332,15 @@ describe("integration:TaikoL1", function () {
             // expect each one to be successful.
             for (let i = 0; i < config.maxNumBlocks.toNumber() - 1; i++) {
                 await commitAndProposeLatestBlock(
-                    taikoL1,
+                    MXCL1,
                     l1Signer,
                     l2Provider,
                     0
                 );
 
-                const stateVariables = await taikoL1.getStateVariables();
+                const stateVariables = await MXCL1.getStateVariables();
                 const nextBlockId = stateVariables.nextBlockId;
-                const proposedBlock = await taikoL1.getProposedBlock(
+                const proposedBlock = await MXCL1.getProposedBlock(
                     nextBlockId.sub(1)
                 );
 
@@ -365,10 +357,10 @@ describe("integration:TaikoL1", function () {
 
             // now expect another proposed block to be invalid since all slots are full and none have
             // been proven.
-            const { commitConfirmations } = await taikoL1.getConfig();
+            const { commitConfirmations } = await MXCL1.getConfig();
             const block = await l2Provider.getBlock("latest");
             const { tx: commitBlockTx, commit } = await commitBlock(
-                taikoL1.connect(l1Signer),
+                MXCL1.connect(l1Signer),
                 block,
                 0
             );
@@ -394,7 +386,7 @@ describe("integration:TaikoL1", function () {
 
             await txShouldRevertWithCustomError(
                 (
-                    await taikoL1.proposeBlock(
+                    await MXCL1.proposeBlock(
                         buildProposeBlockInputs(block, meta),
                         { gasLimit: 500000 }
                     )
@@ -421,17 +413,17 @@ describe("integration:TaikoL1", function () {
                 }
 
                 const { verifyEvent } = await commitProposeProveAndVerify(
-                    taikoL1,
+                    MXCL1,
                     l2Provider,
                     blockNumber,
                     proposer,
-                    taikoTokenL1,
+                    MXCTokenL1,
                     prover
                 );
 
                 expect(verifyEvent).not.to.be.undefined;
 
-                const header = await taikoL1.getLatestSyncedHeader();
+                const header = await MXCL1.getLatestSyncedHeader();
                 expect(header).to.be.eq(verifyEvent.args.blockHash);
                 blocks++;
             }
@@ -442,7 +434,7 @@ describe("integration:TaikoL1", function () {
         it("reverts when inputs is incorrect length", async function () {
             for (let i = 1; i <= 2; i++) {
                 const txPromise = (
-                    await taikoL1.proveBlock(
+                    await MXCL1.proveBlock(
                         1,
                         new Array(i).fill(ethers.constants.HashZero),
                         {
@@ -461,7 +453,7 @@ describe("integration:TaikoL1", function () {
         it("reverts when evidence meta id is not the same as the blockId", async function () {
             l2Provider.on("block", blockListener(chan, genesisHeight));
 
-            const config = await taikoL1.getConfig();
+            const config = await MXCL1.getConfig();
             /* eslint-disable-next-line */
             for await (const blockNumber of chan) {
                 if (
@@ -488,7 +480,7 @@ describe("integration:TaikoL1", function () {
                 );
 
                 const txPromise = (
-                    await taikoL1.proveBlock(
+                    await MXCL1.proveBlock(
                         proposedEvent.args.meta.id.toNumber() + 1, // id different than meta
                         inputs,
                         {
@@ -508,7 +500,7 @@ describe("integration:TaikoL1", function () {
         it("reverts when prover is the zero address", async function () {
             l2Provider.on("block", blockListener(chan, genesisHeight));
 
-            const config = await taikoL1.getConfig();
+            const config = await MXCL1.getConfig();
             /* eslint-disable-next-line */
             for await (const blockNumber of chan) {
                 if (
@@ -546,7 +538,7 @@ describe("integration:TaikoL1", function () {
                 inputs[2] = "0x";
 
                 const txPromise = (
-                    await taikoL1.proveBlock(
+                    await MXCL1.proveBlock(
                         proposedEvent.args.meta.id.toNumber(), // id different than meta
                         inputs,
                         {

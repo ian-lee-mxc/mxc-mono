@@ -1,6 +1,6 @@
 import { BigNumber, ethers } from "ethers";
 import RLP from "rlp";
-import { TaikoL1 } from "../../typechain";
+import { MXCL1 } from "../../typechain";
 import { BlockMetadata } from "./block_metadata";
 import { encodeBlockMetadata } from "./encoding";
 
@@ -16,7 +16,7 @@ const buildProposeBlockInputs = (
 };
 
 const proposeBlock = async (
-    taikoL1: TaikoL1,
+    taikoL1: MXCL1,
     block: ethers.providers.Block,
     txListHash: string,
     commitHeight: number,

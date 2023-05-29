@@ -1,38 +1,37 @@
 import { expect } from "chai";
 import { SimpleChannel } from "channel-ts";
 import { BigNumber, ethers } from "ethers";
-import { AddressManager, TaikoL1 } from "../../typechain";
-import { TestTaikoToken } from "../../typechain/TestTaikoToken";
+import { AddressManager, MXCL1, TestMXCToken } from "../../typechain";
 import blockListener from "../utils/blockListener";
 import { onNewL2Block } from "../utils/onNewL2Block";
 import Proposer from "../utils/proposer";
 
 import { initIntegrationFixture } from "../utils/fixture";
 import sleep from "../utils/sleep";
-import { deployTaikoL1 } from "../utils/taikoL1";
+import { deployMXCL1 } from "../utils/mxcL1";
 
 describe("tokenomics: blockFee", function () {
-    let taikoL1: TaikoL1;
+    let mxcL1: MXCL1;
     let l2Provider: ethers.providers.JsonRpcProvider;
     let proposerSigner: any;
     let genesisHeight: number;
     let genesisHash: string;
-    let taikoTokenL1: TestTaikoToken;
+    let mxcTokenL1: TestMXCToken;
     let l1AddressManager: AddressManager;
     let interval: any;
     let chan: SimpleChannel<number>;
     /* eslint-disable-next-line */
-    let config: Awaited<ReturnType<TaikoL1["getConfig"]>>;
+    let config: Awaited<ReturnType<MXCL1["getConfig"]>>;
     let proposer: Proposer;
 
     beforeEach(async () => {
         ({
-            taikoL1,
+            MXCL1: mxcL1,
             l2Provider,
             proposerSigner,
             genesisHeight,
             genesisHash,
-            taikoTokenL1,
+            MXCTokenL1: mxcTokenL1,
             l1AddressManager,
             interval,
             chan,
@@ -44,8 +43,8 @@ describe("tokenomics: blockFee", function () {
     afterEach(() => clearInterval(interval));
 
     it("expects getBlockFee to return the initial feeBase at time of contract deployment", async function () {
-        // deploy a new instance of TaikoL1 so no blocks have passed.
-        const tL1 = await deployTaikoL1(l1AddressManager, genesisHash, true);
+        // deploy a new instance of MXCL1 so no blocks have passed.
+        const tL1 = await deployMXCL1(l1AddressManager, genesisHash, true);
         const blockFee = await tL1.getBlockFee();
         expect(blockFee).to.be.eq(0);
     });
@@ -56,11 +55,11 @@ describe("tokenomics: blockFee", function () {
             .mul(1000)
             .toNumber();
 
-        let lastBlockFee: BigNumber = await taikoL1.getBlockFee();
+        let lastBlockFee: BigNumber = await mxcL1.getBlockFee();
 
         for (let i = 0; i < iterations; i++) {
             await sleep(period);
-            const blockFee = await taikoL1.getBlockFee();
+            const blockFee = await mxcL1.getBlockFee();
             expect(blockFee).to.be.gt(lastBlockFee);
             lastBlockFee = blockFee;
         }
@@ -72,7 +71,7 @@ describe("tokenomics: blockFee", function () {
             "no proofs have been submitted",
         async function () {
             // get the initial tkoBalance, which should decrease every block proposal
-            let lastProposerBalance = await taikoTokenL1.balanceOf(
+            let lastProposerBalance = await mxcTokenL1.balanceOf(
                 await proposerSigner.getAddress()
             );
 
@@ -80,7 +79,7 @@ describe("tokenomics: blockFee", function () {
 
             // we want to wait for enough blocks until the blockFee is no longer 0, then run our
             // tests.
-            while ((await taikoL1.getBlockFee()).eq(0)) {
+            while ((await mxcL1.getBlockFee()).eq(0)) {
                 await sleep(500);
             }
 
@@ -98,9 +97,9 @@ describe("tokenomics: blockFee", function () {
                         l2Provider,
                         blockNumber,
                         proposer,
-                        taikoL1,
+                        mxcL1,
                         proposerSigner,
-                        taikoTokenL1
+                        mxcTokenL1
                     );
 
                 console.log("lastProposerBalance", lastProposerBalance);

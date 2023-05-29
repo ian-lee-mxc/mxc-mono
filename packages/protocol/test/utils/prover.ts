@@ -1,18 +1,18 @@
 import { ethers } from "ethers";
-import { TaikoL1 } from "../../typechain";
+import { MXCL1 } from "../../typechain";
 import { BlockProvenEvent } from "../../typechain/LibProving";
 import { BlockMetadata } from "./block_metadata";
 import { proveBlock } from "./prove";
 import sleep from "./sleep";
 
 class Prover {
-    private readonly taikoL1: TaikoL1;
+    private readonly taikoL1: MXCL1;
     private readonly l2Provider: ethers.providers.JsonRpcProvider;
     private provingMutex: boolean = false;
     private readonly signer: ethers.Wallet;
 
     constructor(
-        taikoL1: TaikoL1,
+        taikoL1: MXCL1,
         l2Provider: ethers.providers.JsonRpcProvider,
         signer: ethers.Wallet
     ) {

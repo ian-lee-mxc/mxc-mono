@@ -22,6 +22,7 @@
     "test:all": "pnpm run test && pnpm run test:integration && pnpm run test:tokenomics && pnpm run test:genesis",
     "deploy:hardhat": "pnpm hardhat deploy_L1 --network arb_goerli --dao-vault 0x67FBaF4596207631c12a437A0bB618066471B2dB --team-vault 0x67FBaF4596207631c12a437A0bB618066471B2dB --l2-genesis-block-hash 0xc2aaf43ee2e2bfc28a0cf76d30b92caf5073df07bb0b916b9355230fb50cec58 --bridge-funder-private-key ${privateKey} --bridge-fund 0xff --oracle-prover 0x67FBaF4596207631c12a437A0bB618066471B2dB --solo-proposer 0x67FBaF4596207631c12a437A0bB618066471B2dB --confirmations 1",
     "deploy:L2": "pnpm hardhat deploy_L2 --network mxc_testnet",
+    "task:mockTransactionL2": "pnpm hardhat mock_transaction_L2 --network mxc_testnet",
     "lint-staged": "lint-staged --allow-empty",
     "sizer": "pnpm hardhat size-contracts"
   },
@@ -74,6 +75,7 @@
     "hardhat-gas-reporter": "^1.0.7",
     "lint-staged": "^12.3.4",
     "merkle-patricia-tree": "^4.2.4",
+    "mocha": "^10.2.0",
     "prettier": "^2.5.1",
     "prettier-plugin-solidity": "^1.1.2",
     "rlp": "^3.0.0",

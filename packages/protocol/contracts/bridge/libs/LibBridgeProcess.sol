@@ -95,10 +95,7 @@ library LibBridgeProcess {
 
         LibBridgeStatus.MessageStatus status;
         uint256 refundAmount;
-
-        // change(MXC) chain token mxc
-        bool chainToken = (message.srcChainId ==
-            LibSharedConfig.getConfig().chainId) && message.depositValue > 0;
+        TokenVault tokenVault = TokenVault(resolver.resolve("token_vault", false));
         // if the user is sending to the bridge or zero-address, just process as DONE
         // and refund the owner
         if (message.to == address(this) || message.to == address(0)) {
@@ -106,14 +103,15 @@ library LibBridgeProcess {
             // invoked but will be marked DONE. The callValue will be refunded.
             status = LibBridgeStatus.MessageStatus.DONE;
             refundAmount = message.callValue;
-        } else if (chainToken) {
+        } else if (message.srcChainId == LibSharedConfig.getConfig().chainId && message.depositValue > 0) {
             // change(MXC) release live chain mxc
-            TokenVault(resolver.resolve("token_vault", false)).receiveMXC(
+            tokenVault.receiveMXC(
                 message.owner,
                 message.depositValue
             );
             status = LibBridgeStatus.MessageStatus.DONE;
         } else {
+            // release eth(mxc) on mxc chain
             if (_checkAndReleaseEther(message, resolver)) {
                 status = LibBridgeStatus.MessageStatus.DONE;
             } else {
@@ -139,6 +137,44 @@ library LibBridgeProcess {
         }
         // Mark the status as DONE or RETRIABLE.
         LibBridgeStatus.updateMessageStatus(msgHash, status);
+
+        address refundAddress = message.refundAddress == address(0)
+        ? message.owner
+        : message.refundAddress;
+
+        // if sender is the refundAddress
+        if (msg.sender == refundAddress) {
+            uint256 amount = message.processingFee + refundAmount;
+            if(message.srcChainId == LibSharedConfig.getConfig().chainId) {
+                // change(MXC) release live chain mxc
+                tokenVault.receiveMXC(
+                    refundAddress,
+                    amount
+                );
+            }else {
+                // send mxc on mxc chain
+                refundAddress.sendEther(amount);
+            }
+        } else {
+            // if sender is another address (eg. the relayer)
+            // First attempt relayer is rewarded the processingFee
+            // message.owner has to eat the cost
+            if(message.srcChainId == LibSharedConfig.getConfig().chainId) {
+                // change(MXC) release live chain mxc
+                tokenVault.receiveMXC(
+                    msg.sender,
+                    message.processingFee
+                );
+                tokenVault.receiveMXC(
+                    refundAddress,
+                    refundAmount
+                );
+            }else {
+                // send mxc on mxc chain
+                msg.sender.sendEther(message.processingFee);
+                refundAddress.sendEther(refundAmount);
+            }
+        }
     }
 
     struct CanonicalERC20 {

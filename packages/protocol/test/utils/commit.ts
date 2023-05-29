@@ -1,8 +1,8 @@
 import { ethers } from "ethers";
 import RLP from "rlp";
-import { TaikoL1 } from "../../typechain";
+import { MXCL1 } from "../../typechain";
 import { BlockProposedEvent } from "../../typechain/LibProposing";
-import { BlockCommittedEvent } from "../../typechain/TaikoEvents";
+import { BlockCommittedEvent } from "../../typechain/MXCEvents";
 import { proposeBlock } from "./propose";
 import { sendTinyEtherToZeroAddress } from "./seed";
 
@@ -26,7 +26,7 @@ const generateCommitHash = (
 };
 
 const commitBlock = async (
-    taikoL1: TaikoL1,
+    taikoL1: MXCL1,
     block: ethers.providers.Block,
     commitSlot: number = 0
 ): Promise<{
@@ -47,7 +47,7 @@ const commitBlock = async (
 };
 
 const commitAndProposeLatestBlock = async (
-    taikoL1: TaikoL1,
+    taikoL1: MXCL1,
     l1Signer: any,
     l2Provider: ethers.providers.JsonRpcProvider,
     commitSlot: number = 0

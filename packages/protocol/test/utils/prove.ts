@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { TaikoL1 } from "../../typechain";
+import { MXCL1 } from "../../typechain";
 import { BlockProvenEvent } from "../../typechain/LibProving";
 import { BlockMetadata } from "./block_metadata";
 import { encodeEvidence } from "./encoding";
@@ -40,7 +40,7 @@ const buildProveBlockInputs = (
 };
 
 const proveBlock = async (
-    taikoL1: TaikoL1,
+    taikoL1: MXCL1,
     l2Provider: ethers.providers.JsonRpcProvider,
     proverAddress: string,
     blockId: number,

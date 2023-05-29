@@ -1,5 +1,5 @@
 import { BigNumber, ethers } from "ethers";
-import { TaikoL1, TaikoToken } from "../../typechain";
+import { MXCL1, MXCToken } from "../../typechain";
 import { BlockProposedEvent } from "../../typechain/LibProposing";
 import Proposer from "./proposer";
 import sleep from "./sleep";
@@ -13,9 +13,9 @@ async function onNewL2Block(
     l2Provider: ethers.providers.JsonRpcProvider,
     blockNumber: number,
     proposer: Proposer,
-    taikoL1: TaikoL1,
+    taikoL1: MXCL1,
     proposerSigner: any,
-    taikoTokenL1: TaikoToken
+    taikoTokenL1: MXCToken
 ): Promise<{
     proposedEvent: BlockProposedEvent;
     newProposerBalance: BigNumber;

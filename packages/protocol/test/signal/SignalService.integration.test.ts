@@ -61,7 +61,7 @@ describe("integration:SignalService", function () {
             .deploy();
 
         await l2AddressManager.setAddress(
-            `${enabledDestChainId}.taiko`,
+            `${enabledDestChainId}.mxc_header_sync`,
             headerSync.address
         );
 

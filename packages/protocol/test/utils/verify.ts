@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { BigNumber, ethers as ethersLib } from "ethers";
 import { ethers } from "hardhat";
-import { TaikoL1, TaikoToken } from "../../typechain";
+import { MXCL1, MXCToken } from "../../typechain";
 import { BlockVerifiedEvent } from "../../typechain/LibVerifying";
 import { BlockInfo, BlockMetadata } from "./block_metadata";
 import { onNewL2Block } from "./onNewL2Block";
@@ -10,7 +10,7 @@ import Prover from "./prover";
 import { getDefaultL1Signer } from "./provider";
 import { sendTinyEtherToZeroAddress } from "./seed";
 
-async function verifyBlocks(taikoL1: TaikoL1, maxBlocks: number) {
+async function verifyBlocks(taikoL1: MXCL1, maxBlocks: number) {
     // Since we are connecting to a geth node with clique consensus (auto mine), we
     // need to manually mine a new block here to ensure the latest block.timestamp increased as expected when
     // calling eth_estimateGas.
@@ -28,8 +28,8 @@ async function verifyBlocks(taikoL1: TaikoL1, maxBlocks: number) {
 }
 
 async function verifyBlockAndAssert(
-    taikoL1: TaikoL1,
-    taikoTokenL1: TaikoToken,
+    taikoL1: MXCL1,
+    taikoTokenL1: MXCToken,
     block: BlockInfo,
     lastProofReward: BigNumber
 ): Promise<{ newProofReward: BigNumber }> {
@@ -74,7 +74,7 @@ async function verifyBlockAndAssert(
     // fork choice should be nullified via _cleanUp in LibVerifying
     const forkChoice = await taikoL1.getForkChoice(block.id, block.parentHash);
     expect(forkChoice.provenAt).to.be.eq(BigNumber.from(0));
-    expect(forkChoice.provers).to.be.empty;
+    expect(forkChoice.prover).to.be.empty;
     expect(forkChoice.blockHash).to.be.eq(ethers.constants.HashZero);
 
     // proposer should be minted their refund of their deposit back after
@@ -83,11 +83,11 @@ async function verifyBlockAndAssert(
 }
 
 async function commitProposeProveAndVerify(
-    taikoL1: TaikoL1,
+    taikoL1: MXCL1,
     l2Provider: ethersLib.providers.JsonRpcProvider,
     blockNumber: number,
     proposer: Proposer,
-    taikoTokenL1: TaikoToken,
+    taikoTokenL1: MXCToken,
     prover: Prover
 ) {
     console.log("proposing", blockNumber);
