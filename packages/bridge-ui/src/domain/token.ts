@@ -11,6 +11,10 @@ export type Token = {
   symbol: string;
   decimals: number;
   logoUrl?: string;
+  // is chain token
+  isETHToken?: boolean;
+  // faucet get number
+  tokenFaucet?: number;
   logoComponent: ComponentType;
 };
 

@@ -8,7 +8,7 @@
   let tooltipOpen: boolean = false;
 </script>
 
-<div class="flex flex-row justify-between">
+<div class="flex flex-row justify-between mb-2 mt-2">
   <ButtonWithTooltip onClick={() => (tooltipOpen = true)}>
     <span slot="buttonText">Custom Recipient</span>
   </ButtonWithTooltip>

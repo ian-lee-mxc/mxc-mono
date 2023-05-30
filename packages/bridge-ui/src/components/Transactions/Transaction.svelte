@@ -262,7 +262,8 @@
             : transaction.message?.depositValue,
         )
       : ethers.utils.formatUnits(transaction.amountInWei)}
-    {transaction.symbol ?? 'ETH'}
+    <!-- {transaction.symbol ?? 'ETH'} -->
+    {transaction.symbol ?? 'MXC'}
   </td>
 
   <td>
