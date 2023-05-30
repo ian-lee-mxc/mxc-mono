@@ -15,17 +15,27 @@
   import { ETHToken, tokens } from '../../token/tokens';
   import { errorToast, successToast } from '../Toast.svelte';
   import { tokenService } from '../../storage/services';
+  import { L1_CHAIN_ID, L2_CHAIN_ID} from '../../constants/envVars';
 
   let dropdownElement: HTMLDivElement;
   let showAddressField = false;
   let loading = false;
+
+  // l1 => MXC is erc20
+  const l1Token = tokens.filter(item=>{
+    return !item.isETHToken
+  })
+  // l2 => MXC is ethToken
+  const l2Token = tokens.filter(item=>{
+    return item.isETHToken && item.symbol=='MXC' ? false: true
+  })
 
   function select(t: Token) {
     if (t === $token) return;
 
     token.set(t);
 
-    if (t.symbol.toLowerCase() === ETHToken.symbol.toLowerCase()) {
+    if (t.symbol.toLowerCase() === ETHToken.symbol.toLowerCase() && $fromChain.id===L2_CHAIN_ID) {
       bridgeType.set(BridgeType.ETH);
     } else {
       bridgeType.set(BridgeType.ERC20);
@@ -105,24 +115,37 @@
 
 <div class="dropdown dropdown-bottom" bind:this={dropdownElement}>
   <!-- svelte-ignore a11y-label-has-associated-control -->
+  <!-- svelte-ignore a11y-no-noninteractive-element-to-interactive-role -->
   <label
     role="button"
     tabindex="0"
     class="flex items-center justify-center hover:cursor-pointer">
-    {#if $token.logoComponent}
+    <!-- {#if $token.logoComponent}
       <svelte:component this={$token.logoComponent} />
     {:else}
       <Erc20 />
+    {/if} -->
+    {#if $token.logoUrl}
+      <div class="flex pr-5">
+        <img src={$token.logoUrl} height={22} width={22} alt="" />      
+        <p class="px-2 text-sm">{$token.symbol.toUpperCase()}</p>
+      </div>
+      {:else}
+      <div class="flex">
+        <svelte:component this={$token.logoComponent} height={22} width={22} />
+        <p class="px-2 text-sm">{$token.symbol.toUpperCase()}</p>
+      </div>
     {/if}
-    <p class="px-2 text-sm">{$token.symbol.toUpperCase()}</p>
-    <ChevronDown size="20" />
+    <div>
+      <ChevronDown size="20" />
+    </div>
   </label>
 
   <ul
     role="listbox"
     tabindex="0"
     class="token-dropdown dropdown-content menu my-2 shadow-xl bg-dark-2 rounded-box p-2">
-    {#each tokens as t}
+    <!-- {#each tokens as t}
       <li class="cursor-pointer w-full hover:bg-dark-5 rounded-none">
         <button on:click={() => select(t)} class="flex hover:bg-dark-5 p-4">
           <svelte:component this={t.logoComponent} height={22} width={22} />
@@ -130,7 +153,40 @@
             >{t.symbol.toUpperCase()}</span>
         </button>
       </li>
-    {/each}
+    {/each} -->
+
+    {#if $fromChain && $fromChain.id==L1_CHAIN_ID}
+      {#each l1Token  as t}
+        <li class="cursor-pointer w-full hover:bg-dark-5 rounded-none">
+          <button on:click={() => select(t)} class="flex hover:bg-dark-5 p-4">
+            {#if t.logoUrl}
+              <img src={t.logoUrl} height={22} width={22} alt="" />
+            {:else}
+              <svelte:component this={t.logoComponent} height={22} width={22} />
+            {/if}
+          
+            <span class="text-sm font-medium bg-transparent px-2"
+              >{t.symbol.toUpperCase()}</span>
+          </button>
+        </li>
+      {/each}
+    {:else}
+      {#each l2Token  as t}
+        <li class="cursor-pointer w-full hover:bg-dark-5 rounded-none">
+          <button on:click={() => select(t)} class="flex hover:bg-dark-5 p-4">
+            {#if t.logoUrl}
+              <img src={t.logoUrl} height={22} width={22} alt="" />
+            {:else}
+              <svelte:component this={t.logoComponent} height={22} width={22} />
+            {/if}
+          
+            <span class="text-sm font-medium bg-transparent px-2"
+              >{t.symbol.toUpperCase()}</span>
+          </button>
+        </li>
+      {/each}
+    {/if}
+
     {#each $userTokens as t}
       <li class="cursor-pointer w-full hover:bg-dark-5">
         <button on:click={() => select(t)} class="flex hover:bg-dark-5 p-4">

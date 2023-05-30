@@ -54,7 +54,7 @@
           <td>Call value</td>
           <td class="text-right">
             {ethers.utils.formatEther(transaction.message.callValue.toString())}
-            ETH
+            MXC
           </td>
         </tr>
       {/if}
@@ -62,7 +62,7 @@
         <tr>
           <td>Processing Fee</td>
           <td class="text-right">
-            {ethers.utils.formatEther(transaction.message.processingFee)} ETH
+            {ethers.utils.formatEther(transaction.message.processingFee)} MXC
           </td>
         </tr>
       {/if}

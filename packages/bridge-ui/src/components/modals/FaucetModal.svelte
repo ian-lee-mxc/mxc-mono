@@ -101,10 +101,11 @@
 </script>
 
 <Modal title={'ERC20 Faucet'} bind:isOpen>
-  You can request 50 {$token.symbol}. {$token.symbol} is only available to be minted
+  <!-- You can request 50 {$token.symbol}. {$token.symbol} is only available to be minted
   on {L1_CHAIN_NAME}. If you are on {L2_CHAIN_NAME}, your network will be
   changed first. You must have a small amount of ETH in your {L1_CHAIN_NAME} wallet
-  to send the transaction.
+  to send the transaction. -->
+  MXC Arbitrum Faucet - This faucet is only for running MXC supernodes. Each address will get {$token.tokenFaucet} {$token.symbol}. If you want to get MXC faucet on Wannsee, you need to change your network first. Please make sure you get the Arbitrum Goerli ETH first in this faucet.
   <br />
   <button
     class="btn btn-dark-5 h-[60px] text-base"

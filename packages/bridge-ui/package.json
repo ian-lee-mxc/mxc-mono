@@ -1,5 +1,5 @@
 {
-  "name": "@taiko/bridge-ui",
+  "name": "@mxc/bridge-ui",
   "version": "0.7.0",
   "private": true,
   "type": "module",
@@ -19,6 +19,8 @@
   },
   "devDependencies": {
     "@babel/preset-env": "^7.16.0",
+    "@rollup/plugin-commonjs": "^24.0.1",
+    "@rollup/plugin-node-resolve": "^15.0.2",
     "@sveltejs/vite-plugin-svelte": "^1.0.1",
     "@tsconfig/svelte": "^3.0.0",
     "@types/debug": "^4.1.7",
@@ -71,6 +73,7 @@
     "@ethersproject/experimental": "^5.7.0",
     "@lottiefiles/svelte-lottie-player": "^0.2.0",
     "@sveltestack/svelte-query": "^1.6.0",
+    "@upstash/redis": "^1.20.3",
     "@wagmi/connectors": "^0.1.1",
     "@wagmi/core": "^0.8.0",
     "axios": "^1.2.0",
@@ -78,6 +81,9 @@
     "debug": "^4.3.4",
     "ethers": "^5.7.1",
     "identicon.js": "^2.3.3",
+    "ip": "^1.1.8",
+    "redis": "^4.6.5",
+    "request-ip": "^3.3.0",
     "svelte-i18n": "^3.5.1",
     "svelte-spa-router": "^3.2.0"
   }

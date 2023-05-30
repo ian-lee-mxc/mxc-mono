@@ -16,15 +16,18 @@ import {
   L2_SIGNAL_SERVICE_ADDRESS,
 } from '../constants/envVars';
 import type { Chain, ChainID } from '../domain/chain';
-import Eth from '../components/icons/ETH.svelte';
-import Taiko from '../components/icons/TKO.svelte';
+// import Eth from '../components/icons/ETH.svelte';
+// import Taiko from '../components/icons/TKO.svelte';
+import MxcIcon from "../assets/token/mxc.png"
+import EthIcon from "../assets/ether.png"
 
 export const mainnetChain: Chain = {
   id: L1_CHAIN_ID,
   name: L1_CHAIN_NAME,
   rpc: L1_RPC,
   enabled: true,
-  icon: Eth,
+  // icon: Eth,
+  logoUrl: EthIcon,
   bridgeAddress: L1_BRIDGE_ADDRESS,
   crossChainSyncAddress: L1_CROSS_CHAIN_SYNC_ADDRESS,
   explorerUrl: L1_EXPLORER_URL,
@@ -36,7 +39,8 @@ export const taikoChain: Chain = {
   name: L2_CHAIN_NAME,
   rpc: L2_RPC,
   enabled: true,
-  icon: Taiko,
+  // icon: Taiko,
+  logoUrl: MxcIcon,
   bridgeAddress: L2_BRIDGE_ADDRESS,
   crossChainSyncAddress: L2_CROSS_CHAIN_SYNC_ADDRESS,
   explorerUrl: L2_EXPLORER_URL,

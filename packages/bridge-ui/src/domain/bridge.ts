@@ -5,6 +5,7 @@ import type { Message } from './message';
 export enum BridgeType {
   ERC20 = 'ERC20',
   ETH = 'ETH',
+  MXC = 'MXC',
   ERC721 = 'ERC721',
   ERC1155 = 'ERC1155',
 }

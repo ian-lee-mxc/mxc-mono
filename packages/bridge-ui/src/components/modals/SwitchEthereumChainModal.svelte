@@ -20,7 +20,8 @@
       successToast('Successfully switched chain');
     } catch (e) {
       console.error(e);
-      errorToast('Error switching ethereum chain');
+      // errorToast('Error switching ethereum chain');
+      errorToast('Error Switching Chain. Try Switching Manually On Your Wallet');
     }
   };
 </script>
