@@ -53,7 +53,7 @@ export const TEST_ERC20: {
 }[] = JSON.parse(import.meta.env?.VITE_TEST_ERC20);
 
 
-export const L1MXCTOKEN: string = import.meta.env?.L1MXCTOKEN;
+export const L1MXCTOKEN: string = import.meta.env?.VITE_L1MXCTOKEN;
 export const SITE_KEY: string = import.meta.env?.VITE_RECAPTCHA_SITEKEY;
 export const L1_HEADER_SYNC_ADDRESS: Address = import.meta.env
   ?.VITE_MAINNET_HEADER_SYNC_ADDRESS;

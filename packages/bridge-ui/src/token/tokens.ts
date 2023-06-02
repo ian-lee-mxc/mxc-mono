@@ -29,7 +29,7 @@ export const ETHToken: Token = {
   logoComponent: Mxc,
   logoUrl: MxcIcon,
   isETHToken: true,
-  tokenFaucet: 10000
+  tokenFaucet: 100
 };
 
 // export const ETHToken: Token = {
@@ -95,7 +95,7 @@ export const testERC20Tokens: Token[] = TEST_ERC20.map(
       },
     ],
     decimals: 18,
-    tokenFaucet: symbol == 'MXC' ? 10000 : 50,
+    tokenFaucet: symbol == 'MXC' ? 100 : 50,
     logoComponent: symbolToLogoComponent[symbol] || Unknown,
     logoUrl: symbolToLogoSvg[symbol],
   }),
