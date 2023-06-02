@@ -57,6 +57,7 @@
   //       logic and unit test the hell out of all this.
 
   async function addrForToken() {
+    console.log($token.addresses,"$token.addresses")
     let addr = $token.addresses.find(
       (t) => t.chainId === $fromChain.id,
     ).address;
@@ -96,6 +97,7 @@
           tokenBalance = '0';
           return;
         }
+        console.log(addr,"addr")
         const contract = new Contract(addr, erc20ABI, signer);
         const userBalance = await contract.balanceOf(await signer.getAddress());
         tokenBalance = ethers.utils.formatUnits(userBalance, token.decimals);
