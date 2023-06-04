@@ -23,6 +23,6 @@ contract FreeMintERC20 is ERC20 {
         }
 
         minters[to] = true;
-        _mint(to, 50 * (10 ** decimals()));
+        _mint(to, 200 * (10 ** decimals()));
     }
 }

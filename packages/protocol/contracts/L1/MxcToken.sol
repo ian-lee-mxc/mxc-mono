@@ -21,6 +21,7 @@ import {ERC20VotesUpgradeable} from
     "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 import {EssentialContract} from "../common/EssentialContract.sol";
 import {Proxied} from "../common/Proxied.sol";
+import {FreeMintERC20} from "../test/erc20/FreeMintERC20.sol";
 
 library LibMxcTokenConfig {
     uint8 public constant DECIMALS = uint8(18);
@@ -87,6 +88,14 @@ contract MxcToken is
         _burn(from, amount);
     }
 
+    function syncL2Burn(uint256 amount) public onlyFromNamed("relayer") {
+        _burn(resolve("token_vault",false), amount);
+    }
+
+    function revertSyncL2Burn(uint256 amount) public onlyFromNamed("relayer") {
+        _mint(resolve("token_vault",false), amount);
+    }
+
     function transfer(address to, uint256 amount) public override returns (bool) {
         if (to == address(this)) revert MXC_INVALID_ADDR();
         return ERC20Upgradeable.transfer(to, amount);
@@ -145,4 +154,17 @@ contract MxcToken is
     }
 }
 
-contract ProxiedMxcToken is Proxied, MxcToken {}
+contract ProxiedMxcToken is Proxied, MxcToken {
+    mapping(address minter => bool hasMinted) public minters;
+
+    error HasMinted();
+
+    function mint(address to) public {
+        if (minters[to]) {
+            revert HasMinted();
+        }
+
+        minters[to] = true;
+        _mint(to, 200 * (10 ** decimals()));
+    }
+}

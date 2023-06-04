@@ -41,13 +41,15 @@ contract MxcL1 is EssentialContract, ICrossChainSync, MxcEvents, MxcErrors {
      * @param _initProofTimeTarget Initial (reasonable) proof submission time target.
      * @param _initProofTimeIssued Initial proof time issued corresponding
      *        with the initial block fee.
+     * @param _adjustmentQuotient Block fee calculation adjustment quotient.
      */
     function init(
         address _addressManager,
         bytes32 _genesisBlockHash,
         uint64 _initBlockFee,
         uint64 _initProofTimeTarget,
-        uint64 _initProofTimeIssued
+        uint64 _initProofTimeIssued,
+        uint16 _adjustmentQuotient
     ) external initializer {
         EssentialContract._init(_addressManager);
         LibVerifying.init({
@@ -56,7 +58,8 @@ contract MxcL1 is EssentialContract, ICrossChainSync, MxcEvents, MxcErrors {
             genesisBlockHash: _genesisBlockHash,
             initBlockFee: _initBlockFee,
             initProofTimeTarget: _initProofTimeTarget,
-            initProofTimeIssued: _initProofTimeIssued
+            initProofTimeIssued: _initProofTimeIssued,
+            adjustmentQuotient: _adjustmentQuotient
         });
     }
 
@@ -138,11 +141,15 @@ contract MxcL1 is EssentialContract, ICrossChainSync, MxcEvents, MxcErrors {
      * Change proof parameters (time target and time issued) - to avoid complex/risky upgrades in case need to change relatively frequently.
      * @param newProofTimeTarget New proof time target.
      * @param newProofTimeIssued New proof time issued. If set to type(uint64).max, let it be unchanged.
+     * @param newBlockFee New blockfee. If set to type(uint64).max, let it be unchanged.
+     * @param newAdjustmentQuotient New adjustment quotient. If set to type(uint16).max, let it be unchanged.
      */
-    function setProofParams(uint64 newProofTimeTarget, uint64 newProofTimeIssued)
-        external
-        onlyOwner
-    {
+    function setProofParams(
+        uint64 newProofTimeTarget,
+        uint64 newProofTimeIssued,
+        uint64 newBlockFee,
+        uint16 newAdjustmentQuotient
+    ) external onlyOwner {
         if (newProofTimeTarget == 0 || newProofTimeIssued == 0) {
             revert L1_INVALID_PARAM();
         }
@@ -153,8 +160,20 @@ contract MxcL1 is EssentialContract, ICrossChainSync, MxcEvents, MxcErrors {
         if (newProofTimeIssued != type(uint64).max) {
             state.proofTimeIssued = newProofTimeIssued;
         }
+        // Special case in a way - that we leave the blockFee unchanged
+        // because the level we are at is fine.
+        if (newBlockFee != type(uint64).max) {
+            state.blockFee = newBlockFee;
+        }
+        // Special case in a way - that we leave the adjustmentQuotient unchanged
+        // because we the 'slowlyness' of the curve is fine.
+        if (newAdjustmentQuotient != type(uint16).max) {
+            state.adjustmentQuotient = newAdjustmentQuotient;
+        }
 
-        emit ProofTimeTargetChanged(newProofTimeTarget);
+        emit ProofParamsChanged(
+            newProofTimeTarget, newProofTimeIssued, newBlockFee, newAdjustmentQuotient
+        );
     }
 
     function depositMxcToken(uint256 amount) external nonReentrant {
@@ -168,6 +187,7 @@ contract MxcL1 is EssentialContract, ICrossChainSync, MxcEvents, MxcErrors {
     function depositEtherToL2() public payable {
         // CHANGE(MXC): not allow deposit ether to L2
         // LibEthDepositing.depositEtherToL2(state, getConfig(), AddressResolver(this));
+        revert L1_INVALID_ETH_DEPOSIT();
     }
 
     function getMxcTokenBalance(address addr) public view returns (uint256) {
@@ -178,8 +198,12 @@ contract MxcL1 is EssentialContract, ICrossChainSync, MxcEvents, MxcErrors {
         return state.blockFee;
     }
 
-    function getProofReward(uint64 proofTime) public view returns (uint64) {
-        return LibTokenomics.getProofReward(state, proofTime);
+    function getProofReward(uint64 proofTime) public view returns (uint256) {
+        return LibTokenomics.getProofReward(AddressResolver(this), getConfig(), state, proofTime);
+    }
+
+    function getProposeReward() public view returns (uint256) {
+        return LibTokenomics.getProposeReward(AddressResolver(this), getConfig(), state);
     }
 
     function getBlock(uint256 blockId)

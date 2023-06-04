@@ -41,6 +41,14 @@ contract ArbSysTest is ArbSys {
         return blockhash(blockNumber);
     }
 }
+interface IArbGasInfo {
+    function getMinimumGasPrice() external view returns (uint256);
+}
+contract ArbGasInfoTest is IArbGasInfo {
+    function getMinimumGasPrice() external view returns (uint256) {
+        return 1e8;
+    }
+}
 
 abstract contract MxcL1TestBase is Test {
     AddressManager public addressManager;
@@ -51,12 +59,13 @@ abstract contract MxcL1TestBase is Test {
     uint256 internal logCount;
 
     bytes32 public constant GENESIS_BLOCK_HASH = keccak256("GENESIS_BLOCK_HASH");
-    uint64 feeBase = 1e18; // 1 TKO
+    uint64 feeBase = 1e8; // final 1 MXC
     uint64 l2GasExcess = 1e18;
 
     address public constant L2Treasury = 0x859d74b52762d9ed07D1b2B8d7F93d26B1EA78Bb;
     address public constant L2SS = 0xa008AE5Ba00656a3Cc384de589579e3E52aC030C;
     address public constant MxcL2 = 0x0082D90249342980d011C58105a03b35cCb4A315;
+    address public constant L1TokenVault = address(0x1);
     address public constant L1EthVault = 0xDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5;
 
     address public constant Alice = 0xa9bcF99f5eb19277f48b71F9b14f5960AEA58a89;
@@ -74,7 +83,9 @@ abstract contract MxcL1TestBase is Test {
     // Calculation shall be done in derived contracts - based on testnet or mainnet expected proof time
     uint64 public initProofTimeIssued;
     uint16 proofTimeTarget;
-    uint8 public constant ADJUSTMENT_QUOTIENT = 16;
+    // As we know this is value which will make the curve 'quick' this is fine for testing and
+    // will readjust during simulation to test devnet, where we need to reset everything blockfee calculation related.
+    uint16 public constant ADJUSTMENT_QUOTIENT = 16;
 
     function deployMxcL1() internal virtual returns (MxcL1 mxcL1);
 
@@ -82,6 +93,8 @@ abstract contract MxcL1TestBase is Test {
         ArbSys arbSysTest = new ArbSysTest();
         vm.etch(address(100), address(arbSysTest).code);
         console2.log(ArbSys(arbSysTest).arbBlockNumber());
+        ArbGasInfoTest arbGasInfoTest = new ArbGasInfoTest();
+        vm.etch(address(108),address(arbGasInfoTest).code);
     }
 
     function setUp() public virtual {
@@ -97,6 +110,7 @@ abstract contract MxcL1TestBase is Test {
 
         registerAddress("signal_service", address(ss));
         registerAddress("ether_vault", address(L1EthVault));
+        registerAddress("token_vault", address(L1TokenVault));
         registerL2Address("treasury", L2Treasury);
         registerL2Address("mxczkevm", address(MxcL2));
         registerL2Address("signal_service", address(L2SS));
@@ -128,7 +142,8 @@ abstract contract MxcL1TestBase is Test {
             GENESIS_BLOCK_HASH,
             feeBase,
             proofTimeTarget,
-            initProofTimeIssued
+            initProofTimeIssued,
+            ADJUSTMENT_QUOTIENT
         );
         printVariables("init  ");
     }

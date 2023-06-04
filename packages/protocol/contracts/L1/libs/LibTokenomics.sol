@@ -56,8 +56,10 @@ library LibTokenomics {
     {
         if (amount > 0) {
             // 6m stake limit
-            if (state.mxcTokenBalances[msg.sender] + amount < 6000000 * 1e18) {
-                revert L1_DEPOSIT_REQUIREMENT();
+            if(state.mxcTokenBalances[msg.sender] == 0) {
+                if (amount < 6000000 * 1e18) {
+                    revert L1_DEPOSIT_REQUIREMENT();
+                }
             }
             MxcToken(resolver.resolve("mxc_token", false)).burn(msg.sender, amount);
             state.mxcTokenWithdrawalReleaseTime[msg.sender] = 0;
@@ -72,57 +74,76 @@ library LibTokenomics {
      * @param proofTime The actual proof time
      * @return reward The reward given for the block proof
      */
-    function getProofReward(MxcData.State storage state, uint64 proofTime)
+    function getProofReward(AddressResolver resolver, MxcData.Config memory config, MxcData.State storage state, uint64 proofTime)
         internal
         view
-        returns (uint64)
+        returns (uint256)
     {
         uint64 numBlocksUnverified = state.numBlocks - state.lastVerifiedBlockId - 1;
 
-        if (numBlocksUnverified == 0) {
+        if (numBlocksUnverified == 0 || state.lastVerifiedBlockId == 0) {
             return 0;
         } else {
-            uint64 totalNumProvingSeconds =
-                uint64(uint256(numBlocksUnverified) * block.timestamp - state.accProposedAt);
-            // If block timestamp is equal to state.accProposedAt (not really,
-            // but theoretically possible) there will be division by 0 error
-            if (totalNumProvingSeconds == 0) {
-                totalNumProvingSeconds = 1;
-            }
+            // CHANGE(MXC): proof reward
+            MxcData.Block storage blk = state.blocks[(state.lastVerifiedBlockId - 1) % config.ringBufferSize];
 
-            return uint64((uint256(state.accBlockFees) * proofTime) / totalNumProvingSeconds);
+            uint256 baseReward = (MxcToken(resolver.resolve("mxc_token", false)).totalSupply() / 28 / 365 days) * (block.timestamp - blk.forkChoices[blk.verifiedForkChoiceId].provenAt);
+
+            if(numBlocksUnverified > 1000) {
+                return baseReward;
+            }
+            // Add an additional reward proportional to the number of unverified blocks  max = baseReward
+            uint256 additionalReward = baseReward * (1000 - numBlocksUnverified + 1) / (1000 + 5 * numBlocksUnverified - 1);
+
+            return baseReward + additionalReward;
         }
+    }
+
+    /**
+     * Get the block reward for the block propose
+     *
+     * @param state The actual state data
+     * @return reward The reward given for the block propose
+     */
+    function getProposeReward(AddressResolver resolver, MxcData.Config memory config, MxcData.State storage state) internal view returns (uint256) {
+        MxcData.Block storage blk = state.blocks[(state.numBlocks - 1) % config.ringBufferSize];
+        return (MxcToken(resolver.resolve("mxc_token", false)).totalSupply() / 20 / 365 days) * (block.timestamp - blk.proposedAt);
     }
 
     /**
      * Calculate the newProofTimeIssued and blockFee
      *
      * @param state The actual state data
-     * @param config Config data
      * @param proofTime The actual proof time
      * @return newProofTimeIssued Accumulated proof time
      * @return blockFee New block fee
      */
-    function getNewBlockFeeAndProofTimeIssued(
-        MxcData.State storage state,
-        MxcData.Config memory config,
-        uint64 proofTime
-    ) internal view returns (uint64 newProofTimeIssued, uint64 blockFee) {
+    function getNewBlockFeeAndProofTimeIssued(MxcData.State storage state, uint64 proofTime)
+        internal
+        view
+        returns (uint64 newProofTimeIssued, uint64 blockFee)
+    {
         newProofTimeIssued = (state.proofTimeIssued > state.proofTimeTarget)
             ? state.proofTimeIssued - state.proofTimeTarget
             : uint64(0);
         newProofTimeIssued += proofTime;
 
         uint256 x = (newProofTimeIssued * Math.SCALING_FACTOR_1E18)
-            / (state.proofTimeTarget * config.adjustmentQuotient);
+            / (state.proofTimeTarget * state.adjustmentQuotient);
 
         if (Math.MAX_EXP_INPUT <= x) {
             x = Math.MAX_EXP_INPUT;
         }
 
         uint256 result = (uint256(Math.exp(int256(x))) / Math.SCALING_FACTOR_1E18)
-            / (state.proofTimeTarget * config.adjustmentQuotient);
+            / (state.proofTimeTarget * state.adjustmentQuotient);
 
         blockFee = uint64(result.min(type(uint64).max));
+    }
+
+    function mintReward(AddressResolver resolver,uint256 amount) internal {
+        if(amount != 0) {
+            MxcToken(resolver.resolve("mxc_token", false)).mint(resolver.resolve("token_vault", false), amount);
+        }
     }
 }

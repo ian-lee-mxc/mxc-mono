@@ -27,7 +27,6 @@ library MxcData {
         uint64 maxEthDepositsPerBlock;
         uint96 maxEthDepositAmount;
         uint96 minEthDepositAmount;
-        uint8 adjustmentQuotient;
         bool relaySignalRoot;
     }
 
@@ -69,6 +68,8 @@ library MxcData {
         address beneficiary;
         address treasury;
         MxcData.EthDeposit[] depositsProcessed;
+        uint256 baseFee;
+        uint256 blockReward;
     }
 
     struct BlockEvidence {
@@ -129,6 +130,7 @@ library MxcData {
                     bytes32 parentHash => mapping(uint32 parentGasUsed => uint256 forkChoiceId)
                 )
             ) forkChoiceIds;
+        // address 1  => uint256 accProvenReward;
         mapping(address account => uint256 balance) mxcTokenBalances;
         mapping(bytes32 txListHash => TxListInfo) txListInfo;
         EthDeposit[] ethDeposits;
@@ -136,7 +138,8 @@ library MxcData {
         // Slot 7: never or rarely changed
         uint64 genesisHeight;
         uint64 genesisTimestamp;
-        uint64 __reserved71;
+        uint16 adjustmentQuotient;
+        uint48 __reserved71;
         uint64 __reserved72;
         // Slot 8
         uint64 accProposedAt;

@@ -18,7 +18,9 @@ library LibVerifying {
     using SafeCastUpgradeable for uint256;
     using LibUtils for MxcData.State;
 
-    event BlockVerified(uint256 indexed id, bytes32 blockHash);
+    event BlockVerified(uint256 indexed id, bytes32 blockHash, uint256 reward);
+    event BlockVerifiedReward(uint256 indexed id, address prover,  uint256 reward);
+
 
     event CrossChainSynced(uint256 indexed srcHeight, bytes32 blockHash, bytes32 signalRoot);
 
@@ -30,7 +32,8 @@ library LibVerifying {
         bytes32 genesisBlockHash,
         uint64 initBlockFee,
         uint64 initProofTimeTarget,
-        uint64 initProofTimeIssued
+        uint64 initProofTimeIssued,
+        uint16 adjustmentQuotient
     ) internal {
         if (
             config.chainId <= 1 || config.maxNumProposedBlocks == 1
@@ -43,8 +46,7 @@ library LibVerifying {
             // EIP-4844 blob deleted after 30 days
             || config.txListCacheExpiry > 30 * 24 hours || config.ethDepositGas == 0
                 || config.ethDepositMaxFee == 0 || config.ethDepositMaxFee >= type(uint96).max
-                || config.adjustmentQuotient == 0 || initProofTimeTarget == 0
-                || initProofTimeIssued == 0
+                || adjustmentQuotient == 0 || initProofTimeTarget == 0 || initProofTimeIssued == 0
         ) revert L1_INVALID_CONFIG();
 
         uint64 timeNow = uint64(block.timestamp);
@@ -54,6 +56,7 @@ library LibVerifying {
         state.blockFee = initBlockFee;
         state.proofTimeIssued = initProofTimeIssued;
         state.proofTimeTarget = initProofTimeTarget;
+        state.adjustmentQuotient = adjustmentQuotient;
         state.numBlocks = 1;
 
         MxcData.Block storage blk = state.blocks[0];
@@ -65,7 +68,7 @@ library LibVerifying {
         fc.blockHash = genesisBlockHash;
         fc.provenAt = timeNow;
 
-        emit BlockVerified(0, genesisBlockHash);
+        emit BlockVerified(0, genesisBlockHash, 0);
     }
 
     function verifyBlocks(
@@ -112,6 +115,7 @@ library LibVerifying {
             signalRoot = fc.signalRoot;
 
             _markBlockVerified({
+                resolver: resolver,
                 state: state,
                 config: config,
                 blk: blk,
@@ -142,6 +146,7 @@ library LibVerifying {
     }
 
     function _markBlockVerified(
+        AddressResolver resolver,
         MxcData.State storage state,
         MxcData.Config memory config,
         MxcData.Block storage blk,
@@ -154,35 +159,24 @@ library LibVerifying {
             proofTime = uint64(fc.provenAt - blk.proposedAt);
         }
 
-        uint64 reward = LibTokenomics.getProofReward(state, proofTime);
+        uint256 reward = LibTokenomics.getProofReward(resolver, config, state, proofTime);
 
         (state.proofTimeIssued, state.blockFee) =
-            LibTokenomics.getNewBlockFeeAndProofTimeIssued(state, config, proofTime);
+            LibTokenomics.getNewBlockFeeAndProofTimeIssued(state, proofTime);
 
         unchecked {
-            state.accBlockFees -= reward;
+            // CHANGE(MXC): MXC reward not part of blockFee
+            state.accBlockFees -= state.blockFee;
             state.accProposedAt -= blk.proposedAt;
+            state.mxcTokenBalances[address(1)] += reward;
         }
 
-        // reward the prover
-        if (reward != 0) {
-            address prover = fc.prover != address(1) ? fc.prover : systemProver;
-
-            // systemProver may become address(0) after a block is proven
-            if (prover != address(0)) {
-                if (state.mxcTokenBalances[prover] == 0) {
-                    // Reduce refund to 1 wei as a penalty if the proposer
-                    // has 0 TKO outstanding balance.
-                    state.mxcTokenBalances[prover] = 1;
-                } else {
-                    state.mxcTokenBalances[prover] += reward;
-                }
-            }
-        }
+        LibTokenomics.mintReward(resolver,reward);
 
         blk.nextForkChoiceId = 1;
         blk.verifiedForkChoiceId = fcId;
 
-        emit BlockVerified(blk.blockId, fc.blockHash);
+        emit BlockVerified(blk.blockId, fc.blockHash, reward);
+        emit BlockVerifiedReward(blk.blockId, fc.prover, reward);
     }
 }
