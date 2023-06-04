@@ -60,6 +60,11 @@ ul.token-dropdown li.cursor-pointer:first-child {
   background-repeat: no-repeat;
 }
 
+[data-theme='light'] .taiko-banner {
+  background-image: url('assets/taiko-banner-white.png');
+  background-repeat: no-repeat;
+}
+
 .dropdown-content.address-dropdown-content {
   border-radius: 6px;
 }
@@ -88,6 +93,10 @@ input[type='number'] {
 
 [data-theme='dark'] .switch-to-dark-mode {
   display: none;
+}
+
+[data-theme='light'] .chain-name {
+  color: #333;
 }
 
 .tx-data {

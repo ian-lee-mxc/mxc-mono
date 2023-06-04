@@ -61,6 +61,7 @@
 
 <div class="dropdown dropdown-bottom dropdown-end">
   <!-- svelte-ignore a11y-label-has-associated-control -->
+  <!-- svelte-ignore a11y-no-noninteractive-element-to-interactive-role -->
   <label role="button" tabindex="0" class="btn btn-md justify-around">
     <span class="font-normal flex-1 text-left flex items-center">
       {#if $pendingTransactions && $pendingTransactions.length}
@@ -102,10 +103,10 @@
         <div class="text-lg mt-2">
           {tokenBalance.length > 10
             ? `${truncateString(tokenBalance)}...`
-            : tokenBalance} ETH
+            : tokenBalance} MXC
         </div>
       {:else}
-        <div class="text-lg mt-2">-- ETH</div>
+        <div class="text-lg mt-2">-- MXC</div>
       {/if}
     </div>
     <div class="divider" />

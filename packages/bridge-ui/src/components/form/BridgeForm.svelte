@@ -7,7 +7,7 @@
   import { activeBridge, bridgeType } from '../../store/bridge';
   import { signer } from '../../store/signer';
   import { BigNumber, Contract, ethers, Signer } from 'ethers';
-  import ProcessingFee from './ProcessingFee';
+  // import ProcessingFee from './ProcessingFee';
   import SelectToken from '../buttons/SelectToken.svelte';
 
   import type { Token } from '../../domain/token';
@@ -26,7 +26,7 @@
   import { Funnel } from 'svelte-heros-v2';
   import FaucetModal from '../modals/FaucetModal.svelte';
   import { errorToast, successToast } from '../Toast.svelte';
-  import { L1_CHAIN_ID } from '../../constants/envVars';
+  import { L1_CHAIN_ID, L2_CHAIN_ID } from '../../constants/envVars';
   import { fetchFeeData } from '@wagmi/core';
   import { checkIfTokenIsDeployedCrossChain } from '../../utils/checkIfTokenIsDeployedCrossChain';
   import To from './To.svelte';
@@ -57,6 +57,7 @@
   //       logic and unit test the hell out of all this.
 
   async function addrForToken() {
+    console.log($token.addresses,"$token.addresses")
     let addr = $token.addresses.find(
       (t) => t.chainId === $fromChain.id,
     ).address;
@@ -86,8 +87,8 @@
     token: Token,
     fromChain: Chain,
   ) {
-    if (signer && token) {
-      if (token.symbol == ETHToken.symbol) {
+    if (signer && token && fromChain) {
+      if (token.symbol == ETHToken.symbol && token.isETHToken && fromChain.id==L2_CHAIN_ID) {
         const userBalance = await signer.getBalance('latest');
         tokenBalance = ethers.utils.formatEther(userBalance);
       } else {
@@ -96,6 +97,7 @@
           tokenBalance = '0';
           return;
         }
+        console.log(addr,"addr")
         const contract = new Contract(addr, erc20ABI, signer);
         const userBalance = await contract.balanceOf(await signer.getAddress());
         tokenBalance = ethers.utils.formatUnits(userBalance, token.decimals);
@@ -202,7 +204,7 @@
 
       let balanceAvailableForTx = userBalance;
 
-      if ($token.symbol === ETHToken.symbol) {
+      if ($token.symbol === ETHToken.symbol && $fromChain.id==L2_CHAIN_ID) {
         balanceAvailableForTx = userBalance.sub(
           ethers.utils.parseEther(amount),
         );
@@ -395,7 +397,7 @@
   $: showFaucet =
     $fromChain && // chain selected?
     $fromChain.id === L1_CHAIN_ID && // are we in L1?
-    $token.symbol !== ETHToken.symbol && // bridging ERC20?
+    // $token.symbol !== ETHToken.symbol && // bridging ERC20?
     $signer && // wallet connected?
     tokenBalance &&
     ethers.utils
@@ -456,7 +458,7 @@
 
 <To bind:showTo bind:to />
 
-<ProcessingFee bind:method={feeMethod} bind:amount={feeAmount} />
+<!-- <ProcessingFee bind:method={feeMethod} bind:amount={feeAmount} /> -->
 
 <Memo bind:memo bind:memoError />
 
