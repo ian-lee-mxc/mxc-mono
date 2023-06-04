@@ -18,7 +18,9 @@ library LibVerifying {
     using SafeCastUpgradeable for uint256;
     using LibUtils for MxcData.State;
 
-    event BlockVerified(uint256 indexed id, bytes32 blockHash, uint64 reward);
+    event BlockVerified(uint256 indexed id, bytes32 blockHash, uint256 reward);
+    event BlockVerifiedReward(uint256 indexed id, address prover,  uint256 reward);
+
 
     event CrossChainSynced(uint256 indexed srcHeight, bytes32 blockHash, bytes32 signalRoot);
 
@@ -113,7 +115,9 @@ library LibVerifying {
             signalRoot = fc.signalRoot;
 
             _markBlockVerified({
+                resolver: resolver,
                 state: state,
+                config: config,
                 blk: blk,
                 fcId: uint24(fcId),
                 fc: fc,
@@ -142,7 +146,9 @@ library LibVerifying {
     }
 
     function _markBlockVerified(
+        AddressResolver resolver,
         MxcData.State storage state,
+        MxcData.Config memory config,
         MxcData.Block storage blk,
         MxcData.ForkChoice storage fc,
         uint24 fcId,
@@ -153,35 +159,24 @@ library LibVerifying {
             proofTime = uint64(fc.provenAt - blk.proposedAt);
         }
 
-        uint64 reward = LibTokenomics.getProofReward(state, proofTime);
+        uint256 reward = LibTokenomics.getProofReward(resolver, config, state, proofTime);
 
         (state.proofTimeIssued, state.blockFee) =
             LibTokenomics.getNewBlockFeeAndProofTimeIssued(state, proofTime);
 
         unchecked {
-            state.accBlockFees -= reward;
+            // CHANGE(MXC): MXC reward not part of blockFee
+            state.accBlockFees -= state.blockFee;
             state.accProposedAt -= blk.proposedAt;
+            state.mxcTokenBalances[address(1)] += reward;
         }
 
-        // reward the prover
-        if (reward != 0) {
-            address prover = fc.prover != address(1) ? fc.prover : systemProver;
-
-            // systemProver may become address(0) after a block is proven
-            if (prover != address(0)) {
-                if (state.mxcTokenBalances[prover] == 0) {
-                    // Reduce refund to 1 wei as a penalty if the proposer
-                    // has 0 TKO outstanding balance.
-                    state.mxcTokenBalances[prover] = 1;
-                } else {
-                    state.mxcTokenBalances[prover] += reward;
-                }
-            }
-        }
+        LibTokenomics.mintReward(resolver,reward);
 
         blk.nextForkChoiceId = 1;
         blk.verifiedForkChoiceId = fcId;
 
         emit BlockVerified(blk.blockId, fc.blockHash, reward);
+        emit BlockVerifiedReward(blk.blockId, fc.prover, reward);
     }
 }

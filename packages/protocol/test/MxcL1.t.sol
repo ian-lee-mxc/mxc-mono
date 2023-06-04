@@ -207,6 +207,7 @@ contract MxcL1Test is MxcL1TestBase {
         parentHashes[0] = GENESIS_BLOCK_HASH;
 
         depositMxcToken(Alice, 1e6 * 1e18, 100000 ether);
+        depositMxcToken(Bob, 1e6 * 1e18, 100000 ether);
 
         // Propose blocks
         for (uint256 blockId = 1; blockId < iterationCnt; blockId++) {

@@ -19,6 +19,29 @@ import "../contracts/common/AddressManager.sol";
 import "../contracts/test/erc20/FreeMintERC20.sol";
 import "../contracts/test/erc20/MayFailFreeMintERC20.sol";
 import "../test/LibLn.sol";
+interface ArbSys {
+    /**
+     * @notice Get Arbitrum block number (distinct from L1 block number; Arbitrum genesis block has block number 0)
+     * @return block number as int
+     */
+    function arbBlockNumber() external view returns (uint256);
+
+    function arbBlockHash(uint256 blockNumber) external view returns (bytes32);
+}
+
+contract ArbSysTest is ArbSys {
+    /**
+     * @notice Get Arbitrum block number (distinct from L1 block number; Arbitrum genesis block has block number 0)
+     * @return block number as int
+     */
+    function arbBlockNumber() external view returns (uint256) {
+        return block.number;
+    }
+
+    function arbBlockHash(uint256 blockNumber) external view returns (bytes32) {
+        return blockhash(blockNumber);
+    }
+}
 
 contract DeployOnL1 is Script {
     using SafeCastUpgradeable for uint256;
@@ -64,8 +87,10 @@ contract DeployOnL1 is Script {
         require(l2SignalService != address(0), "l2SignalService is zero");
         require(treasury != address(0), "treasury is zero");
         require(mxcTokenPremintRecipient != address(0), "mxcTokenPremintRecipient is zero");
-        require(mxcTokenPremintAmount < type(uint64).max, "premint too large");
+        require(mxcTokenPremintAmount < type(uint256).max, "premint too large");
 
+        console2.log("owner",owner);
+        deployArbSysTest();
         vm.startBroadcast(deployerPrivateKey);
 
         // AddressManager
@@ -104,14 +129,14 @@ contract DeployOnL1 is Script {
             )
         );
 
-        // HorseToken && BullToken
-        address horseToken = address(new FreeMintERC20("Horse Token", "HORSE"));
-        console2.log("HorseToken", horseToken);
+//        // HorseToken && BullToken
+//        address horseToken = address(new FreeMintERC20("Horse Token", "HORSE"));
+//        console2.log("HorseToken", horseToken);
+//
+//        address bullToken = address(new MayFailFreeMintERC20("Bull Token", "BLL"));
+//        console2.log("BullToken", bullToken);
 
-        address bullToken = address(new MayFailFreeMintERC20("Bull Token", "BLL"));
-        console2.log("BullToken", bullToken);
-
-        uint64 feeBase = uint64(1) ** mxcToken.decimals();
+        uint64 feeBase = uint64(1) ** 8;
 
         // Calculating it for our needs based on testnet/mainnet. We need it in
         // order to make the fees on the same level - in ideal circumstences.
@@ -120,9 +145,9 @@ contract DeployOnL1 is Script {
             revert PROOF_TIME_TARGET_NOT_SET();
         }
 
-        uint64 initProofTimeIssued = LibLn.calcInitProofTimeIssued(
-            feeBase, uint16(INITIAL_PROOF_TIME_TARGET), uint16(ADJUSTMENT_QUOTIENT)
-        );
+//        uint64 initProofTimeIssued = LibLn.calcInitProofTimeIssued(
+//            feeBase, uint16(INITIAL_PROOF_TIME_TARGET), uint16(ADJUSTMENT_QUOTIENT)
+//        );
 
         address mxcL1Proxy = deployProxy(
             "mxczkevm",
@@ -134,7 +159,7 @@ contract DeployOnL1 is Script {
                     genesisHash,
                     feeBase,
                     INITIAL_PROOF_TIME_TARGET,
-                    initProofTimeIssued,
+                    32000,
                     uint16(ADJUSTMENT_QUOTIENT)
                 )
             )
@@ -175,6 +200,12 @@ contract DeployOnL1 is Script {
         deployPlonkVerifiers();
 
         vm.stopBroadcast();
+    }
+
+    function deployArbSysTest() internal {
+        ArbSys arbSysTest = new ArbSysTest();
+        vm.etch(address(100), address(arbSysTest).code);
+        console2.log(ArbSys(arbSysTest).arbBlockNumber());
     }
 
     function deployPlonkVerifiers() private {

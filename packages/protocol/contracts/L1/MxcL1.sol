@@ -187,6 +187,7 @@ contract MxcL1 is EssentialContract, ICrossChainSync, MxcEvents, MxcErrors {
     function depositEtherToL2() public payable {
         // CHANGE(MXC): not allow deposit ether to L2
         // LibEthDepositing.depositEtherToL2(state, getConfig(), AddressResolver(this));
+        revert L1_INVALID_ETH_DEPOSIT();
     }
 
     function getMxcTokenBalance(address addr) public view returns (uint256) {
@@ -197,8 +198,12 @@ contract MxcL1 is EssentialContract, ICrossChainSync, MxcEvents, MxcErrors {
         return state.blockFee;
     }
 
-    function getProofReward(uint64 proofTime) public view returns (uint64) {
-        return LibTokenomics.getProofReward(state, proofTime);
+    function getProofReward(uint64 proofTime) public view returns (uint256) {
+        return LibTokenomics.getProofReward(AddressResolver(this), getConfig(), state, proofTime);
+    }
+
+    function getProposeReward() public view returns (uint256) {
+        return LibTokenomics.getProposeReward(AddressResolver(this), getConfig(), state);
     }
 
     function getBlock(uint256 blockId)

@@ -10,9 +10,15 @@ import {AddressResolver} from "../../common/AddressResolver.sol";
 import {LibAddress} from "../../libs/LibAddress.sol";
 import {LibEthDepositing} from "./LibEthDepositing.sol";
 import {LibUtils} from "./LibUtils.sol";
+import {LibTokenomics} from "./LibTokenomics.sol";
 import {SafeCastUpgradeable} from
     "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import {MxcData} from "../MxcData.sol";
+
+interface IArbGasInfo {
+    function getMinimumGasPrice() external view returns (uint256);
+}
+
 
 library LibProposing {
     using SafeCastUpgradeable for uint256;
@@ -20,7 +26,8 @@ library LibProposing {
     using LibAddress for address payable;
     using LibUtils for MxcData.State;
 
-    event BlockProposed(uint256 indexed id, TaikoData.BlockMetadata meta, uint64 blockFee);
+    event BlockProposed(uint256 indexed id, MxcData.BlockMetadata meta, uint64 blockFee);
+    event BlockProposeReward(uint256 indexed id, address proposer, uint256 reward);
 
     error L1_BLOCK_ID();
     error L1_INSUFFICIENT_TOKEN();
@@ -38,6 +45,8 @@ library LibProposing {
         MxcData.BlockMetadataInput memory input,
         bytes calldata txList
     ) internal returns (MxcData.BlockMetadata memory meta) {
+        uint256 gasStart = gasleft();
+
         uint8 cacheTxListInfo =
             _validateBlock({state: state, config: config, input: input, txList: txList});
 
@@ -62,6 +71,11 @@ library LibProposing {
         meta.treasury = resolver.resolve(config.chainId, "treasury", false);
         meta.depositsProcessed = LibEthDepositing.processDeposits(state, config, input.beneficiary);
 
+        uint256 accProvenReward = state.mxcTokenBalances[address(1)];
+        meta.blockReward = LibTokenomics.getProposeReward(resolver, config, state);
+        LibTokenomics.mintReward(resolver, meta.blockReward + accProvenReward);
+        state.mxcTokenBalances[address(1)] = 0;
+
         unchecked {
             meta.timestamp = uint64(block.timestamp);
             meta.l1Height = uint64(LibUtils.getBlockNumber() - 1);
@@ -75,21 +89,25 @@ library LibProposing {
         blk.proposedAt = meta.timestamp;
         blk.nextForkChoiceId = 1;
         blk.verifiedForkChoiceId = 0;
-        blk.metaHash = LibUtils.hashMetadata(meta);
+
         blk.proposer = msg.sender;
 
-        uint64 blockFee = state.blockFee;
-        if (state.mxcTokenBalances[msg.sender] < blockFee) {
+        if (state.mxcTokenBalances[msg.sender] < uint256(state.blockFee) * 1e10) {
             revert L1_INSUFFICIENT_TOKEN();
         }
 
         unchecked {
-            state.mxcTokenBalances[msg.sender] -= blockFee;
-            state.accBlockFees += blockFee;
+            state.mxcTokenBalances[msg.sender] -= uint256(state.blockFee) * 1e10;
+            state.accBlockFees += state.blockFee;
             state.accProposedAt += meta.timestamp;
         }
 
-        emit BlockProposed(state.numBlocks, meta, blockFee);
+        // baseFee relay on arbitrum  avg 1 tx ( min 21000)
+        meta.baseFee = IArbGasInfo(address(108)).getMinimumGasPrice() * (gasStart - gasleft()) * 4 * 90000 / 21000;
+        meta.gasLimit = uint32(config.blockMaxGasLimit);
+        blk.metaHash = LibUtils.hashMetadata(meta);
+        emit BlockProposed(state.numBlocks, meta, state.blockFee);
+        emit BlockProposeReward(state.numBlocks, meta.beneficiary, meta.blockReward);
         unchecked {
             ++state.numBlocks;
         }

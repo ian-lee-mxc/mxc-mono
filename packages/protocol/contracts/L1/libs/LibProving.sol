@@ -36,6 +36,8 @@ library LibProving {
     error L1_SAME_PROOF();
     error L1_SYSTEM_PROVER_DISABLED();
     error L1_SYSTEM_PROVER_PROHIBITED();
+    error L1_INSUFFICIENT_TOKEN();
+
 
     function proveBlock(
         MxcData.State storage state,
@@ -44,6 +46,11 @@ library LibProving {
         uint256 blockId,
         MxcData.BlockEvidence memory evidence
     ) internal {
+        // CHANGE(MXC): prove block stake first
+        if (state.mxcTokenBalances[msg.sender] == 0) {
+            revert L1_INSUFFICIENT_TOKEN();
+        }
+
         if (
             evidence.parentHash == 0 || evidence.blockHash == 0
                 || evidence.blockHash == evidence.parentHash || evidence.signalRoot == 0

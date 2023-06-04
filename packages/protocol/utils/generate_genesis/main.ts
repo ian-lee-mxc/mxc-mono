@@ -1,4 +1,5 @@
 import { Config } from "./interface";
+import { deployCreate2 } from "./create2";
 const fs = require("fs");
 const path = require("path");
 const { ethers } = require("ethers");
@@ -56,6 +57,12 @@ async function main() {
         console.log("start deploy an ERC-20 token");
 
         result = await deployERC20(config, result);
+    }
+
+    if (config.create2) {
+        console.log("start deploy create2 contract");
+
+        result = await deployCreate2(config, result);
     }
 
     const allocSavedPath = path.join(

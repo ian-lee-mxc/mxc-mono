@@ -12,7 +12,7 @@ import {SafeCastUpgradeable} from
     "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import {MxcData} from "../MxcData.sol";
 
-interface ArbSys {
+interface IArbSys {
     /**
      * @notice Get Arbitrum block number (distinct from L1 block number; Arbitrum genesis block has block number 0)
      * @return block number as int
@@ -87,7 +87,7 @@ library LibUtils {
     }
 
     function hashMetadata(MxcData.BlockMetadata memory meta) internal pure returns (bytes32 hash) {
-        uint256[7] memory inputs;
+        uint256[9] memory inputs;
 
         inputs[0] = (uint256(meta.id) << 192) | (uint256(meta.timestamp) << 128)
             | (uint256(meta.l1Height) << 64);
@@ -101,9 +101,11 @@ library LibUtils {
             | (uint256(meta.gasLimit) << 176) | (uint256(uint160(meta.beneficiary)) << 16);
 
         inputs[6] = (uint256(uint160(meta.treasury)) << 96);
+        inputs[7] = meta.baseFee;
+        inputs[8] = meta.blockReward;
 
         assembly {
-            hash := keccak256(inputs, mul(7, 32))
+            hash := keccak256(inputs, mul(9, 32))
         }
     }
 
@@ -126,10 +128,12 @@ library LibUtils {
     }
 
     function getBlockNumber() internal view returns (uint256 blockNumber) {
-        blockNumber = ArbSys(address(100)).arbBlockNumber();
+        // eth l1 block number
+        blockNumber = IArbSys(address(100)).arbBlockNumber();
     }
 
     function getBlockHash(uint256 blockNumber) internal view returns (bytes32 L1BlockHash) {
-        L1BlockHash = ArbSys(address(100)).arbBlockHash(blockNumber);
+        // eth l1 block number
+        L1BlockHash = IArbSys(address(100)).arbBlockHash(blockNumber);
     }
 }
