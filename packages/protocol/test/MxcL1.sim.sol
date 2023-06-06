@@ -105,9 +105,9 @@ contract MxcL1Simulation is MxcL1TestBase {
 
         assertEq(time, 1);
 
-        depositTaikoToken(Alice, 1e9 * 1e8, 10000 ether);
+        depositMxcToken(Alice, 1e9 * 1e18, 10000 ether);
 
-        TaikoData.BlockMetadata[] memory metas = new MxcData.BlockMetadata[](
+        MxcData.BlockMetadata[] memory metas = new MxcData.BlockMetadata[](
             blocksToSimulate
         );
 
@@ -264,9 +264,9 @@ contract MxcL1Simulation is MxcL1TestBase {
 
         assertEq(time, 1);
 
-        depositTaikoToken(Alice, 1e9 * 1e8, 10000 ether);
+        depositMxcToken(Alice, 1e9 * 1e18, 10000 ether);
 
-        TaikoData.BlockMetadata[] memory metas = new TaikoData.BlockMetadata[](
+        MxcData.BlockMetadata[] memory metas = new MxcData.BlockMetadata[](
             blocksToSimulate
         );
 

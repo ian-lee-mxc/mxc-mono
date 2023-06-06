@@ -44,7 +44,7 @@ contract TestMxc1559Params is Test {
             ratio2x1x: 11250 // ~12.5% increase
         });
 
-        TaikoL2 L2 = new TaikoL2();
+        MxcL2 L2 = new MxcL2();
         L2.init(address(1), param1559); // Dummy address manager address.
 
         console2.log("basefee           :", param1559.basefee);

@@ -117,6 +117,7 @@ library LibVerifying {
             _markBlockVerified({
                 resolver: resolver,
                 state: state,
+                config: config,
                 blk: blk,
                 fcId: uint24(fcId),
                 fc: fc,
