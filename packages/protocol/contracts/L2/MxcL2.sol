@@ -183,20 +183,20 @@ contract MxcL2 is EssentialContract, MxcL2Signer, ICrossChainSync {
         emit CrossChainSynced(l1Height, l1Hash, l1SignalRoot);
 
         // Check EIP-1559 basefee
-//        uint256 basefee;
-//        EIP1559Config memory config = getEIP1559Config();
-//        if (config.gasIssuedPerSecond != 0) {
-//            (basefee, gasExcess) = _calcBasefee(
-//                config, block.timestamp - parentTimestamp, uint64(block.gaslimit), parentGasUsed
-//            );
-//        }
-//
-//        // On L2, basefee is not burnt, but sent to a treasury instead.
-//        // The circuits will need to verify the basefee recipient is the designated
-//        // address.
-//        if (block.basefee != basefee) {
-//            revert L2_BASEFEE_MISMATCH(uint64(basefee), uint64(block.basefee));
-//        }
+        uint256 basefee;
+        EIP1559Config memory config = getEIP1559Config();
+        if (config.gasIssuedPerSecond != 0) {
+            (basefee, gasExcess) = _calcBasefee(
+                config, block.timestamp - parentTimestamp, uint64(block.gaslimit), parentGasUsed
+            );
+        }
+
+        // On L2, basefee is not burnt, but sent to a treasury instead.
+        // The circuits will need to verify the basefee recipient is the designated
+        // address.
+        if (block.basefee != basefee) {
+            revert L2_BASEFEE_MISMATCH(uint64(basefee), uint64(block.basefee));
+        }
 
         parentTimestamp = uint64(block.timestamp);
 
@@ -220,8 +220,7 @@ contract MxcL2 is EssentialContract, MxcL2Signer, ICrossChainSync {
         view
         returns (uint256 _basefee)
     {
-//        (_basefee,) = _calcBasefee(getEIP1559Config(), timeSinceParent, gasLimit, parentGasUsed);
-        _basefee = block.basefee;
+        (_basefee,) = _calcBasefee(getEIP1559Config(), timeSinceParent, gasLimit, parentGasUsed);
     }
 
     function getCrossChainBlockHash(uint256 number) public view override returns (bytes32) {

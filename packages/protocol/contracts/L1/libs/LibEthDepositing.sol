@@ -31,8 +31,11 @@ library LibEthDepositing {
             revert L1_INVALID_ETH_DEPOSIT();
         }
 
-        MxcData.EthDeposit memory deposit =
-            MxcData.EthDeposit({recipient: msg.sender, amount: uint96(msg.value)});
+        MxcData.EthDeposit memory deposit = MxcData.EthDeposit({
+            recipient: msg.sender,
+            amount: uint96(msg.value),
+            id: uint64(state.ethDeposits.length)
+        });
 
         address to = resolver.resolve("ether_vault", true);
         if (to == address(0)) {
@@ -51,7 +54,7 @@ library LibEthDepositing {
     ) internal returns (MxcData.EthDeposit[] memory depositsProcessed) {
         // Allocate one extra slot for collecting fees on L2
         depositsProcessed = new MxcData.EthDeposit[](
-            config.maxEthDepositsPerBlock + 1
+            config.maxEthDepositsPerBlock
         );
 
         uint256 j; // number of deposits to process on L2
@@ -74,27 +77,29 @@ library LibEthDepositing {
                     i < state.ethDeposits.length
                         && i < state.nextEthDepositToProcess + config.maxEthDepositsPerBlock
                 ) {
-                    MxcData.EthDeposit storage deposit = state.ethDeposits[i];
-                    if (deposit.amount > feePerDeposit) {
+                    depositsProcessed[j] = state.ethDeposits[i];
+
+                    if (depositsProcessed[j].amount > feePerDeposit) {
                         totalFee += feePerDeposit;
-                        depositsProcessed[j].recipient = deposit.recipient;
-                        depositsProcessed[j].amount = deposit.amount - feePerDeposit;
-                        ++j;
+                        depositsProcessed[j].amount -= feePerDeposit;
                     } else {
-                        totalFee += deposit.amount;
+                        totalFee += depositsProcessed[j].amount;
+                        depositsProcessed[j].amount = 0;
                     }
 
-                    // delete the deposit
-                    deposit.recipient = address(0);
-                    deposit.amount = 0;
                     ++i;
+                    ++j;
                 }
 
                 // Fee collecting deposit
                 if (totalFee > 0) {
-                    depositsProcessed[j].recipient = beneficiary;
-                    depositsProcessed[j].amount = totalFee;
-                    ++j;
+                    MxcData.EthDeposit memory deposit = MxcData.EthDeposit({
+                        recipient: beneficiary,
+                        amount: totalFee,
+                        id: uint64(state.ethDeposits.length)
+                    });
+
+                    state.ethDeposits.push(deposit);
                 }
                 // Advance cursor
                 state.nextEthDepositToProcess = i;
@@ -111,27 +116,6 @@ library LibEthDepositing {
         pure
         returns (bytes32)
     {
-        return _hashEthDeposits(deposits);
-    }
-
-    function _hashEthDeposits(MxcData.EthDeposit[] memory deposits)
-        private
-        pure
-        returns (bytes32)
-    {
-        bytes memory buffer = new bytes(32 * deposits.length);
-
-        for (uint256 i; i < deposits.length;) {
-            uint256 encoded =
-                uint256(uint160(deposits[i].recipient)) << 96 | uint256(deposits[i].amount);
-            assembly {
-                mstore(add(buffer, mul(32, add(1, i))), encoded)
-            }
-            unchecked {
-                ++i;
-            }
-        }
-
-        return keccak256(buffer);
+        return keccak256(abi.encode(deposits));
     }
 }
