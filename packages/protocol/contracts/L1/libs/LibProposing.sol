@@ -72,8 +72,9 @@ library LibProposing {
         meta.depositsProcessed = LibEthDepositing.processDeposits(state, config, input.beneficiary);
 
         uint256 accProvenReward = state.mxcTokenBalances[address(1)];
-        meta.blockReward = LibTokenomics.getProposeReward(resolver, config, state);
-        LibTokenomics.mintReward(resolver, meta.blockReward + accProvenReward);
+        uint256 proposeReward = LibTokenomics.getProposeReward(resolver, config, state);
+        meta.blockReward = proposeReward + accProvenReward;
+        LibTokenomics.mintReward(resolver, meta.blockReward);
         state.mxcTokenBalances[address(1)] = 0;
 
         unchecked {
@@ -107,7 +108,7 @@ library LibProposing {
         meta.gasLimit = uint32(config.blockMaxGasLimit);
         blk.metaHash = LibUtils.hashMetadata(meta);
         emit BlockProposed(state.numBlocks, meta, state.blockFee);
-        emit BlockProposeReward(state.numBlocks, meta.beneficiary, meta.blockReward);
+        emit BlockProposeReward(state.numBlocks, meta.beneficiary, proposeReward);
         unchecked {
             ++state.numBlocks;
         }

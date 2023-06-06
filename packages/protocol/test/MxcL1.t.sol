@@ -172,7 +172,7 @@ contract MxcL1Test is MxcL1TestBase {
 
         printVariables("after processing send-ethers");
         assertTrue(LibEthDepositing.hashEthDeposits(meta.depositsProcessed) != emptyDepositsRoot);
-        assertEq(meta.depositsProcessed.length, count + 1);
+        assertEq(meta.depositsProcessed.length, count);
 
         gas = gasleft();
         meta = proposeBlock(Alice, 1000000, 1024);
@@ -293,11 +293,13 @@ contract MxcL1Test is MxcL1TestBase {
         // We shall invoke proposeBlock() because this is what will call the processDeposits()
         MxcData.BlockMetadata memory meta = proposeBlock(Alice, 1000000, 1024);
 
-        // Expected: 0x8117066d69ff650d78f0d7383a10cc802c2b8c0eedd932d70994252e2438c636  (pre calculated with these values)
+        // Expected:
+        // 0x60386add6a400d9b23968e1239bd600d22d2eea4709246895c0e5d8f5ae49dc3  (pre
+        // calculated with these values)
         //console2.logBytes32(meta.depositsRoot);
         assertEq(
             LibEthDepositing.hashEthDeposits(meta.depositsProcessed),
-            0x8117066d69ff650d78f0d7383a10cc802c2b8c0eedd932d70994252e2438c636
+            0x60386add6a400d9b23968e1239bd600d22d2eea4709246895c0e5d8f5ae49dc3
         );
     }
 }

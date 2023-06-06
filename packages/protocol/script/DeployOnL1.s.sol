@@ -72,8 +72,8 @@ contract DeployOnL1 is Script {
     // For testnet it could be somewhere 85-100s
     // For mainnet it could be around 1800 s (30mins)
     // Can be adjusted later with setters
-    uint64 public INITIAL_PROOF_TIME_TARGET = uint64(vm.envUint("INITIAL_PROOF_TIME_TARGET"));
-    uint16 public ADJUSTMENT_QUOTIENT = uint16(vm.envUint("ADJUSTMENT_QUOTIENT"));
+    uint64 public INITIAL_PROOF_TIME_TARGET = uint64(vm.envUint("INITIAL_PROOF_TIME_TARGET")); // 160s
+    uint16 public ADJUSTMENT_QUOTIENT = uint16(vm.envUint("ADJUSTMENT_QUOTIENT")); // 32000
 
     MxcL1 mxcL1;
     address public addressManagerProxy;
@@ -145,9 +145,9 @@ contract DeployOnL1 is Script {
             revert PROOF_TIME_TARGET_NOT_SET();
         }
 
-//        uint64 initProofTimeIssued = LibLn.calcInitProofTimeIssued(
-//            feeBase, uint16(INITIAL_PROOF_TIME_TARGET), uint16(ADJUSTMENT_QUOTIENT)
-//        );
+        uint64 initProofTimeIssued = LibLn.calcInitProofTimeIssued(
+            feeBase, uint16(INITIAL_PROOF_TIME_TARGET), uint16(ADJUSTMENT_QUOTIENT)
+        );
 
         address mxcL1Proxy = deployProxy(
             "mxczkevm",
@@ -159,7 +159,7 @@ contract DeployOnL1 is Script {
                     genesisHash,
                     feeBase,
                     INITIAL_PROOF_TIME_TARGET,
-                    32000,
+                    initProofTimeIssued,
                     uint16(ADJUSTMENT_QUOTIENT)
                 )
             )
