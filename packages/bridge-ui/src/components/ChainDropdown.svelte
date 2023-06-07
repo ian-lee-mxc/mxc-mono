@@ -1,11 +1,18 @@
 <script lang="ts">
-  import { fromChain } from '../store/chain';
+  import { UserRejectedRequestError } from '@wagmi/core';
   import { ChevronDown, ExclamationTriangle } from 'svelte-heros-v2';
+
   import { mainnetChain, taikoChain } from '../chain/chains';
-  import { selectChain } from '../utils/selectChain';
   import type { Chain } from '../domain/chain';
-  import { errorToast, successToast } from './Toast.svelte';
+  import { srcChain } from '../store/chain';
   import { signer } from '../store/signer';
+  import { pendingTransactions } from '../store/transaction';
+  import { selectChain } from '../utils/selectChain';
+  import {
+    errorToast,
+    successToast,
+    warningToast,
+  } from './NotificationToast.svelte';
 
   import MxcIcon from "../assets/token/mxc.png"
   import EthIcon from "../assets/ether.png"
@@ -16,29 +23,36 @@
       return;
     }
 
+    if (chain === $srcChain) {
+      // Already on this chain
+      return;
+    }
+
     try {
       await selectChain(chain);
-      successToast('Successfully changed chain');
-    } catch (e) {
-      console.error(e);
-      // errorToast('Error switching chain');
-      errorToast('Error Switching Chain. Try Switching Manually On Your Wallet');
+      successToast('Successfully changed chain.');
+    } catch (error) {
+      console.error(error);
+
+      if (error instanceof UserRejectedRequestError) {
+        warningToast('Switch chain request rejected.');
+      } else {
+        // errorToast('Error switching chain.');
+        errorToast('Error Switching Chain. Try Switching Manually On Your Wallet');
+      }
     }
   };
+
+  $: cannotSwitch = $pendingTransactions && $pendingTransactions.length > 0;
 </script>
 
 <div class="dropdown dropdown-end mr-4">
-  <!-- svelte-ignore a11y-label-has-associated-control -->
-  <!-- svelte-ignore a11y-no-noninteractive-element-to-interactive-role -->
-  <label
-    role="button"
-    tabindex="0"
-    class="btn btn-md justify-around md:w-[200px]">
+  <button class="btn justify-around md:w-[210px]" disabled={cannotSwitch}>
     <span class="font-normal flex-1 text-left mr-2 flex items-center justify-center">
-      {#if $fromChain}
-        <!-- <svelte:component this={$fromChain.icon} /> -->
-        <img src={$fromChain.logoUrl} height={30} width={30} alt="" >
-        <span class="ml-2 hidden md:inline-block">{$fromChain.name}</span>
+      {#if $srcChain}
+        <!-- <svelte:component this={$srcChain.icon} /> -->
+        <img src={$srcChain.logoUrl} height={30} width={30} alt="" >
+        <span class="ml-2 hidden md:inline-block">{$srcChain.name}</span>
       {:else}
         <span class="ml-2 flex items-center">
           <ExclamationTriangle class="mr-2" size="20" />
@@ -47,14 +61,14 @@
       {/if}
     </span>
     <ChevronDown size="20" />
-  </label>
+  </button>
   <ul
     role="listbox"
     tabindex="0"
-    class="dropdown-content address-dropdown-content flex my-2 menu p-2 shadow bg-dark-2 rounded-sm w-[194px]">
+    class="dropdown-content rounded-box flex my-2 menu p-2 shadow bg-dark-2 w-[194px]">
     <li>
       <button
-        class="flex items-center px-2 py-4 hover:bg-dark-5 rounded-xl justify-around"
+        class="flex items-center px-2 py-4 hover:bg-dark-5 rounded-sm"
         on:click={() => switchChains(mainnetChain)}>
         <!-- <svelte:component this={mainnetChain.icon} height={24} /> -->
         <img src={EthIcon} height={24} width={24} alt="" />
@@ -63,7 +77,7 @@
     </li>
     <li>
       <button
-        class="flex items-center px-2 py-4 hover:bg-dark-5 rounded-xl justify-around"
+        class="flex items-center px-2 py-4 hover:bg-dark-5 rounded-sm"
         on:click={() => switchChains(taikoChain)}>
         <!-- <svelte:component this={taikoChain.icon} height={24} /> -->
         <img src={MxcIcon} height={24} width={24} alt="" />

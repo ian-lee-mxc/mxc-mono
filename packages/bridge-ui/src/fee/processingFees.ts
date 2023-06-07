@@ -27,4 +27,5 @@ export const processingFees: Map<ProcessingFeeMethod, ProcessingFeeDetails> =
         timeToConfirm: 15 * 60 * 1000,
       },
     ],
+
   ]);

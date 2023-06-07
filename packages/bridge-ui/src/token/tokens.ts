@@ -2,48 +2,37 @@
 // import Eth from '../components/icons/ETH.svelte';
 // import Horse from '../components/icons/Horse.svelte';
 // import Tko from '../components/icons/TKO.svelte';
-import Mxc from '../components/icons/MXC.svelte';
 import Unknown from '../components/icons/Unknown.svelte';
 import { L1_CHAIN_ID, L2_CHAIN_ID, TEST_ERC20, L1MXCTOKEN } from '../constants/envVars';
 import type { Token } from '../domain/token';
 
+import Mxc from '../components/icons/MXC.svelte';
 import MxcIcon from "../assets/token/mxc.png"
 import ParkIcon from "../assets/token/park.svg"
 import RideIcon from "../assets/token/bicycle.svg"
 import MoonIcon from "../assets/token/moon.svg"
 
+
 export const ETHToken: Token = {
   name: 'MXC',
-  addresses: [
-    {
-      chainId: L1_CHAIN_ID,
-      address: L1MXCTOKEN,
-    },
-    {
-      chainId: L2_CHAIN_ID,
-      address: '0x00',
-    },
-  ],
+  addresses: {
+    [L1_CHAIN_ID]: L1MXCTOKEN,
+    [L2_CHAIN_ID]: '0x00',
+  },
   decimals: 18,
   symbol: 'MXC',
   logoComponent: Mxc,
   logoUrl: MxcIcon,
-  isETHToken: true,
-  tokenFaucet: 100
+  isChainToken: true,
+  tokenFaucet: 200
 };
 
 // export const ETHToken: Token = {
 //   name: 'Ethereum',
-//   addresses: [
-//     {
-//       chainId: L1_CHAIN_ID,
-//       address: '0x00',
-//     },
-//     {
-//       chainId: L2_CHAIN_ID,
-//       address: '0x00',
-//     },
-//   ],
+//   addresses: {
+//     [L1_CHAIN_ID]: '0x00',
+//     [L2_CHAIN_ID]: '0x00',
+//   },
 //   decimals: 18,
 //   symbol: 'ETH',
 //   logoComponent: Eth,
@@ -51,16 +40,10 @@ export const ETHToken: Token = {
 
 // export const TKOToken: Token = {
 //   name: 'Taiko',
-//   addresses: [
-//     {
-//       chainId: L1_CHAIN_ID,
-//       address: '0x00',
-//     },
-//     {
-//       chainId: L2_CHAIN_ID,
-//       address: '0x00',
-//     },
-//   ],
+//   addresses: {
+//     [L1_CHAIN_ID]: '0x00',
+//     [L2_CHAIN_ID]: '0x00',
+//   },
 //   decimals: 18,
 //   symbol: 'TKO',
 //   logoComponent: Tko,
@@ -84,21 +67,32 @@ export const testERC20Tokens: Token[] = TEST_ERC20.map(
     name,
     symbol,
 
-    addresses: [
-      {
-        chainId: L1_CHAIN_ID,
-        address,
-      },
-      {
-        chainId: L2_CHAIN_ID,
-        address: '0x00',
-      },
-    ],
+    addresses: {
+      [L1_CHAIN_ID]: address,
+      [L2_CHAIN_ID]: '0x00',
+    },
     decimals: 18,
-    tokenFaucet: symbol == 'MXC' ? 100 : 50,
-    logoComponent: symbolToLogoComponent[symbol] || Unknown,
+    tokenFaucet: symbol == 'MXC' ? 200 : 50,
     logoUrl: symbolToLogoSvg[symbol],
+    logoComponent: symbolToLogoComponent[symbol] || Unknown,
   }),
 );
 
 export const tokens = [ETHToken, ...testERC20Tokens];
+
+export function isTestToken(token: Token): boolean {
+  const testingTokens = TEST_ERC20.map((testToken) =>
+    testToken.symbol.toLocaleLowerCase(),
+  );
+  return testingTokens.includes(token.symbol.toLocaleLowerCase());
+}
+
+export function isETH(token: Token): boolean {
+  return (
+    token.symbol.toLocaleLowerCase() === ETHToken.symbol.toLocaleLowerCase()
+  );
+}
+
+export function isERC20(token: Token): boolean {
+  return !isETH(token);
+}

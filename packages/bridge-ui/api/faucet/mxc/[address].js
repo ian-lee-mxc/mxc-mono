@@ -24,10 +24,11 @@ export default async function handler(req, res) {
 
   const contractFaucet = new ethers.Contract(c_faucet, abiFaucet, wallet);
   try {
-    await contractFaucet.callStatic.requestMXC(address, {
-      gasPrice: 9000000000000,
-      gasLimit: 3000000,
-    });
+    // await contractFaucet.callStatic.requestMXC(address, {
+    //   gasPrice: 9000000000000,
+    //   gasLimit: 3000000,
+    // });
+    await contractFaucet.callStatic.requestMXC(address);
   } catch (error) {
     console.log(error);
     return res.status(200).send({
@@ -36,10 +37,11 @@ export default async function handler(req, res) {
     });
   }
 
-  let tx = await contractFaucet.requestMXC(address, {
-    gasPrice: 9000000000000,
-    gasLimit: 3000000,
-  });
+  // let tx = await contractFaucet.requestMXC(address, {
+  //   gasPrice: 9000000000000,
+  //   gasLimit: 3000000,
+  // });
+  let tx = await contractFaucet.requestMXC(address);
   await tx.wait();
   return res.status(200).send({ status: 200, msg: `Request successful!` });
 }
