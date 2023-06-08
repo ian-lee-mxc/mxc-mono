@@ -80,16 +80,20 @@ library LibBridgeProcess {
             revert B_SIGNAL_NOT_RECEIVED();
         }
 
+        bool isMxc = block.chainid == MxcConfig.getConfig().chainId;
+
         uint256 allValue = message.depositValue + message.callValue + message.processingFee;
         // We retrieve the necessary ether from EtherVault if receiving on
-        // Taiko, otherwise it is already available in this Bridge.
+        // Mxc, otherwise it is already available in this Bridge.
         address ethVault = resolver.resolve("ether_vault", true);
-        if (ethVault != address(0) && (allValue > 0)) {
+        if (ethVault != address(0) && (allValue > 0) && isMxc) {
             EtherVault(payable(ethVault)).releaseEther(allValue);
         }
         // We send the Ether before the message call in case the call will
         // actually consume Ether.
-        message.owner.sendEther(message.depositValue);
+        if(isMxc) {
+            message.owner.sendEther(message.depositValue);
+        }
 
         LibBridgeStatus.MessageStatus status;
         uint256 refundAmount;
@@ -105,7 +109,11 @@ library LibBridgeProcess {
             refundAmount = message.callValue;
         } else {
             // CHANGE(MXC): unpack message data and process it if mxc token
-            if (_checkAndReleaseEther(message, resolver)) {
+            if (_checkAndReleaseEther(message, resolver) && isMxc) {
+                status = LibBridgeStatus.MessageStatus.DONE;
+            } else if (isMxc == false && message.depositValue > 0) {
+                // change(MXC) release live chain mxc
+                tokenVault.receiveMXC(message.owner, message.depositValue);
                 status = LibBridgeStatus.MessageStatus.DONE;
             } else {
                 // use the specified message gas limit if not called by the owner
@@ -122,7 +130,9 @@ library LibBridgeProcess {
                     status = LibBridgeStatus.MessageStatus.DONE;
                 } else {
                     status = LibBridgeStatus.MessageStatus.RETRIABLE;
-                    ethVault.sendEther(message.callValue);
+                    if(isMxc) {
+                        ethVault.sendEther(message.callValue);
+                    }
                 }
             }
         }
@@ -136,25 +146,28 @@ library LibBridgeProcess {
         // if sender is the refundAddress
         if (msg.sender == refundAddress) {
             uint256 amount = message.processingFee + refundAmount;
-            if (message.srcChainId == MxcConfig.getConfig().chainId) {
-                // change(MXC) release live chain mxc
-                tokenVault.receiveMXC(refundAddress, amount);
-            } else {
+            if (isMxc) {
                 // send mxc on mxc chain
                 refundAddress.sendEther(amount);
+            }else if(amount > 0) {
+                tokenVault.receiveMXC(message.owner, amount);
             }
         } else {
             // if sender is another address (eg. the relayer)
             // First attempt relayer is rewarded the processingFee
             // message.owner has to eat the cost
-            if (message.srcChainId == MxcConfig.getConfig().chainId) {
-                // change(MXC) release live chain mxc
-                tokenVault.receiveMXC(msg.sender, message.processingFee);
-                tokenVault.receiveMXC(refundAddress, refundAmount);
-            } else {
+            if (isMxc) {
                 // send mxc on mxc chain
                 msg.sender.sendEther(message.processingFee);
                 refundAddress.sendEther(refundAmount);
+            }else {
+                if(message.processingFee > 0) {
+                    tokenVault.receiveMXC(message.sender, message.processingFee);
+                }
+                // CHANGE(MXC): always zero, not allow call ether on L1.
+//                if(refundAmount > 0) {
+//                    tokenVault.receiveMXC(refundAddress, refundAmount);
+//                }
             }
         }
     }
@@ -182,10 +195,7 @@ library LibBridgeProcess {
         (CanonicalERC20 memory token,, address to, uint256 amount) =
             abi.decode(message.data[4:], (CanonicalERC20, address, address, uint256));
         // change(MXC) release ether
-        if (
-            token.addr == resolver.resolve(message.srcChainId, "mxc_token", false)
-                && message.destChainId == MxcConfig.getConfig().chainId
-        ) {
+        if (token.addr == resolver.resolve(message.srcChainId, "mxc_token", false)) {
             EtherVault(payable(resolver.resolve("ether_vault", false))).releaseEther(to, amount);
             return true;
         }

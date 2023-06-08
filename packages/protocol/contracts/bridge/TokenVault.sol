@@ -208,6 +208,7 @@ contract TokenVault is EssentialContract {
         message.refundAddress = refundAddress;
         message.memo = memo;
 
+
         bytes32 msgHash = IBridge(resolve("bridge", false)).sendMessage{value: msg.value}(message);
 
         // record the deposit for this message

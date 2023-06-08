@@ -82,7 +82,8 @@ library LibBridgeSend {
                 ethVault.sendEther(expectedAmount);
             }
         } else {
-            if (msg.value != 0) {
+            // CHANGE(MXC): not allow call ether in L1
+            if (msg.value != 0 || message.callValue != 0) {
                 revert B_WRONG_CHAIN_ID();
             }
             address tokenVault = resolver.resolve("token_vault", true);
