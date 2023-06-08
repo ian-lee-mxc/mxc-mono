@@ -195,7 +195,7 @@ contract MxcL1 is EssentialContract, ICrossChainSync, MxcEvents, MxcErrors {
     }
 
     function getBlockFee() public view returns (uint64) {
-        return state.blockFee;
+        return state.blockFee * 1e8;
     }
 
     function getProofReward(uint64 proofTime) public view returns (uint256) {

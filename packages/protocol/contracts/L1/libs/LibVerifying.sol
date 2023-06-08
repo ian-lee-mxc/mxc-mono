@@ -168,8 +168,6 @@ library LibVerifying {
             state.mxcTokenBalances[address(1)] += reward;
         }
 
-        LibTokenomics.mintReward(resolver,reward);
-
         blk.nextForkChoiceId = 1;
         blk.verifiedForkChoiceId = fcId;
 

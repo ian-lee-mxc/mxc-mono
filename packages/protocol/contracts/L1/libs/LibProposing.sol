@@ -71,11 +71,14 @@ library LibProposing {
         meta.treasury = resolver.resolve(config.chainId, "treasury", false);
         meta.depositsProcessed = LibEthDepositing.processDeposits(state, config, input.beneficiary);
 
-        uint256 accProvenReward = state.mxcTokenBalances[address(1)];
         uint256 proposeReward = LibTokenomics.getProposeReward(resolver, config, state);
-        meta.blockReward = proposeReward + accProvenReward;
-        LibTokenomics.mintReward(resolver, meta.blockReward);
-        state.mxcTokenBalances[address(1)] = 0;
+        state.mxcTokenBalances[address(1)] += proposeReward;
+
+        if(state.numBlocks % 10 == 0) {
+            meta.blockReward = state.mxcTokenBalances[address(1)];
+            LibTokenomics.mintReward(resolver, meta.blockReward);
+            state.mxcTokenBalances[address(1)] = 0;
+        }
 
         unchecked {
             meta.timestamp = uint64(block.timestamp);
@@ -105,6 +108,8 @@ library LibProposing {
 
         // baseFee relay on arbitrum  avg 1 tx ( min 21000)
         meta.baseFee = IArbGasInfo(address(108)).getMinimumGasPrice() * (gasStart - gasleft()) * 4 * 90000 / 21000;
+//        meta.baseFee = IArbGasInfo(address(108)).getMinimumGasPrice();
+
         meta.gasLimit = uint32(config.blockMaxGasLimit);
         blk.metaHash = LibUtils.hashMetadata(meta);
         emit BlockProposed(state.numBlocks, meta, state.blockFee);

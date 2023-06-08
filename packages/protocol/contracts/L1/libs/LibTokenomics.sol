@@ -85,9 +85,7 @@ library LibTokenomics {
             return 0;
         } else {
             // CHANGE(MXC): proof reward
-            MxcData.Block storage blk = state.blocks[(state.lastVerifiedBlockId - 1) % config.ringBufferSize];
-
-            uint256 baseReward = (MxcToken(resolver.resolve("mxc_token", false)).totalSupply() / 28 / 365 days) * (block.timestamp - blk.forkChoices[blk.verifiedForkChoiceId].provenAt);
+            uint256 baseReward = (MxcToken(resolver.resolve("mxc_token", false)).totalSupply() / 28 / 365 days) * 3;
 
             if(numBlocksUnverified > 1000) {
                 return baseReward;
