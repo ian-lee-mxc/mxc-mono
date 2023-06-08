@@ -16,6 +16,8 @@ contract SetBridgeAddress is Script {
 
     address public owner = vm.envAddress("OWNER");
 
+    address public relayer = vm.envAddress("RELAYER");
+
     address public addressManagerProxy;
 
     MxcL1 mxcL1;
@@ -35,7 +37,6 @@ contract SetBridgeAddress is Script {
         address signalServiceAddr = vm.parseJsonAddress(deployL1Json, ".signal_service");
 
 
-
         if(l2ChainId == block.chainid) {
             addressManagerProxy = address(0x1000777700000000000000000000000000000006);
             console2.log(AddressManager(addressManagerProxy).owner());
@@ -48,20 +49,18 @@ contract SetBridgeAddress is Script {
         }else {
             addressManagerProxy = vm.parseJsonAddress(deployL1Json, ".address_manager");
             vm.startBroadcast(deployerPrivateKey);
-            setAddress(421613, "relayer", address(0x45CD149025038242ca37BDe03B3d176590CA6013));
 
-//            MxcToken(address(mxcTokenAddr)).syncL2Burn(18930740383000000000000000000);
-//           console2.log(MxcToken(address(mxcTokenAddr)).totalSupply());
-//            EtherVault etherVault = new ProxiedEtherVault();
-//            deployProxy(
-//                "ether_vault",
-//                address(etherVault),
-//                bytes.concat(etherVault.init.selector, abi.encode(addressManagerProxy))
-//            );
-//
-//            setAddress(l2ChainId, "bridge", address(0x1000777700000000000000000000000000000004));
-//            setAddress(l2ChainId, "ether_vault", address(0x1000777700000000000000000000000000000002));
-//            setAddress(l2ChainId, "token_vault", address(0x1000777700000000000000000000000000000003));
+
+            EtherVault etherVault = new ProxiedEtherVault();
+            deployProxy(
+                "ether_vault",
+                address(etherVault),
+                bytes.concat(etherVault.init.selector, abi.encode(addressManagerProxy))
+            );
+            setAddress(421613, "relayer", address(relayer));
+            setAddress(l2ChainId, "bridge", address(0x1000777700000000000000000000000000000004));
+            setAddress(l2ChainId, "ether_vault", address(0x1000777700000000000000000000000000000003));
+            setAddress(l2ChainId, "token_vault", address(0x1000777700000000000000000000000000000002));
         }
         vm.stopBroadcast();
 
