@@ -104,6 +104,7 @@ library LibBridgeProcess {
             status = LibBridgeStatus.MessageStatus.DONE;
             refundAmount = message.callValue;
         } else {
+            // CHANGE(MXC): unpack message data and process it if mxc token
             if (_checkAndReleaseEther(message, resolver)) {
                 status = LibBridgeStatus.MessageStatus.DONE;
             } else {

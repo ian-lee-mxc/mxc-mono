@@ -6,6 +6,8 @@ import "../contracts/common/AddressManager.sol";
 import "../contracts/L1/MxcL1.sol";
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "../contracts/bridge/EtherVault.sol";
+import "../contracts/L1/MxcToken.sol";
+
 
 
 contract SetBridgeAddress is Script {
@@ -35,10 +37,9 @@ contract SetBridgeAddress is Script {
 
 
         if(l2ChainId == block.chainid) {
-
-            vm.etch(address(0x1000777700000000000000000000000000000006),address(addressManager).code);
+            addressManagerProxy = address(0x1000777700000000000000000000000000000006);
+            console2.log(AddressManager(addressManagerProxy).owner());
             vm.startBroadcast(deployerPrivateKey);
-
             setAddress(421613, "mxczkevm", headerSyncAddr);
             setAddress(421613, "bridge", bridgeAddr);
             setAddress(421613, "token_vault", tokenVaultAddr);
@@ -46,19 +47,21 @@ contract SetBridgeAddress is Script {
             setAddress(421613, "signal_service", signalServiceAddr);
         }else {
             addressManagerProxy = vm.parseJsonAddress(deployL1Json, ".address_manager");
-            vm.etch(addressManagerProxy, address(addressManager).code);
             vm.startBroadcast(deployerPrivateKey);
+            setAddress(421613, "relayer", address(0x45CD149025038242ca37BDe03B3d176590CA6013));
 
-            EtherVault etherVault = new ProxiedEtherVault();
-            deployProxy(
-                "ether_vault",
-                address(etherVault),
-                bytes.concat(etherVault.init.selector, abi.encode(addressManagerProxy))
-            );
-
-            setAddress(l2ChainId, "bridge", address(0x1000777700000000000000000000000000000004));
-            setAddress(l2ChainId, "ether_vault", address(0x1000777700000000000000000000000000000002));
-            setAddress(l2ChainId, "token_vault", address(0x1000777700000000000000000000000000000003));
+//            MxcToken(address(mxcTokenAddr)).syncL2Burn(18930740383000000000000000000);
+//           console2.log(MxcToken(address(mxcTokenAddr)).totalSupply());
+//            EtherVault etherVault = new ProxiedEtherVault();
+//            deployProxy(
+//                "ether_vault",
+//                address(etherVault),
+//                bytes.concat(etherVault.init.selector, abi.encode(addressManagerProxy))
+//            );
+//
+//            setAddress(l2ChainId, "bridge", address(0x1000777700000000000000000000000000000004));
+//            setAddress(l2ChainId, "ether_vault", address(0x1000777700000000000000000000000000000002));
+//            setAddress(l2ChainId, "token_vault", address(0x1000777700000000000000000000000000000003));
         }
         vm.stopBroadcast();
 
