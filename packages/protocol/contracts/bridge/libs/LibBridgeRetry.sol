@@ -86,7 +86,7 @@ library LibBridgeRetry {
             address refundAddress =
                 message.refundAddress == address(0) ? message.owner : message.refundAddress;
 
-            if (message.srcChainId != MxcConfig.getConfig().chainId) {
+            if (block.chainid == MxcConfig.getConfig().chainId) {
                 refundAddress.sendEther(message.callValue);
             } else {
                 TokenVault(tokenVault).receiveMXC(refundAddress, message.callValue);
