@@ -210,7 +210,7 @@
 			bind:this={amountInput} />
 		</label>
 		<!-- svelte-ignore a11y-label-has-associated-control -->
-		<label class="label label-text text-left">At least stake 6000,000 MXC</label>
+		<label class="label label-text text-left">At least stake 6,000,000 MXC</label>
 	</div>
 	
 	{#if loading}

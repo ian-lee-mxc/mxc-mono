@@ -48,6 +48,9 @@ export default async function handler(req, res) {
   //   [ipAddress]: 1,
   // });
 
+  // clear all data
+  // await redis.flushall();
+
   // await redis.hset('address', {
   //   '0xa8eF099f636AFe4210de699f546A37326820aaF7': '1',
   // });

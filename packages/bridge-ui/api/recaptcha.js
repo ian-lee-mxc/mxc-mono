@@ -21,7 +21,10 @@ export default async function handler(req, res) {
   let shortToken = token.slice(0, 30);
   let data = resp.data;
   data.token = shortToken;
-  await redis.set(shortToken, '1');
+  // await redis.set(shortToken, '1');
+  await redis.hset('token', {
+    [shortToken]: '1',
+  });
 
   return res.status(200).json({ status: 200, data });
 }
