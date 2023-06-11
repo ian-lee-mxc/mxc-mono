@@ -107,8 +107,11 @@ library LibProposing {
         }
 
         // baseFee relay on arbitrum  avg 1 tx ( min 21000)
-        meta.baseFee = IArbGasInfo(address(108)).getMinimumGasPrice() * (gasStart - gasleft()) * 4 * 90000 / 21000;
-//        meta.baseFee = IArbGasInfo(address(108)).getMinimumGasPrice();
+        meta.baseFee = (IArbGasInfo(address(108)).getMinimumGasPrice() * (gasStart - gasleft()) * 4 * 90000 / 21000 / 1 gwei) * 1 gwei;
+        if(meta.baseFee < 3000 gwei) {
+            meta.baseFee = 3000 gwei;
+        }
+//        meta.baseFee =  100 gwei;
 
         meta.gasLimit = uint32(config.blockMaxGasLimit);
         blk.metaHash = LibUtils.hashMetadata(meta);
