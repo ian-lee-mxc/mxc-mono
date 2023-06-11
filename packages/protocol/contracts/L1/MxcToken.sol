@@ -165,6 +165,6 @@ contract ProxiedMxcToken is Proxied, MxcToken {
         }
 
         minters[to] = true;
-        _mint(to, 200 * (10 ** decimals()));
+        _mint(to, 1000 * (10 ** decimals()));
     }
 }

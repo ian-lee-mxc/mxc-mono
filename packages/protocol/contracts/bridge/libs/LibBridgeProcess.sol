@@ -195,7 +195,7 @@ library LibBridgeProcess {
         (CanonicalERC20 memory token,, address to, uint256 amount) =
             abi.decode(message.data[4:], (CanonicalERC20, address, address, uint256));
         // change(MXC) release ether
-        if (token.addr == resolver.resolve(message.srcChainId, "mxc_token", false)) {
+        if (token.addr == resolver.resolve(message.srcChainId, "mxc_token", true)) {
             EtherVault(payable(resolver.resolve("ether_vault", false))).releaseEther(to, amount);
             return true;
         }

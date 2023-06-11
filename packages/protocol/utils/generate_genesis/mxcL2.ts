@@ -74,7 +74,12 @@ export async function deployMxcL2(
         // rollup/artifacts/build-info will contain storage layouts, here
         // reading it using smock package.
         let storageLayoutName = contractName;
-        if (contractConfig.isProxy) {
+        if (
+            contractName.includes("Placeholder") &&
+            contractName.includes("Proxy")
+        ) {
+            storageLayoutName = `ProxiedPlaceholder`;
+        } else if (contractConfig.isProxy) {
             storageLayoutName = contractName.replace("Proxy", "");
             storageLayoutName = `Proxied${storageLayoutName}`;
         }
@@ -161,9 +166,14 @@ async function generateContractConfigs(
         )),
     };
 
+
     const proxy = require(path.join(
         ARTIFACTS_PATH,
         "./TransparentUpgradeableProxy.sol/TransparentUpgradeableProxy.json"
+    ));
+    const proxiedPlaceholder = require(path.join(
+        ARTIFACTS_PATH,
+        "./ProxiedPlaceholder.sol/ProxiedPlaceholder.json"
     ));
     contractArtifacts.MxcL2Proxy = proxy;
     contractArtifacts.BridgeProxy = proxy;
@@ -171,6 +181,10 @@ async function generateContractConfigs(
     contractArtifacts.EtherVaultProxy = proxy;
     contractArtifacts.SignalServiceProxy = proxy;
     contractArtifacts.AddressManagerProxy = proxy;
+    contractArtifacts.ProxiedPlaceholder = proxiedPlaceholder;
+    for (let i = 0; i < 9; i++) {
+        contractArtifacts[`Placeholder${i + 1}Proxy`] = proxy;
+    }
 
     const addressMap: any = {};
 
@@ -243,7 +257,7 @@ async function generateContractConfigs(
     console.log("pre-computed addresses:");
     console.log(addressMap);
 
-    return {
+    const result = {
         // Libraries
         LibTrieProof: {
             address: addressMap.LibTrieProof,
@@ -311,6 +325,13 @@ async function generateContractConfigs(
             address: addressMap.ProxiedMxcL2,
             deployedBytecode: linkContractLibs(
                 contractArtifacts.ProxiedMxcL2,
+                addressMap
+            ),
+        },
+        ProxiedPlaceholder: {
+            address: addressMap.ProxiedPlaceholder,
+            deployedBytecode: linkContractLibs(
+                contractArtifacts.ProxiedPlaceholder,
                 addressMap
             ),
         },
@@ -466,6 +487,22 @@ async function generateContractConfigs(
             isProxy: true,
         },
     };
+    for (let i = 0; i < 9; i++) {
+        // @ts-ignore
+        console.log(`Placeholder${i + 1}`);
+        // @ts-ignore
+        result[`Placeholder${i + 1}Proxy`] = {
+            address: addressMap[`Placeholder${i + 1}Proxy`],
+            deployedBytecode: proxy.deployedBytecode.object,
+            slots: {
+                [ADMIN_SLOT]: contractAdmin,
+                [IMPLEMENTATION_SLOT]: addressMap.ProxiedPlaceholder,
+            },
+            isProxy: true
+        };
+    }
+
+    return result;
 }
 
 // linkContractLibs tries to link contract deployedBytecode to its libraries.
