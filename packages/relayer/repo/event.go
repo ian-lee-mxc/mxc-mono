@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"gorm.io/gorm"
 	"strings"
 
 	"net/http"
@@ -64,15 +65,19 @@ func (r *EventRepository) UpdateStatus(ctx context.Context, id int, status relay
 	return nil
 }
 
-func (r *EventRepository) FindAllByMsgHash(
+func (r *EventRepository) FirstByMsgHash(
 	ctx context.Context,
 	msgHash string,
-) ([]*relayer.Event, error) {
-	e := make([]*relayer.Event, 0)
+) (*relayer.Event, error) {
+	e := &relayer.Event{}
 	// find all message sent events
 	if err := r.db.GormDB().Where("msg_hash = ?", msgHash).
-		Find(&e).Error; err != nil {
-		return nil, errors.Wrap(err, "r.db.Find")
+		First(&e).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return e, nil
+		}
+
+		return nil, errors.Wrap(err, "r.db.First")
 	}
 
 	return e, nil
@@ -111,4 +116,11 @@ func (r *EventRepository) FindAllByAddress(
 	page := reqCtx.Request(req).Response(&[]relayer.Event{})
 
 	return page, nil
+}
+
+func (r *EventRepository) Delete(
+	ctx context.Context,
+	id int,
+) error {
+	return r.db.GormDB().Delete(relayer.Event{}, id).Error
 }
