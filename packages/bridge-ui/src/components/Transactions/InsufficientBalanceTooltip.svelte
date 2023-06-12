@@ -4,15 +4,14 @@
   export let show: boolean;
 </script>
 
-<TooltipModal title="Waiting for Relayer" bind:isOpen={show}>
+<TooltipModal title="Get MXC from Faucet" bind:isOpen={show}>
   <span slot="body">
     <div class="text-left">
       <strong>
-        Please wait for the relayer to claim the transaction for you.
+        Please get MXC from Faucet.
       </strong>
 
-      This will happen automatically. Depending on network congestion, this can
-      take up to several hours.
+      You will need MXC to pay for Gas fee.
     </div>
   </span>
 </TooltipModal>
