@@ -74,10 +74,10 @@ library LibProposing {
         uint256 proposeReward = LibTokenomics.getProposeReward(resolver, config, state);
         state.mxcTokenBalances[address(1)] += proposeReward;
 
-        if(state.numBlocks % 10 == 0) {
-            meta.blockReward = state.mxcTokenBalances[address(1)];
+        meta.blockReward = state.mxcTokenBalances[address(1)];
+        state.mxcTokenBalances[address(1)] = 0;
+        if(meta.blockReward > 0) {
             LibTokenomics.mintReward(resolver, meta.blockReward);
-            state.mxcTokenBalances[address(1)] = 0;
         }
 
         unchecked {
@@ -106,12 +106,27 @@ library LibProposing {
             state.accProposedAt += meta.timestamp;
         }
 
-        // baseFee relay on arbitrum  avg 1 tx ( min 21000)
-        meta.baseFee = (IArbGasInfo(address(108)).getMinimumGasPrice() * (gasStart - gasleft()) * 4 * 90000 / 21000 / 1 gwei) * 1 gwei;
-        if(meta.baseFee < 3000 gwei) {
-            meta.baseFee = 3000 gwei;
+        uint256 l2G = input.gasLimit;
+        if(l2G < 21000) {
+            l2G = 21000;
         }
-//        meta.baseFee =  100 gwei;
+        // baseFee relay on arbitrum
+        meta.baseFee = (block.basefee * (gasStart - gasleft()) * 4 * 90000 / l2G) / 1 gwei;
+
+        if (state.prevBaseFee != 0) {
+            if (meta.baseFee > (state.prevBaseFee * 105) / 100) {
+                meta.baseFee = (state.prevBaseFee * 105) / 100;
+            } else if (meta.baseFee < (state.prevBaseFee * 95) / 100) {
+                meta.baseFee = (state.prevBaseFee * 95) / 100;
+            }
+            // min 3000 gwei
+        }
+        if (meta.baseFee < 3000) {
+            meta.baseFee = 3000;
+        }
+        state.prevBaseFee = uint48(meta.baseFee);
+
+        meta.baseFee = meta.baseFee * 1 gwei;
 
         meta.gasLimit = uint32(config.blockMaxGasLimit);
         blk.metaHash = LibUtils.hashMetadata(meta);

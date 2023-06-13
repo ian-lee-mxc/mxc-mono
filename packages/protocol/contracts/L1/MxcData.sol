@@ -140,7 +140,7 @@ library MxcData {
         uint64 genesisHeight;
         uint64 genesisTimestamp;
         uint16 adjustmentQuotient;
-        uint48 __reserved71;
+        uint48 prevBaseFee;
         uint64 __reserved72;
         // Slot 8
         uint64 accProposedAt;
