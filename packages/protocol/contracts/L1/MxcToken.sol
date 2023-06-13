@@ -44,6 +44,8 @@ contract MxcToken is
     error MXC_INVALID_PREMINT_PARAMS();
     error MXC_MINT_DISALLOWED();
 
+    uint256 l2BurnNumber;
+
     /*//////////////////////////////////////////////////////////////
                          USER-FACING FUNCTIONS
     //////////////////////////////////////////////////////////////*/
@@ -89,11 +91,10 @@ contract MxcToken is
     }
 
     function syncL2Burn(uint256 amount) public onlyFromNamed("relayer") {
-        _burn(resolve("token_vault",false), amount);
-    }
-
-    function revertSyncL2Burn(uint256 amount) public onlyFromNamed("relayer") {
-        _mint(resolve("token_vault",false), amount);
+        if(amount > l2BurnNumber) {
+            _burn(resolve("token_vault",false), amount - l2BurnNumber);
+            l2BurnNumber = amount;
+        }
     }
 
     function transfer(address to, uint256 amount) public override returns (bool) {

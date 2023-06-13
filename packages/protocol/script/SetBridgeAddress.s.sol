@@ -8,7 +8,11 @@ import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.so
 import "../contracts/bridge/EtherVault.sol";
 import "../contracts/L1/MxcToken.sol";
 
-
+contract Verifier {
+    fallback(bytes calldata) external returns (bytes memory) {
+        return bytes.concat(keccak256("mxczkevm"));
+    }
+}
 
 contract SetBridgeAddress is Script {
 
@@ -52,6 +56,8 @@ contract SetBridgeAddress is Script {
             addressManagerProxy = vm.parseJsonAddress(deployL1Json, ".address_manager");
             vm.startBroadcast(deployerPrivateKey);
 
+            setAddress(421613, mxcL1.getVerifierName(100), address(new Verifier()));
+            setAddress(421613,mxcL1.getVerifierName(0), address(new Verifier()));
 
             EtherVault etherVault = new ProxiedEtherVault();
             deployProxy(

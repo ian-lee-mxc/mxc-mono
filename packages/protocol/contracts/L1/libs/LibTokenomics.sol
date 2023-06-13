@@ -85,7 +85,7 @@ library LibTokenomics {
             return 0;
         } else {
             // CHANGE(MXC): proof reward
-            uint256 baseReward = (MxcToken(resolver.resolve("mxc_token", false)).totalSupply() / 28 / 365 days) * 3;
+            uint256 baseReward = (MxcToken(resolver.resolve("mxc_token", false)).totalSupply() / 28 / 365 days) * 2;
 
             if(numBlocksUnverified > 1000) {
                 return baseReward;
@@ -105,7 +105,11 @@ library LibTokenomics {
      */
     function getProposeReward(AddressResolver resolver, MxcData.Config memory config, MxcData.State storage state) internal view returns (uint256) {
         MxcData.Block storage blk = state.blocks[(state.numBlocks - 1) % config.ringBufferSize];
-        return (MxcToken(resolver.resolve("mxc_token", false)).totalSupply() / 20 / 365 days) * (block.timestamp - blk.proposedAt);
+        uint256 elapsedSeconds = block.timestamp - blk.proposedAt;
+        if(elapsedSeconds == 0) {
+            elapsedSeconds = 1;
+        }
+        return (MxcToken(resolver.resolve("mxc_token", false)).totalSupply() / 20 / 365 days) * elapsedSeconds;
     }
 
     /**
