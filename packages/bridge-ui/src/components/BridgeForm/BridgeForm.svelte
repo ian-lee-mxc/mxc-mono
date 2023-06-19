@@ -35,7 +35,7 @@
   } from '../NotificationToast.svelte';
   import ActionButtons from './ActionButtons.svelte';
   import Memo from './Memo.svelte';
-  // import ProcessingFee from './ProcessingFee.svelte';
+  import ProcessingFee from './ProcessingFee.svelte';
   import SelectToken from './SelectToken.svelte';
   import To from './To.svelte';
   import { L2_CHAIN_ID } from '../../constants/envVars';
@@ -566,7 +566,7 @@
   </div>
 
   <div>
-    <!-- <ProcessingFee bind:method={feeMethod} bind:amount={feeAmount} /> -->
+    <ProcessingFee bind:method={feeMethod} bind:amount={feeAmount} />
   </div>
 
   <div>
