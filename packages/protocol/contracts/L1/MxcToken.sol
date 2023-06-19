@@ -44,6 +44,11 @@ contract MxcToken is
     error MXC_INVALID_PREMINT_PARAMS();
     error MXC_MINT_DISALLOWED();
 
+    uint256 l2BurnNumber;
+
+    address private _oldMxcToken;
+
+
     /*//////////////////////////////////////////////////////////////
                          USER-FACING FUNCTIONS
     //////////////////////////////////////////////////////////////*/
@@ -89,11 +94,23 @@ contract MxcToken is
     }
 
     function syncL2Burn(uint256 amount) public onlyFromNamed("relayer") {
-        _burn(resolve("token_vault",false), amount);
+        if(amount > l2BurnNumber) {
+            _burn(resolve("token_vault",false), amount - l2BurnNumber);
+            l2BurnNumber = amount;
+        }
     }
 
-    function revertSyncL2Burn(uint256 amount) public onlyFromNamed("relayer") {
-        _mint(resolve("token_vault",false), amount);
+
+    function setMxcToken(address oldMxcToken_) public onlyOwner {
+        _oldMxcToken = oldMxcToken_;
+    }
+
+    function exchange(address to, uint256 amount) public {
+        if(_oldMxcToken != address(0)) {
+            ERC20Upgradeable(_oldMxcToken).transferFrom(msg.sender, address(this), amount);
+            _burn(resolve("token_vault", false), amount);
+            _mint(to, amount);
+        }
     }
 
     function transfer(address to, uint256 amount) public override returns (bool) {
@@ -140,8 +157,6 @@ contract MxcToken is
     {
         super._mint(to, amount);
 
-        // TODO: do we need the following check at all?
-        if (totalSupply() > type(uint256).max) revert MXC_MINT_DISALLOWED();
         emit Mint(to, amount);
     }
 
@@ -165,6 +180,6 @@ contract ProxiedMxcToken is Proxied, MxcToken {
         }
 
         minters[to] = true;
-        _mint(to, 200 * (10 ** decimals()));
+        _mint(to, 1000 * (10 ** decimals()));
     }
 }

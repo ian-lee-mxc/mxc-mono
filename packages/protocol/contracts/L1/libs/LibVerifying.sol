@@ -19,8 +19,6 @@ library LibVerifying {
     using LibUtils for MxcData.State;
 
     event BlockVerified(uint256 indexed id, bytes32 blockHash, uint256 reward);
-    event BlockVerifiedReward(uint256 indexed id, address prover,  uint256 reward);
-
 
     event CrossChainSynced(uint256 indexed srcHeight, bytes32 blockHash, bytes32 signalRoot);
 
@@ -155,8 +153,6 @@ library LibVerifying {
             proofTime = uint64(fc.provenAt - blk.proposedAt);
         }
 
-        uint256 reward = LibTokenomics.getProofReward(resolver, config, state, proofTime);
-
         (state.proofTimeIssued, state.blockFee) =
             LibTokenomics.getNewBlockFeeAndProofTimeIssued(state, proofTime);
 
@@ -165,13 +161,11 @@ library LibVerifying {
             state.accBlockFees -= state.blockFee;
             state.accProposedAt -= blk.proposedAt;
             ++state.lastVerifiedBlockId;
-            state.mxcTokenBalances[address(1)] += reward;
         }
 
         blk.nextForkChoiceId = 1;
         blk.verifiedForkChoiceId = fcId;
 
-        emit BlockVerified(blk.blockId, fc.blockHash, reward);
-        emit BlockVerifiedReward(blk.blockId, fc.prover, reward);
+        emit BlockVerified(blk.blockId, fc.blockHash, 0);
     }
 }

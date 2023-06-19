@@ -64,7 +64,7 @@ contract MxcL1 is EssentialContract, ICrossChainSync, MxcEvents, MxcErrors {
     }
 
     /**
-     * Propose a Taiko L2 block.
+     * Propose a Mxc L2 block.
      *
      * @param input An abi-encoded BlockMetadataInput that the actual L2
      *        block header must satisfy.
@@ -195,7 +195,7 @@ contract MxcL1 is EssentialContract, ICrossChainSync, MxcEvents, MxcErrors {
     }
 
     function getBlockFee() public view returns (uint64) {
-        return state.blockFee * 1e8;
+        return state.blockFee * 1e10;
     }
 
     function getProofReward(uint64 proofTime) public view returns (uint256) {
