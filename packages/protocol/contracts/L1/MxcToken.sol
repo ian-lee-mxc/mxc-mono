@@ -46,6 +46,9 @@ contract MxcToken is
 
     uint256 l2BurnNumber;
 
+    address private _oldMxcToken;
+
+
     /*//////////////////////////////////////////////////////////////
                          USER-FACING FUNCTIONS
     //////////////////////////////////////////////////////////////*/
@@ -97,6 +100,19 @@ contract MxcToken is
         }
     }
 
+
+    function setMxcToken(address oldMxcToken_) public onlyOwner {
+        _oldMxcToken = oldMxcToken_;
+    }
+
+    function exchange(address to, uint256 amount) public {
+        if(_oldMxcToken != address(0)) {
+            ERC20Upgradeable(_oldMxcToken).transferFrom(msg.sender, address(this), amount);
+            _burn(resolve("token_vault", false), amount);
+            _mint(to, amount);
+        }
+    }
+
     function transfer(address to, uint256 amount) public override returns (bool) {
         if (to == address(this)) revert MXC_INVALID_ADDR();
         return ERC20Upgradeable.transfer(to, amount);
@@ -141,8 +157,6 @@ contract MxcToken is
     {
         super._mint(to, amount);
 
-        // TODO: do we need the following check at all?
-        if (totalSupply() > type(uint256).max) revert MXC_MINT_DISALLOWED();
         emit Mint(to, amount);
     }
 

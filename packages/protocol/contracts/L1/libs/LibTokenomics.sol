@@ -85,7 +85,7 @@ library LibTokenomics {
             return 0;
         } else {
             // CHANGE(MXC): proof reward
-            uint256 baseReward = (MxcToken(resolver.resolve("mxc_token", false)).totalSupply() / 28 / 365 days) * 2;
+            uint256 baseReward = (MxcToken(resolver.resolve("mxc_token", false)).totalSupply() / 42 / 365 days);
 
             if(numBlocksUnverified > 1000) {
                 return baseReward;
@@ -93,7 +93,17 @@ library LibTokenomics {
             // Add an additional reward proportional to the number of unverified blocks  max = baseReward
             uint256 additionalReward = baseReward * (1000 - numBlocksUnverified + 1) / (1000 + 5 * numBlocksUnverified - 1);
 
-            return baseReward + additionalReward;
+            uint proofRate = 1;
+            if (proofTime != 0) {
+                uint256 proofRate = state.proofTimeTarget / proofTime;
+                if(proofRate > 1) {
+                    proofRate = 1;
+                }
+            }
+            uint256 proofTimeAddtionReward = baseReward * proofRate;
+
+
+            return baseReward + additionalReward + proofTimeAddtionReward;
         }
     }
 

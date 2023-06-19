@@ -14,6 +14,7 @@ import {LibTokenomics} from "./LibTokenomics.sol";
 import {SafeCastUpgradeable} from
     "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import {MxcData} from "../MxcData.sol";
+import {AggregatorInterface} from "../../common/AggregatorInterface.sol";
 
 interface IArbGasInfo {
     function getMinimumGasPrice() external view returns (uint256);
@@ -110,8 +111,18 @@ library LibProposing {
         if(l2G < 21000) {
             l2G = 21000;
         }
+        uint256 ethMxcPrice = 90000;
+        {
+            address oracle = resolver.resolve("oracle_ethmxc",true);
+            if(oracle != address(0)) {
+                ethMxcPrice = uint256(AggregatorInterface(oracle).latestAnswer());
+                if(ethMxcPrice == 0) {
+                    ethMxcPrice = 90000;
+                }
+            }
+        }
         // baseFee relay on arbitrum
-        meta.baseFee = (block.basefee * (gasStart - gasleft()) * 4 * 90000 / l2G) / 1 gwei;
+        meta.baseFee = (block.basefee * (gasStart - gasleft()) * 4 * ethMxcPrice / l2G) / 1 gwei;
 
         if (state.prevBaseFee != 0) {
             if (meta.baseFee > (state.prevBaseFee * 105) / 100) {

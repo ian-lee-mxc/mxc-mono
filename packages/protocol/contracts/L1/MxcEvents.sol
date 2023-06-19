@@ -21,9 +21,10 @@ abstract contract MxcEvents {
         address prover,
         uint32 parentGasUsed
     );
+    event BlockProvenReward(uint256 indexed id, address prover, uint256 reward);
+
 
     event BlockVerified(uint256 indexed id, bytes32 blockHash, uint256 reward);
-    event BlockVerifiedReward(uint256 indexed id, address prover,  uint256 reward);
 
     event EthDeposited(MxcData.EthDeposit deposit);
 
