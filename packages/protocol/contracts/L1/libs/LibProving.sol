@@ -10,6 +10,7 @@ import {AddressResolver} from "../../common/AddressResolver.sol";
 import {LibMath} from "../../libs/LibMath.sol";
 import {LibUtils} from "./LibUtils.sol";
 import {MxcData} from "../../L1/MxcData.sol";
+import {LibTokenomics} from "./LibTokenomics.sol";
 
 library LibProving {
     using LibMath for uint256;
@@ -23,6 +24,8 @@ library LibProving {
         address prover,
         uint32 parentGasUsed
     );
+
+    event BlockProvenReward(uint256 indexed id, address prover, uint256 reward);
 
     error L1_ALREADY_PROVEN();
     error L1_BLOCK_ID();
@@ -205,6 +208,10 @@ library LibProving {
                 revert L1_INVALID_PROOF();
             }
         }
+        uint256 reward = LibTokenomics.getProofReward(resolver, config, state, uint64(fc.provenAt - blk.proposedAt));
+
+        // pending reward add to next propose block meta
+        state.mxcTokenBalances[address(1)] += reward;
 
         emit BlockProven({
             id: blk.blockId,
@@ -214,6 +221,8 @@ library LibProving {
             prover: evidence.prover,
             parentGasUsed: evidence.parentGasUsed
         });
+
+        emit BlockProvenReward({id: blk.blockId, prover: evidence.prover, reward: reward});
     }
 
     function getForkChoice(
