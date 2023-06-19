@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { UserRejectedRequestError } from '@wagmi/core';
+  // import { UserRejectedRequestError } from '@wagmi/core';
+  // import { chains } from '../../chain/chains';
   import { ethers, type Signer } from 'ethers';
   import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
   import axios from 'axios';
   import { onMount } from 'svelte';
-  import { chains } from '../../chain/chains';
   import {
+    // L1_CHAIN_NAME,
+    // L2_CHAIN_NAME,
     L1_CHAIN_ID,
-    L1_CHAIN_NAME,
     L2_CHAIN_ID,
-    L2_CHAIN_NAME,
   } from '../../constants/envVars';
   import type { Chain } from '../../domain/chain';
   import type { Token } from '../../domain/token';
@@ -21,10 +21,7 @@
   import { getIsMintedWithEstimation } from '../../utils/getIsMintedWithEstimation';
   import { getLogger } from '../../utils/logger';
   import { mintERC20 } from '../../utils/mintERC20';
-  import { selectChain } from '../../utils/selectChain';
   import Button from '../Button.svelte';
-  // import Eth from '../icons/ETH.svelte';
-  // import Tko from '../icons/TKO.svelte';
   import Loading from '../Loading.svelte';
   import {
     errorToast,
@@ -33,6 +30,11 @@
   } from '../NotificationToast.svelte';
   import TestTokenDropdown from './TestTokenDropdown.svelte';
   import { SITE_KEY  } from '../../constants/envVars';
+
+  
+  // import { selectChain } from '../../utils/selectChain';
+  // import Eth from '../icons/ETH.svelte';
+  // import Tko from '../icons/TKO.svelte';
   
 
   const log = getLogger('component:Faucet');

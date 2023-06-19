@@ -25,8 +25,8 @@ export default {
   RPC_URL: `https://wannsee-rpc.mxc.com`,
   // RPC_URL: `http://207.246.99.8:8545`,
   L1_RPC_URL: `https://goerli-rollup.arbitrum.io/rpc`,
-  c_moonToken: `0x8cCBf1B113a61B228c440fa1C9735bb2C7521267`,
-  c_faucet: `0x05bFb74D59312588480f45713167a3287D3c5268`,
+  c_moonToken: `0x13d65548C25A7448fDBb95ae1CC48266DfE0fc51`,
+  c_faucet: `0xcD641fd19E4C792531fB7A4a61C075E68309285d`,
 
   abiFaucet: [
     'function requestMoon(address recipient) external',

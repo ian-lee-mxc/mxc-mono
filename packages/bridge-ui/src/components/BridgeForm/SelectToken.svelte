@@ -116,12 +116,12 @@
     {#if $token.logoUrl}
       <div class="flex pr-5">
         <img src={$token.logoUrl} height={22} width={22} alt="" />      
-        <p class="px-2 text-sm">{$token.symbol.toUpperCase()}</p>
+        <p class="px-2 text-sm">{$token.symbol}</p>
       </div>
       {:else}
       <div class="flex">
         <svelte:component this={$token.logoComponent} height={22} width={22} />
-        <p class="px-2 text-sm">{$token.symbol.toUpperCase()}</p>
+        <p class="px-2 text-sm">{$token.symbol}</p>
       </div>
     {/if}
     <div>
@@ -164,7 +164,7 @@
               <svelte:component this={_token.logoComponent} height={22} width={22} />
             {/if}
             <span class="text-sm font-medium bg-transparent px-2">
-              {_token.symbol.toUpperCase()}
+              {_token.symbol}
             </span>
           </button>
         </li>
@@ -186,7 +186,7 @@
             {/if}
 
             <span class="text-sm font-medium bg-transparent px-2">
-              {_token.symbol.toUpperCase()}
+              {_token.symbol}
             </span>
           </button>
         </li>
@@ -200,7 +200,7 @@
           class="flex items-center px-2 py-4 hover:bg-dark-5 rounded-sm">
           <Erc20 height={22} width={22} />
           <span class="text-sm font-medium bg-transparent px-2"
-            >{_token.symbol.toUpperCase()}</span>
+            >{_token.symbol}</span>
         </button>
       </li>
     {/each}

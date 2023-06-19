@@ -372,7 +372,7 @@
   <td>
     {#if Boolean(transaction.message) && isETHByMessage(transaction.message)}
       {@const { depositValue, callValue } = transaction.message}
-      {utils.formatEther(depositValue.eq(0) ? callValue : depositValue)}
+      {depositValue && utils.formatEther(depositValue.eq(0) ? callValue : depositValue)}
     {:else}
       {utils.formatUnits(transaction.amountInWei)}
     {/if}

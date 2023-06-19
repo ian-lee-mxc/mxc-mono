@@ -55,4 +55,5 @@ export const TEST_ERC20: {
 
 
 export const L1MXCTOKEN: Address = import.meta.env?.VITE_L1MXCTOKEN;
+export const L1MXCCROSSTOKEN: Address = import.meta.env?.VITE_L1MXCCROSSTOKEN;
 export const SITE_KEY: string = import.meta.env?.VITE_RECAPTCHA_SITEKEY;

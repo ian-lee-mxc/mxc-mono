@@ -59,7 +59,7 @@ const symbolToLogoSvg = {
   MXC: MxcIcon,
   Ride: RideIcon,
   Park: ParkIcon,
-  Moon: MoonIcon
+  Moon: MoonIcon,
 };
 
 export const testERC20Tokens: Token[] = TEST_ERC20.map(
