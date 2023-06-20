@@ -34,7 +34,7 @@ export default async function handler(req, res) {
   if (parseFloat(formatEther(balance)) < 0.1) {
     return res.status(200).send({
       status: 14,
-      msg: `Faucet balance is insufficient. Please contact faucet@mxc.com for assistance.`,
+      msg: `Faucet balance is insufficient. Please contact zkevm@mxc.com for assistance.`,
     });
   }
 
@@ -52,7 +52,7 @@ export default async function handler(req, res) {
     await redis.del(token);
     return res
       .status(200)
-      .send({ status: 12, msg: `This address has already received.` });
+      .send({ status: 12, msg: `This address has already received ETH from the faucet` });
   }
 
   // ip check
@@ -62,7 +62,7 @@ export default async function handler(req, res) {
     await redis.del(token);
     return res
       .status(200)
-      .send({ status: 11, msg: `Try to use your mobile data to claim the faucet.` });
+      .send({ status: 11, msg: `Try to use your mobile data to claim the token.` });
   }
 
   try {
