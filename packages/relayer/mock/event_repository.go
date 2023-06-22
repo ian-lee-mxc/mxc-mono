@@ -105,3 +105,30 @@ func (r *EventRepository) FirstByMsgHash(
 
 	return nil, nil
 }
+
+func (r *EventRepository) FirstByEventAndMsgHash(
+	ctx context.Context,
+	event string,
+	msgHash string,
+) (*relayer.Event, error) {
+	for _, e := range r.events {
+		if e.MsgHash == msgHash && e.Event == event {
+			return e, nil
+		}
+	}
+
+	return nil, nil
+}
+
+func (r *EventRepository) Delete(
+	ctx context.Context,
+	id int,
+) error {
+	for i, e := range r.events {
+		if e.ID == id {
+			r.events = append(r.events[:i], r.events[i+1:]...)
+		}
+	}
+
+	return nil
+}
