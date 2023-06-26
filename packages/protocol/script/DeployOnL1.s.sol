@@ -14,11 +14,15 @@ import "../contracts/L1/MxcToken.sol";
 import "../contracts/L1/MxcL1.sol";
 import "../contracts/bridge/Bridge.sol";
 import "../contracts/bridge/TokenVault.sol";
+import "../contracts/bridge/EtherVault.sol";
 import "../contracts/signal/SignalService.sol";
 import "../contracts/common/AddressManager.sol";
 import "../contracts/test/erc20/FreeMintERC20.sol";
 import "../contracts/test/erc20/MayFailFreeMintERC20.sol";
 import "../test/LibLn.sol";
+import "../contracts/thirdparty/WETH9.sol";
+import "../contracts/common/EthMxcPriceAggregator.sol";
+
 interface ArbSys {
     /**
      * @notice Get Arbitrum block number (distinct from L1 block number; Arbitrum genesis block has block number 0)
@@ -43,6 +47,12 @@ contract ArbSysTest is ArbSys {
     }
 }
 
+contract Verifier {
+    fallback(bytes calldata) external returns (bytes memory) {
+        return bytes.concat(keccak256("mxczkevm"));
+    }
+}
+
 contract DeployOnL1 is Script {
     using SafeCastUpgradeable for uint256;
 
@@ -55,6 +65,8 @@ contract DeployOnL1 is Script {
     address public l2SignalService = vm.envAddress("L2_SIGNAL_SERVICE");
 
     address public owner = vm.envAddress("OWNER");
+
+    address public relayer = vm.envAddress("RELAYER");
 
     address public oracleProver = vm.envAddress("ORACLE_PROVER");
     address public systemProver = vm.envAddress("SYSTEM_PROVER");
@@ -195,6 +207,35 @@ contract DeployOnL1 is Script {
             console2.log("Warining: using shared signal service: ", sharedSignalService);
             setAddress("signal_service", sharedSignalService);
         }
+
+        setAddress(mxcL1.getVerifierName(100), address(new Verifier()));
+        setAddress(mxcL1.getVerifierName(0), address(new Verifier()));
+
+//        WETH9 weth = new WETH9();
+//        deployProxy(
+//            "weth",
+//            address(weth),
+//            ""
+//        );
+//        EtherVault etherVault = new ProxiedEtherVault();
+//        deployProxy(
+//            "ether_vault",
+//            address(etherVault),
+//            bytes.concat(etherVault.init.selector, abi.encode(addressManagerProxy))
+//        );
+
+        EthMxcPriceAggregator ethMxcPriceAggregator = new EthMxcPriceAggregator();
+        int price = 90000;
+        deployProxy(
+            "oracle_ethmxc",
+            address(ethMxcPriceAggregator),
+            bytes.concat(ethMxcPriceAggregator.init.selector, abi.encode(addressManagerProxy, price))
+        );
+        setAddress("relayer", address(relayer));
+
+        setAddress(l2ChainId, "bridge", address(0x1000777700000000000000000000000000000004));
+        setAddress(l2ChainId, "ether_vault", address(0x1000777700000000000000000000000000000003));
+        setAddress(l2ChainId, "token_vault", address(0x1000777700000000000000000000000000000002));
 
         // PlonkVerifier
         deployPlonkVerifiers();
