@@ -8,9 +8,11 @@ pragma solidity ^0.8.18;
 
 import {AddressResolver} from "../../common/AddressResolver.sol";
 import {EtherVault} from "../EtherVault.sol";
+import {TokenVault} from "../TokenVault.sol";
 import {IBridge} from "../IBridge.sol";
 import {LibBridgeData} from "./LibBridgeData.sol";
 import {LibBridgeStatus} from "./LibBridgeStatus.sol";
+import {MxcConfig} from "../../L1/MxcConfig.sol";
 
 library LibBridgeRelease {
     using LibBridgeData for IBridge.Message;
@@ -24,7 +26,7 @@ library LibBridgeRelease {
     error B_WRONG_CHAIN_ID();
 
     /**
-     * Release Ether to the message owner, only if the Taiko Bridge state says:
+     * Release Ether to the message owner, only if the MXC Bridge state says:
      * - Ether for this message has not been released before.
      * - The message is in a failed state.
      */
@@ -57,15 +59,17 @@ library LibBridgeRelease {
         uint256 releaseAmount = message.depositValue + message.callValue;
 
         if (releaseAmount > 0) {
-            address ethVault = resolver.resolve("ether_vault", true);
-            // if on Taiko
-            if (ethVault != address(0)) {
-                EtherVault(payable(ethVault)).releaseEther(message.owner, releaseAmount);
+            TokenVault tokenVault = TokenVault(resolver.resolve("token_vault",false));
+            // if on MXC
+            if(block.chainid == MxcConfig.getConfig().chainId) {
+                // mxc
+                EtherVault(payable(resolver.resolve("ether_vault", false))).releaseEther(message.owner, message.depositValue);
+                // real ether
+                TokenVault(payable(address(tokenVault))).releaseEther(message.owner, message.callValue);
             } else {
-                // if on Ethereum
-                (bool success,) = message.owner.call{value: releaseAmount}("");
-                if (!success) {
-                    revert B_FAILED_TRANSFER();
+                // if on Arbitrum
+                if(releaseAmount > 0) {
+                    tokenVault.receiveMXC(message.owner, releaseAmount);
                 }
             }
         }

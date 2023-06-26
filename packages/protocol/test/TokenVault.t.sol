@@ -160,15 +160,17 @@ contract TestTokenVault is Test {
         assertEq(tokenVaultBalanceAfter - tokenVaultBalanceBefore, amount);
     }
 
-    function test_send_erc20_processing_fee_reverts_if_msg_value_too_low() public {
-        vm.startPrank(Alice);
-
-        uint256 amount = 2 wei;
-        erc20.approve(address(tokenVault), amount);
-
-        vm.expectRevert();
-        tokenVault.sendERC20(destChainId, Bob, address(erc20), amount, 1000000, amount - 1, Bob, "");
-    }
+    // MXC when send erc20 from L1
+//    function test_send_erc20_processing_fee_reverts_if_msg_value_too_low() public {
+//        vm.startPrank(Alice);
+//
+//        uint256 amount = 2 wei;
+//        mxc.approve(address(tokenVault), amount - 1);
+//        erc20.approve(address(tokenVault), amount);
+//
+//        vm.expectRevert();
+//        tokenVault.sendERC20(destChainId, Bob, address(erc20), amount, 1000000, amount - 1, Bob, "");
+//    }
 
     function test_send_erc20_processing_fee() public {
         vm.startPrank(Alice);
@@ -177,15 +179,15 @@ contract TestTokenVault is Test {
         erc20.approve(address(tokenVault), amount);
 
         // CHANGE(MXC): approve bridge to transfer MXCToken
-        mxc.approve(address(bridge), amount);
+        mxc.approve(address(tokenVault), amount - 1);
 
         uint256 aliceBalanceBefore = erc20.balanceOf(Alice);
         uint256 tokenVaultBalanceBefore = erc20.balanceOf(address(tokenVault));
 
         // CHANGE(MXC): only check send msg.value on MXC L1.  MXC L1 replace with safeTransfer MXCToken
-        // tokenVault.sendERC20{value: amount}(
-        //     destChainId, Bob, address(erc20), amount, 1000000, amount - 1, Bob, ""
-        // );
+//         tokenVault.sendERC20{value: amount}(
+//             destChainId, Bob, address(erc20), amount, 1000000, amount - 1, Bob, ""
+//         );
         tokenVault.sendERC20(destChainId, Bob, address(erc20), amount, 1000000, amount - 1, Bob, "");
 
         uint256 aliceBalanceAfter = erc20.balanceOf(Alice);

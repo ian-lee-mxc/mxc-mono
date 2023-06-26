@@ -34,7 +34,7 @@ contract DeployMxcToken is Script {
         require(mxcTokenPremintRecipient != address(0), "mxcTokenPremintRecipient is zero");
         require(mxcTokenPremintAmount < type(uint256).max, "premint too large");
 
-        vm.startBroadcast();
+        vm.startBroadcast(deployerPrivateKey);
 
         AddressManager addressManager = new ProxiedAddressManager();
         addressManagerProxy = deployProxy(

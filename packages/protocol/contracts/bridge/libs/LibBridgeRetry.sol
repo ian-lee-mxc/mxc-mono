@@ -61,11 +61,16 @@ library LibBridgeRetry {
 
         address ethVault = resolver.resolve("ether_vault", true);
         // CHANGE(MXC): target mxc
-        address tokenVault = resolver.resolve("token_vault", true);
-        if (message.srcChainId != MxcConfig.getConfig().chainId && ethVault != address(0)) {
-            EtherVault(payable(ethVault)).releaseEther(message.callValue);
-        }
+        bool isMxc = block.chainid == MxcConfig.getConfig().chainId;
 
+        address tokenVault = resolver.resolve("token_vault", false);
+        if (isMxc) {
+            EtherVault(payable(ethVault)).releaseEther(message.callValue);
+        }else {
+            // weth withdrawal and release callValue Ether
+            TokenVault(payable(tokenVault)).releaseEther(message.callValue);
+        }
+        // CHANGE(MXC): refund callValue with weth on L1
         // successful invocation
         if (
             LibBridgeInvoke
@@ -86,13 +91,19 @@ library LibBridgeRetry {
             address refundAddress =
                 message.refundAddress == address(0) ? message.owner : message.refundAddress;
 
-            if (block.chainid == MxcConfig.getConfig().chainId) {
+            if (isMxc) {
                 refundAddress.sendEther(message.callValue);
             } else {
-                TokenVault(tokenVault).receiveMXC(refundAddress, message.callValue);
+                if(message.callValue > 0) {
+                    TokenVault(payable(tokenVault)).receiveWETH(refundAddress, message.callValue);
+                }
             }
         } else {
-            ethVault.sendEther(message.callValue);
+            if(isMxc) {
+                ethVault.sendEther(message.callValue);
+            }else {
+                TokenVault(payable(tokenVault)).depositToWETH{value: message.callValue}();
+            }
         }
     }
 }

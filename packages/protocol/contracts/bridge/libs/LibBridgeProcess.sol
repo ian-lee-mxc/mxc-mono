@@ -85,20 +85,31 @@ library LibBridgeProcess {
         uint256 allValue = message.depositValue + message.callValue + message.processingFee;
         // We retrieve the necessary ether from EtherVault if receiving on
         // Mxc, otherwise it is already available in this Bridge.
-        address ethVault = resolver.resolve("ether_vault", true);
-        if (ethVault != address(0) && (allValue > 0) && isMxc) {
-            EtherVault(payable(ethVault)).releaseEther(allValue);
+        EtherVault etherVault = EtherVault(payable(resolver.resolve("ether_vault", true)));
+        TokenVault tokenVault = TokenVault(payable(resolver.resolve("token_vault", false)));
+
+        if ((allValue > 0) && isMxc) {
+            etherVault.releaseEther(allValue);
         }
+
+        // weth withdrawal and release callValue Ether
+        if(!isMxc && message.callValue > 0) {
+            tokenVault.releaseEther(message.callValue);
+        }
+
         // We send the Ether before the message call in case the call will
         // actually consume Ether.
         if(isMxc) {
             message.owner.sendEther(message.depositValue);
+        }else {
+            if(message.depositValue > 0) {
+                tokenVault.receiveMXC(message.owner, message.depositValue);
+            }
         }
 
         LibBridgeStatus.MessageStatus status;
         uint256 refundAmount;
         // change(MXC) chain token mxc
-        TokenVault tokenVault = TokenVault(resolver.resolve("token_vault", false));
 
         // if the user is sending to the bridge or zero-address, just process as DONE
         // and refund the owner
@@ -111,10 +122,6 @@ library LibBridgeProcess {
             // CHANGE(MXC): unpack message data and process it if mxc token
             if (_checkAndReleaseEther(message, resolver) && isMxc) {
                 status = LibBridgeStatus.MessageStatus.DONE;
-            } else if (isMxc == false && message.depositValue > 0) {
-                // change(MXC) release live chain mxc
-                tokenVault.receiveMXC(message.owner, message.depositValue);
-                status = LibBridgeStatus.MessageStatus.DONE;
             } else {
                 // use the specified message gas limit if not called by the owner
                 uint256 gasLimit = msg.sender == message.owner ? gasleft() : message.gasLimit;
@@ -125,13 +132,17 @@ library LibBridgeProcess {
                     msgHash: msgHash,
                     gasLimit: gasLimit
                 });
-
                 if (success) {
                     status = LibBridgeStatus.MessageStatus.DONE;
                 } else {
                     status = LibBridgeStatus.MessageStatus.RETRIABLE;
                     if(isMxc) {
-                        ethVault.sendEther(message.callValue);
+                        address(etherVault).sendEther(message.callValue);
+                    }else {
+                        // unused ETH send to tokenVault
+                        if(message.callValue > 0) {
+                            tokenVault.depositToWETH{value: message.callValue}();
+                        }
                     }
                 }
             }
@@ -148,9 +159,15 @@ library LibBridgeProcess {
             uint256 amount = message.processingFee + refundAmount;
             if (isMxc) {
                 // send mxc on mxc chain
-                refundAddress.sendEther(amount);
-            }else if(amount > 0) {
-                tokenVault.receiveMXC(message.owner, amount);
+                refundAddress.sendEther(message.processingFee);
+                // refund callValue with weth
+                if(refundAmount > 0) {
+                    tokenVault.receiveWETH(message.owner, refundAmount);
+                }
+            }else {
+                if(amount > 0) {
+                    tokenVault.receiveMXC(message.owner, amount);
+                }
             }
         } else {
             // if sender is another address (eg. the relayer)
@@ -159,15 +176,16 @@ library LibBridgeProcess {
             if (isMxc) {
                 // send mxc on mxc chain
                 msg.sender.sendEther(message.processingFee);
-                refundAddress.sendEther(refundAmount);
+                if(refundAmount > 0) {
+                    tokenVault.receiveWETH(refundAddress, refundAmount);
+                }
             }else {
                 if(message.processingFee > 0) {
                     tokenVault.receiveMXC(message.sender, message.processingFee);
                 }
-                // CHANGE(MXC): always zero, not allow call ether on L1.
-//                if(refundAmount > 0) {
-//                    tokenVault.receiveMXC(refundAddress, refundAmount);
-//                }
+                if(refundAmount > 0) {
+                    tokenVault.receiveWETH(message.owner, refundAmount);
+                }
             }
         }
     }
