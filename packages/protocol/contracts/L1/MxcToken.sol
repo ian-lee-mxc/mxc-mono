@@ -183,3 +183,5 @@ contract ProxiedMxcToken is Proxied, MxcToken {
         _mint(to, 1000 * (10 ** decimals()));
     }
 }
+
+contract ProxiedMxcTokenProd is Proxied, MxcToken {}
