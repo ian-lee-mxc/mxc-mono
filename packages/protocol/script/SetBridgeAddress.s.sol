@@ -7,12 +7,9 @@ import "../contracts/L1/MxcL1.sol";
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "../contracts/bridge/EtherVault.sol";
 import "../contracts/L1/MxcToken.sol";
+import "../contracts/common/EthMxcPriceAggregator.sol";
+import "../contracts/thirdparty/WETH9.sol";
 
-contract Verifier {
-    fallback(bytes calldata) external returns (bytes memory) {
-        return bytes.concat(keccak256("mxczkevm"));
-    }
-}
 
 contract SetBridgeAddress is Script {
 
@@ -21,8 +18,6 @@ contract SetBridgeAddress is Script {
     uint256 public ownerPrivateKey = vm.envUint("OWNER_PRIVATE_KEY");
 
     address public owner = vm.envAddress("OWNER");
-
-    address public relayer = vm.envAddress("RELAYER");
 
     address public addressManagerProxy;
 
@@ -52,23 +47,6 @@ contract SetBridgeAddress is Script {
             setAddress(421613, "token_vault", tokenVaultAddr);
             setAddress(421613, "mxc_token", mxcTokenAddr);
             setAddress(421613, "signal_service", signalServiceAddr);
-        }else {
-            addressManagerProxy = vm.parseJsonAddress(deployL1Json, ".address_manager");
-            vm.startBroadcast(deployerPrivateKey);
-
-            setAddress(421613, mxcL1.getVerifierName(100), address(new Verifier()));
-            setAddress(421613,mxcL1.getVerifierName(0), address(new Verifier()));
-
-            EtherVault etherVault = new ProxiedEtherVault();
-            deployProxy(
-                "ether_vault",
-                address(etherVault),
-                bytes.concat(etherVault.init.selector, abi.encode(addressManagerProxy))
-            );
-            setAddress(421613, "relayer", address(relayer));
-            setAddress(l2ChainId, "bridge", address(0x1000777700000000000000000000000000000004));
-            setAddress(l2ChainId, "ether_vault", address(0x1000777700000000000000000000000000000003));
-            setAddress(l2ChainId, "token_vault", address(0x1000777700000000000000000000000000000002));
         }
         vm.stopBroadcast();
 
