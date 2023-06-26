@@ -66,31 +66,36 @@ library LibBridgeSend {
             revert B_WRONG_TO_ADDRESS();
         }
 
-        uint256 expectedAmount = message.depositValue + message.callValue + message.processingFee;
-
-        // change(MXC): only check in mxc
-        if (expectedAmount != msg.value && block.chainid == MxcConfig.getConfig().chainId) {
-            revert B_INCORRECT_VALUE();
-        }
+        uint256 expectedAmount = message.depositValue + message.processingFee;
 
         // If on MXC, send the expectedAmount to the EtherVault. Otherwise,
         // store it here on the Bridge. Processing will release Ether from the
         // EtherVault or the Bridge on the destination chain.
-        if (block.chainid == MxcConfig.getConfig().chainId) {
-            address ethVault = resolver.resolve("ether_vault", true);
-            if (ethVault != address(0)) {
-                ethVault.sendEther(expectedAmount);
+        bool isMxc = block.chainid == MxcConfig.getConfig().chainId;
+        address tokenVault = resolver.resolve("token_vault", false);
+        if(isMxc) {
+            if (expectedAmount != msg.value) {
+                revert B_INCORRECT_VALUE();
             }
-        } else {
+            address ethVault = resolver.resolve("ether_vault", false);
+            ethVault.sendEther(expectedAmount);
+            if(message.callValue > 0) {
+                IERC20Upgradeable(resolver.resolve("weth", false)).safeTransferFrom(
+                    message.owner, tokenVault, message.callValue
+                );
+            }
+        }else {
             // CHANGE(MXC): not allow call ether in L1
-            if (msg.value != 0 || message.callValue != 0) {
+            if (msg.value != 0) {
                 revert B_WRONG_CHAIN_ID();
             }
-            address tokenVault = resolver.resolve("token_vault", true);
-            if (tokenVault != address(0)) {
-                IERC20Upgradeable(resolver.resolve("mxc_token", false)).safeTransferFrom(
-                    message.owner, tokenVault, expectedAmount
-                );
+            if(expectedAmount > 0) {
+                // The tokenValue has already received payment in advance on L1. so can save one approval.
+                if (msg.sender != tokenVault) {
+                    IERC20Upgradeable(resolver.resolve("mxc_token", false)).safeTransferFrom(
+                        message.owner, tokenVault, expectedAmount + message.callValue
+                    );
+                }
             }
         }
 

@@ -10,8 +10,9 @@ contract EthMxcPriceAggregator is EssentialContract, AggregatorInterface {
 
     int256 public value;
 
-    function initialize(address _addressManager, int _vaule) external initializer {
+    function init(address _addressManager, int _vaule) external initializer {
         EssentialContract._init(_addressManager);
+        _vaule = value;
     }
 
     function setValue(int _vault) external onlyOwner {

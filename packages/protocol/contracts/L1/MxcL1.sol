@@ -28,6 +28,14 @@ contract MxcL1 is EssentialContract, ICrossChainSync, MxcEvents, MxcErrors {
     MxcData.State public state;
     uint256[100] private __gap;
 
+    modifier onlyEOA() {
+        uint size;
+        address sender = msg.sender;
+        assembly { size := extcodesize(sender) }
+        require(size == 0, "Only EOA accounts allowed");
+        _;
+    }
+
     receive() external payable {
         depositEtherToL2();
     }
@@ -76,7 +84,7 @@ contract MxcL1 is EssentialContract, ICrossChainSync, MxcEvents, MxcErrors {
      */
     function proposeBlock(bytes calldata input, bytes calldata txList)
         external
-        nonReentrant
+        nonReentrant onlyEOA
         returns (MxcData.BlockMetadata memory meta)
     {
         MxcData.Config memory config = getConfig();
@@ -104,7 +112,7 @@ contract MxcL1 is EssentialContract, ICrossChainSync, MxcEvents, MxcErrors {
      *        to select the right implementation version.
      * @param input An abi-encoded MxcData.BlockEvidence object.
      */
-    function proveBlock(uint256 blockId, bytes calldata input) external nonReentrant {
+    function proveBlock(uint256 blockId, bytes calldata input) external nonReentrant onlyEOA {
         MxcData.Config memory config = getConfig();
         LibProving.proveBlock({
             state: state,

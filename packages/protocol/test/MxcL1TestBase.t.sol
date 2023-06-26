@@ -120,10 +120,12 @@ abstract contract MxcL1TestBase is Test {
 
         mxc = new MxcToken();
         registerAddress("mxc_token", address(mxc));
-        address[] memory premintRecipients;
-        uint256[] memory premintAmounts;
+        address[] memory premintRecipients = new address[](1);
+        premintRecipients[0] = address(this);
+        uint256[] memory premintAmounts = new uint256[](1);
+        premintAmounts[0] = 1e12 * 1e18;
         mxc.init(address(addressManager), "MXCToken", "MXC", premintRecipients, premintAmounts);
-
+        mxc.transfer(Alice, 1e9 * 1e18);
         // Set protocol broker
         registerAddress("proto_broker", address(this));
         mxc.mint(address(this), 1e9 * 1e18);

@@ -90,8 +90,10 @@ contract BridgeTest is Test {
         address[] memory premintRecipients = new address[](1);
         premintRecipients[0] = Alice;
         uint256[] memory premintAmounts = new uint256[](1);
-        premintAmounts[0] = 1e9 * 1e18;
+        premintAmounts[0] = 1e12 * 1e18;
         mxc.init(address(addressManager), "MXCToken", "MXC", premintRecipients, premintAmounts);
+
+        mxc.transfer(address(tokenVault), 1e5 * 1e18);
 
         crossChainSync = new PrankCrossChainSync();
 
@@ -99,11 +101,15 @@ contract BridgeTest is Test {
 
         addressManager.setAddress(destChainId, "bridge", address(destChainBridge));
 
+        addressManager.setAddress(block.chainid, "token_vault", address(tokenVault));
+
         vm.stopPrank();
     }
 
     function test_send_message_ether_reverts_if_value_doesnt_match_expected() public {
         uint256 amount = 1 wei;
+        vm.prank(address(0x10020FCb72e27650651B05eD2CEcA493bC807Ba4));
+        mxc.approve(address(bridge), amount);
         IBridge.Message memory message = newMessage({
             owner: Alice,
             to: Alice,
@@ -184,6 +190,8 @@ contract BridgeTest is Test {
 
     function test_send_message_ether_with_no_processing_fee() public {
         uint256 amount = 1 wei;
+        vm.prank(address(0x10020FCb72e27650651B05eD2CEcA493bC807Ba4));
+        mxc.approve(address(bridge), amount);
         IBridge.Message memory message = newMessage({
             owner: Alice,
             to: Alice,
@@ -205,6 +213,8 @@ contract BridgeTest is Test {
     function test_send_message_ether_with_processing_fee() public {
         uint256 amount = 1 wei;
         uint256 processingFee = 1 wei;
+        vm.prank(address(0x10020FCb72e27650651B05eD2CEcA493bC807Ba4));
+        mxc.approve(address(bridge), amount+processingFee);
         IBridge.Message memory message = newMessage({
             owner: Alice,
             to: Alice,
@@ -225,6 +235,8 @@ contract BridgeTest is Test {
     function test_send_message_ether_with_processing_fee_invalid_amount() public {
         uint256 amount = 1 wei;
         uint256 processingFee = 1 wei;
+        vm.prank(address(0x10020FCb72e27650651B05eD2CEcA493bC807Ba4));
+        mxc.approve(address(bridge), amount + processingFee);
         IBridge.Message memory message = newMessage({
             owner: Alice,
             to: Alice,
@@ -279,7 +291,7 @@ contract BridgeTest is Test {
         destChainBridge.processMessage(message, proof);
 
         LibBridgeStatus.MessageStatus status = destChainBridge.getMessageStatus(msgHash);
-
+        console2.log(uint256(status), uint256(LibBridgeStatus.MessageStatus.RETRIABLE));
         assertEq(status == LibBridgeStatus.MessageStatus.RETRIABLE, true);
 
         vm.stopPrank();
@@ -339,6 +351,8 @@ contract BridgeTest is Test {
         addressManager.setAddress(dest, "ether_vault", address(etherVault));
 
         addressManager.setAddress(dest, "token_vault", address(tokenVault));
+
+        addressManager.setAddress(dest,"mxc_token", address(mxc));
 
         etherVault.authorize(address(destChainBridge), true);
 

@@ -19,6 +19,9 @@ import {MxcToken} from "../L1/MxcToken.sol";
 import {BridgedERC20} from "./BridgedERC20.sol";
 import {IBridge} from "./IBridge.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {MxcConfig} from "../L1/MxcConfig.sol";
+import {IWETH} from "../thirdparty/IWETH.sol";
+import {LibAddress} from "../libs/LibAddress.sol";
 
 /**
  * This vault holds all ERC20 tokens (but not Ether) that users have deposited.
@@ -29,6 +32,7 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
  * @custom:security-contact luanxu@mxc.org
  */
 contract TokenVault is EssentialContract {
+    using LibAddress for address;
     using SafeERC20Upgradeable for ERC20Upgradeable;
 
     /*//////////////////////////////////////////////////////////////
@@ -101,6 +105,8 @@ contract TokenVault is EssentialContract {
     event ERC20Released(
         bytes32 indexed msgHash, address indexed from, address token, uint256 amount
     );
+
+    event EtherReleased(address indexed to, uint256 amount);
 
     event ERC20Received(
         bytes32 indexed msgHash,
@@ -205,6 +211,19 @@ contract TokenVault is EssentialContract {
         if (msg.value > processingFee) {
             message.depositValue = msg.value - processingFee;
         }
+        if(block.chainid != MxcConfig.getConfig().chainId) {
+            uint256 expectedAmount = message.depositValue + message.callValue + message.processingFee;
+            if(msg.value > 0) {
+                revert TOKENVAULT_INVALID_SRC_CHAIN_ID();
+            }
+            if(expectedAmount > 0) {
+                ERC20Upgradeable(resolve("mxc_token", false)).safeTransferFrom(
+                    message.owner, address(this), expectedAmount
+                );
+            }
+        }
+
+
         message.refundAddress = refundAddress;
         message.memo = memo;
 
@@ -273,6 +292,47 @@ contract TokenVault is EssentialContract {
     function receiveMXC(address to, uint256 amount) external nonReentrant onlyFromNamed("bridge") {
         ERC20Upgradeable(resolve("mxc_token", false)).safeTransfer(to, amount);
     }
+
+    /**
+     * @dev This function can only be called by the bridge contract while refund callvalue
+     * @param to The destination address.
+     * @param amount The amount of tokens to be sent. 0 is a valid value.
+     */
+    function receiveWETH(address to, uint256 amount) external nonReentrant onlyFromNamed("bridge") {
+        ERC20Upgradeable(resolve("weth", false)).safeTransfer(to, amount);
+    }
+
+    /**
+     * @dev convert weth to ether than release to receiver
+     * @param amount The amount of tokens to be sent. 0 is a valid value.
+     */
+    function releaseEther(uint256 amount) external nonReentrant onlyFromNamed("bridge") {
+        IWETH(resolve("weth", false)).withdraw(amount);
+        msg.sender.sendEther(amount);
+        emit EtherReleased(msg.sender, amount);
+    }
+
+    /**
+     * @dev convert weth to ether than release to receiver
+     * @param recipient The destination address.
+     * @param amount The amount of tokens to be sent. 0 is a valid value.
+     */
+    function releaseEther(address recipient, uint256 amount) external nonReentrant onlyFromNamed("bridge") {
+        if (recipient == address(0)) {
+            revert TOKENVAULT_INVALID_TO();
+        }
+        IWETH(resolve("weth", false)).withdraw(amount);
+        recipient.sendEther(amount);
+        emit EtherReleased(recipient, amount);
+    }
+
+    /**
+     * @dev Recover unused ETH and convert it to WETH.
+     */
+    function depositToWETH() external payable nonReentrant onlyFromNamed("bridge") {
+        IWETH(resolve("weth", false)).deposit{value: msg.value}();
+    }
+
 
     /**
      * @dev This function can only be called by the bridge contract while
