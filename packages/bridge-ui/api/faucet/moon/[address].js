@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import config from '../../config.js';
-let { RPC_URL, private_key, c_faucet, abiFaucet } = config;
+let { RPC_URL, private_key, c_faucet, abiFaucet, gasPrice, gasLimit } = config;
 
 const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
 const wallet = new ethers.Wallet(private_key, provider);
@@ -26,8 +26,8 @@ export default async function handler(req, res) {
 
   try {
     // await contractFaucet.callStatic.requestMoon(address, {
-    //   gasPrice: 9000000000000,
-    //   gasLimit: 3000000,
+    //   gasPrice,
+    //   gasLimit,
     // });
     await contractFaucet.callStatic.requestMoon(address);
   } catch (error) {
@@ -38,8 +38,8 @@ export default async function handler(req, res) {
   }
 
   // let tx = await contractFaucet.requestMoon(address, {
-  //   gasPrice: 9000000000000,
-  //   gasLimit: 3000000,
+  //   gasPrice,
+  //   gasLimit,
   // });
   let tx = await contractFaucet.requestMoon(address);
   await tx.wait();

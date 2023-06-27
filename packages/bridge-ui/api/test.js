@@ -39,13 +39,13 @@ export default async function handler(req, res) {
   // console.log(data);
 
   // const address = '0x63cC3f82293A460717C832e4574Ca63C2aD247b3';
-  // const ipAddress = '127.0.0.1';
+  // const ipAddress = '89.205.137.192';
   // // console.log();
   // await redis.hset('address', {
   //   [address]: 1,
   // });
   // await redis.hset('ips', {
-  //   [ipAddress]: 1,
+  //   [ipAddress]: 0,
   // });
 
   // clear all data

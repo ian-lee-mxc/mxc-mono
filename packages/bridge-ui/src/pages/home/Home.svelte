@@ -109,6 +109,7 @@
       successToast(
         `<strong>Tokens exchange completed!</strong><br />`,
       );
+      tooltipOpen = false;      
     } catch (error) {
       console.error(error);
       const headerError = '<strong>Failed to exchange</strong><br />';
@@ -128,7 +129,6 @@
       }
     }
     loadingClaim = false
-    tooltipOpen = false
   }
 
   async function checkMxcCross() {
