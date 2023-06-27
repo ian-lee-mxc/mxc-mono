@@ -172,7 +172,7 @@
   });
 
   async function shouldDisableButton(signer: Signer, _token: Token) {
-    if (!signer || !_token || !isTestToken(_token) || $srcChain.id===L2_CHAIN_ID) {
+    if (!signer || !_token || !isTestToken(_token) || $srcChain.id===L2_CHAIN_ID || _token.symbol === "WETH") {
       // If signer or token is missing, the button
       // should remained disabled
       return true;

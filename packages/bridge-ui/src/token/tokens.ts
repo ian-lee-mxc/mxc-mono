@@ -11,6 +11,8 @@ import MxcIcon from "../assets/token/mxc.png"
 import ParkIcon from "../assets/token/park.svg"
 import RideIcon from "../assets/token/bicycle.svg"
 import MoonIcon from "../assets/token/moon.svg"
+import {get} from "svelte/store";
+import {srcChain} from "../store/chain";
 
 
 export const ETHToken: Token = {
@@ -89,7 +91,7 @@ export function isTestToken(token: Token): boolean {
 
 export function isETH(token: Token): boolean {
   return (
-    token.symbol.toLocaleLowerCase() === ETHToken.symbol.toLocaleLowerCase()
+    token.symbol.toLocaleLowerCase() === ETHToken.symbol.toLocaleLowerCase() || token.isChainToken === true
   );
 }
 

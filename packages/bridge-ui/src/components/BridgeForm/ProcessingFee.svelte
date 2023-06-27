@@ -14,14 +14,14 @@
 
 
   // export let method: ProcessingFeeMethod = ProcessingFeeMethod.RECOMMENDED;
-  export let method: ProcessingFeeMethod = ProcessingFeeMethod.NONE;
+  export let method: ProcessingFeeMethod = ProcessingFeeMethod.RECOMMENDED;
   export let amount: string = '0';
 
   let showProcessingFeeTooltip: boolean = false;
   let showNoneFeeTooltip: boolean = false;
   let cannotCompute = false;
 
-  export let show: boolean = false;
+  export let show: boolean = true;
 
   $: recommendProcessingFee($destChain, $srcChain, method, $token, $signer)
     .then((recommendedFee) => {
@@ -92,7 +92,7 @@
         class="input input-primary bg-dark-2 border-dark-2 input-md md:input-lg w-full focus:ring-0 !rounded-r-none"
         name="amount" />
       <!-- <span class="!rounded-r-lg bg-dark-2">ETH</span> -->
-      <span class="!rounded-r-lg bg-dark-2">{$srcChain && $srcChain.id==L2_CHAIN_ID ? 'MXC': 'ETH'}</span>
+      <span class="!rounded-r-lg bg-dark-2">MXC</span>
 
     </label>
   {:else if method === ProcessingFeeMethod.RECOMMENDED}
@@ -103,7 +103,7 @@
         {:else}
           <!-- {amount} ETH -->
           {amount}
-          {$srcChain && $srcChain.id==L2_CHAIN_ID ? 'MXC': 'ETH'}
+          MXC
         {/if}
       </span>
     </div>
@@ -128,7 +128,7 @@
 <NoticeModal bind:show={showNoneFeeTooltip} name="NoneFeeTooltip">
   <!-- TODO: translations? -->
   <div class="text-center">
-    Selecting <strong>None</strong> means that you'll require ETH on the receiving
+    Selecting <strong>None</strong> means that you'll require MXC on the receiving
     chain in order to claim the bridged token. Please, come back later to manually
     claim.
   </div>

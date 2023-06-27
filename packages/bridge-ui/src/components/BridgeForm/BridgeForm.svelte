@@ -60,7 +60,7 @@
   let to: string = '';
   let showTo: boolean = false;
 
-  let feeMethod: ProcessingFeeMethod = ProcessingFeeMethod.NONE;
+  let feeMethod: ProcessingFeeMethod = ProcessingFeeMethod.RECOMMENDED;
   let feeAmount: string = '0';
 
   // TODO: too much going on here. We need to extract
@@ -404,7 +404,7 @@
       showTo = false;
       showMemo = false;
       feeAmount = '0';
-      feeMethod = ProcessingFeeMethod.NONE;
+      feeMethod = ProcessingFeeMethod.RECOMMENDED;
 
       // Re-selecting the token triggers reactivity
       $token = $token;
@@ -458,6 +458,8 @@
           memo: memo,
           to: showTo && to ? to : await $signer.getAddress(),
         });
+
+        console.log("activeBridge",$activeBridge, isETH($token), "token",$token)
 
         const requiredGas = gasEstimate.mul(feeData.gasPrice);
         const userBalance = await $signer.getBalance('latest');

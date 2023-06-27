@@ -13,6 +13,7 @@ import type {
 import { MessageStatus } from '../domain/message';
 import type { Prover } from '../domain/proof';
 import { getLogger } from '../utils/logger';
+import {L2_CHAIN_ID} from "../constants/envVars";
 
 const log = getLogger('ERC20Bridge');
 
@@ -146,6 +147,7 @@ export class ERC20Bridge implements Bridge {
   }
 
   async bridge(opts: BridgeOpts): Promise<Transaction> {
+    console.log(opts)
     const requiresAllowance = await this.spenderRequiresAllowance(
       opts.tokenAddress,
       opts.signer,
@@ -159,9 +161,12 @@ export class ERC20Bridge implements Bridge {
 
     const { contract, message } = await ERC20Bridge._prepareTransaction(opts);
 
-    const value = message.processingFee.add(message.callValue);
+    let value = BigNumber.from(0)
+    if (opts.srcChainId === L2_CHAIN_ID) {
+      value = message.processingFee.add(message.callValue);
+    }
 
-    log('Sending ERC20 to bridge with value', value.toString());
+    log('Sending ERC20 to bridge with value', 0);
 
     try {
       const tx = await contract.sendERC20(
@@ -188,12 +193,24 @@ export class ERC20Bridge implements Bridge {
   }
 
   async estimateGas(opts: BridgeOpts): Promise<BigNumber> {
+
     const { contract, message } = await ERC20Bridge._prepareTransaction(opts);
 
     log('Estimating gas for sendERC20 with message', message);
 
     let gasEstimate = BigNumber.from(0);
-
+console.log( message.destChainId,
+    message.to,
+    opts.tokenAddress,
+    opts.amountInWei.toString(),
+    message.gasLimit.toString(),
+    message.processingFee.toString(),
+    message.refundAddress,
+    message.memo)
+    let value = BigNumber.from(0)
+    if (opts.srcChainId === L2_CHAIN_ID) {
+      value = message.processingFee.add(message.callValue);
+    }
     try {
       gasEstimate = await contract.estimateGas.sendERC20(
         message.destChainId,
@@ -205,7 +222,7 @@ export class ERC20Bridge implements Bridge {
         message.refundAddress,
         message.memo,
         {
-          value: message.processingFee.add(message.callValue),
+          value
         },
       );
 

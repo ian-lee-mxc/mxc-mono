@@ -1,12 +1,13 @@
 import { BigNumber, Contract, ethers, Signer } from 'ethers';
 
-import { tokenVaultABI } from '../constants/abi';
+import {ethMxcPriceAggregatorABI, tokenVaultABI} from '../constants/abi';
 import type { Chain } from '../domain/chain';
 import type { ProcessingFeeMethod } from '../domain/fee';
 import type { Token } from '../domain/token';
 import { providers } from '../provider/providers';
 import { isETH } from '../token/tokens';
 import { tokenVaults } from '../vault/tokenVaults';
+import {L1_CHAIN_ID, L2_ETHMXCPRICE_ADDRESS} from "../constants/envVars";
 
 // TODO: config these
 export const ethGasLimit = 900000;
@@ -63,7 +64,18 @@ export async function recommendProcessingFee(
     }
   }
 
-  const recommendedFee = BigNumber.from(gasPrice).mul(gasLimit);
+  let recommendedFee = BigNumber.from(gasPrice).mul(gasLimit);
+
+  // MXC processFee from l2 to l1 pay mxc
+  if(destChain.id === L1_CHAIN_ID) {
+    const ethMxcPriceAggregator = new Contract(
+        L2_ETHMXCPRICE_ADDRESS,
+        ethMxcPriceAggregatorABI,
+        signer
+    );
+    const price = await ethMxcPriceAggregator.latestAnswer();
+    recommendedFee = recommendedFee.mul(price);
+  }
 
   return ethers.utils.formatEther(recommendedFee);
 }

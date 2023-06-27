@@ -12,6 +12,14 @@ import type {
 import { type Message, MessageStatus } from '../domain/message';
 import type { Prover } from '../domain/proof';
 import { getLogger } from '../utils/logger';
+import {get} from "svelte/store";
+import {L1_CHAIN_ID} from "../constants/envVars";
+import {srcChain} from "../store/chain";
+import {ERC20Bridge} from "./ERC20Bridge";
+import type {
+  ApproveOpts,
+} from '../domain/bridge';
+import {bridges} from "./bridges";
 
 const log = getLogger('ETHBridge');
 
@@ -104,9 +112,14 @@ export class ETHBridge implements Bridge {
   async estimateGas(opts: BridgeOpts): Promise<BigNumber> {
     const { contract, message } = await ETHBridge._prepareTransaction(opts);
 
-    const value = message.depositValue
+
+    let value = message.depositValue
       .add(message.processingFee)
       .add(message.callValue);
+
+    if (opts.srcChainId === L1_CHAIN_ID) {
+      value = BigNumber.from(0);
+    }
 
     log(`Estimating gas for sendMessage. Value to send: ${value}`);
 
