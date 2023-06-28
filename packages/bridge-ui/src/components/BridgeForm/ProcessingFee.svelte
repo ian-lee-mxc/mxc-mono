@@ -58,7 +58,7 @@
 </script>
 
 <div class="label flex flex-row justify-between items-center">
-  <div class="px-1 py-0 flex flex-row justify-between">
+  <div class="py-0 flex flex-row justify-between">
     <ButtonWithTooltip onClick={() => (showProcessingFeeTooltip = true)}>
       <span slot="buttonText">{$_('bridgeForm.processingFeeLabel')}</span>
     </ButtonWithTooltip>
