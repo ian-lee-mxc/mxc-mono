@@ -15,6 +15,8 @@
   export let token: Token;
 
   export let requiresAllowance = false;
+
+  export let requiresAllowanceMxc = false;
   export let computingAllowance = false;
 
   export let tokenBalance: string = '';
@@ -24,7 +26,7 @@
 
   export let amountEntered = false;
 
-  export let approve: (token: Token) => Promise<void>;
+  export let approve: (token: Token, isMxc: boolean = false) => Promise<void>;
   export let bridge: (token: Token) => Promise<void>;
 
   let approving = false;
@@ -59,6 +61,13 @@
   function clickApprove() {
     approving = true;
     approve(token).finally(() => {
+      approving = false;
+    });
+  }
+
+  function clickApproveMxc() {
+    approving = true;
+    approve(token, true).finally(() => {
       approving = false;
     });
   }
@@ -112,6 +121,20 @@
           : 'Approve'}
       </Button>
       <ArrowRight />
+      {#if requiresAllowanceMxc}
+        <Button
+                type="accent"
+                class="flex-1"
+                on:click={clickApproveMxc}
+                disabled={!requiresAllowanceMxc || actionDisabled}>
+          {requiresAllowanceMxc
+                  ? 'Approve MXC'
+                  : !computingAllowance && amountEntered
+                          ? '✓ Approved MXC'
+                          : 'Approve MXC'}
+        </Button>
+        <ArrowRight />
+      {/if}
       <Button
         type="accent"
         class="flex-1"

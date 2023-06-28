@@ -91,7 +91,7 @@ export function isTestToken(token: Token): boolean {
 
 export function isETH(token: Token): boolean {
   return (
-    token.symbol.toLocaleLowerCase() === ETHToken.symbol.toLocaleLowerCase() || token.isChainToken === true
+    token.symbol.toLocaleLowerCase() === ETHToken.symbol.toLocaleLowerCase() || token.isChainToken
   );
 }
 

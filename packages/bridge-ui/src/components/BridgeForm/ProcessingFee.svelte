@@ -10,7 +10,9 @@
   import ButtonWithTooltip from '../ButtonWithTooltip.svelte';
   import NoticeModal from '../NoticeModal.svelte';
   import GeneralTooltip from './ProcessingFeeTooltip.svelte';
-  import { L2_CHAIN_ID } from '../../constants/envVars';
+  import {createEventDispatcher} from "svelte";
+
+  const dispatch = createEventDispatcher();
 
 
   // export let method: ProcessingFeeMethod = ProcessingFeeMethod.RECOMMENDED;
@@ -38,6 +40,7 @@
   function updateAmount(event: Event) {
     const target = event.target as HTMLInputElement;
     amount = target.value.toString();
+    dispatch('updateAmount');
   }
 
   function focus(input: HTMLInputElement) {

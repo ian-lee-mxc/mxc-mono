@@ -21,7 +21,7 @@
     pendingTransactions,
     transactions as transactionsStore,
   } from '../../store/transaction';
-  import { isETH } from '../../token/tokens';
+  import {isETH, tokens} from '../../token/tokens';
   import { checkIfTokenIsDeployedCrossChain } from '../../utils/checkIfTokenIsDeployedCrossChain';
   import { getAddressForToken } from '../../utils/getAddressForToken';
   import { isOnCorrectChain } from '../../utils/isOnCorrectChain';
@@ -38,7 +38,8 @@
   import ProcessingFee from './ProcessingFee.svelte';
   import SelectToken from './SelectToken.svelte';
   import To from './To.svelte';
-  import { L2_CHAIN_ID } from '../../constants/envVars';
+  import {L1_CHAIN_ID, L2_CHAIN_ID} from '../../constants/envVars';
+  import {get} from "svelte/store";
 
 
   const log = getLogger('component:BridgeForm');
@@ -47,6 +48,7 @@
 
   let computingAllowance: boolean = false;
   let requiresAllowance: boolean = false;
+  let requiresAllowanceMxc: boolean = false;
 
   let actionDisabled: boolean = true;
 
@@ -125,6 +127,7 @@
     bridgeType: BridgeType,
     srcChain: Chain,
     signer: Signer,
+    feeAmount: string
   ) {
     if (!srcChain || !amount || !token || !bridgeType || !signer) return false;
 
@@ -139,8 +142,13 @@
 
     log(`Checking allowance for token ${token.symbol}`);
 
+    let amt = ethers.utils.parseUnits(amount, token.decimals);
+    if (token.isChainToken && srcChain.id === L1_CHAIN_ID) {
+        amt = amt.add(getProcessingFee());
+    }
+
     const isRequired = await $activeBridge.requiresAllowance({
-      amountInWei: ethers.utils.parseUnits(amount, token.decimals),
+      amountInWei: amt,
       signer: signer,
       contractAddress: address,
       spenderAddress: tokenVaults[srcChain.id],
@@ -158,6 +166,7 @@
     tokenBalance: string,
     memoError: string,
     srcChain: Chain,
+    feeAmount: string
   ) {
     if (
       !signer ||
@@ -180,7 +189,21 @@
 
     const parsedBalance = ethers.utils.parseUnits(tokenBalance, token.decimals);
     const parsedAmount = ethers.utils.parseUnits(amount, token.decimals);
-    if (BigNumber.from(parsedBalance).lt(parsedAmount)) return true;
+    let amt = parsedAmount;
+    if (token.symbol === 'MXC' && srcChain.id === L1_CHAIN_ID) {
+      amt = amt.add(getProcessingFee());
+    }else if(srcChain.id === L1_CHAIN_ID && token.symbol !== 'MXC') {
+      // allowance mxc as well
+      const mxc = tokens.find((item) => item.symbol === 'MXC') as Token
+      const requiredMxcAllowance = await checkAllowance(ethers.utils.formatUnits(getProcessingFee(), mxc.decimals), mxc, $bridgeType, srcChain, signer, feeAmount)
+      if(requiredMxcAllowance) {
+        requiresAllowanceMxc = true;
+      }else {
+        requiresAllowanceMxc = false;
+      }
+    }
+
+    if (BigNumber.from(parsedBalance).lt(amt)) return true;
 
     return false;
   }
@@ -190,11 +213,19 @@
   //       there are other moving pieces here, although neither chain nor signer can change.
   //       Ideally we would pass all the values as arguments and break down this function.
   //       As for changing the state of `requiresAllowance`, we could do this in a wrapper.
-  async function approve(_token: Token) {
+  async function approve(_token: Token, mxc: boolean = false) {
     try {
-      if (!requiresAllowance)
+      if (!requiresAllowance && !requiresAllowanceMxc)
         throw Error('does not require additional allowance');
 
+      let amt = ethers.utils.parseUnits(amount, _token.decimals);
+      if(_token.symbol === 'MXC' && $srcChain.id === L1_CHAIN_ID) {
+        amt = amt.add(getProcessingFee())
+      }
+      if(mxc) {
+        _token = tokens.find(item => item.symbol === 'MXC')
+        amt = getProcessingFee()
+      }
       const contractAddress = await getAddressForToken(
         _token,
         $srcChain,
@@ -206,8 +237,10 @@
 
       log(`Approving token ${_token.symbol}`);
 
+      // add processFee
+
       const tx = await $activeBridge.approve({
-        amountInWei: ethers.utils.parseUnits(amount, _token.decimals),
+        amountInWei: amt,
         signer: $signer,
         contractAddress,
         spenderAddress,
@@ -269,8 +302,16 @@
     // if (isETH($token)) {
     //   balanceAvailableForTx = userBalance.sub(ethers.utils.parseEther(amount));
     // }
+    if ($token.symbol === 'MXC' && bridgeOpts.srcChainId === L1_CHAIN_ID) {
+      const processFee = getProcessingFee();
+      if (balanceAvailableForTx.gt(processFee)) {
+        balanceAvailableForTx = balanceAvailableForTx.sub(processFee);
+      }
+    }
 
     const hasEnoughBalance = balanceAvailableForTx.gte(requiredGas);
+
+
     log(
       `Is required gas ${requiredGas} less than available balance ${balanceAvailableForTx}? ${hasEnoughBalance}`,
     );
@@ -439,7 +480,7 @@
   }
 
   async function useFullAmount() {
-    if (isETH($token)) {
+    if (isETH($token) && ($token.symbol === 'MXC' && $srcChain.id === L2_CHAIN_ID)) {
       try {
         const feeData = await fetchFeeData();
         const gasEstimate = await $activeBridge.estimateGas({
@@ -467,7 +508,10 @@
         let balanceAvailableForTx = userBalance.sub(requiredGas);
 
         if (processingFee) {
-          balanceAvailableForTx = balanceAvailableForTx.sub(processingFee);
+          const processFee = getProcessingFee();
+          if (balanceAvailableForTx.gt(processFee)) {
+            balanceAvailableForTx = balanceAvailableForTx.sub(processingFee);
+          }
         }
 
         amount = ethers.utils.formatEther(balanceAvailableForTx);
@@ -479,16 +523,27 @@
         amount = tokenBalance.toString();
       }
     } else {
-      amount = tokenBalance.toString();
+      let amt = BigNumber.from(ethers.utils.parseUnits(tokenBalance.toString(), $token.decimals))
+      console.log("amt",amt.toString(), getProcessingFee().toString())
+      console.log($token, $srcChain.id)
+
+      if ($token.symbol === 'MXC' && $srcChain.id === L1_CHAIN_ID) {
+        amt = amt.sub(getProcessingFee());
+      }
+      if (amt.gt(0)) {
+        amount = ethers.utils.formatUnits(amt.toString(), $token.decimals).toString();
+      }else {
+        amount = '0'
+      }
     }
   }
 
   function getProcessingFee() {
     if (feeMethod === ProcessingFeeMethod.NONE) {
-      return undefined;
+      return BigNumber.from(0);
     }
 
-    return BigNumber.from(ethers.utils.parseEther(feeAmount));
+    return BigNumber.from(ethers.utils.parseEther(feeAmount || "0"));
   }
 
   function updateAmount(event: Event) {
@@ -507,11 +562,12 @@
     tokenBalance,
     memoError,
     $srcChain,
+    feeAmount
   )
     .then((disabled) => (actionDisabled = disabled))
     .catch((error) => console.error(error));
 
-  $: checkAllowance(amount, $token, $bridgeType, $srcChain, $signer)
+  $: checkAllowance(amount, $token, $bridgeType, $srcChain, $signer, feeAmount)
     .then((isRequired) => (requiresAllowance = isRequired))
     .catch((error) => {
       console.error(error);
@@ -568,7 +624,7 @@
   </div>
 
   <div>
-    <ProcessingFee bind:method={feeMethod} bind:amount={feeAmount} />
+    <ProcessingFee bind:method={feeMethod} bind:amount={feeAmount}/>
   </div>
 
   <div>
@@ -578,6 +634,7 @@
   <ActionButtons
     token={$token}
     {requiresAllowance}
+    {requiresAllowanceMxc}
     {computingAllowance}
     {tokenBalance}
     {computingTokenBalance}
