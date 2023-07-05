@@ -23,6 +23,18 @@ import axios from "axios";
 import { getConfig } from "./getConfig";
 import { getStateVariables } from "./getStateVariables";
 
+
+enum LogLevel {
+  DEBUG = "DEBUG",
+  INFO = "INFO",
+  WARNING = "WARNING",
+  ERROR = "ERROR",
+  OFF = "OFF"
+}
+
+
+ethers.utils.Logger.setLogLevel(LogLevel.OFF);
+
 export function buildStatusIndicators(
   config: ReturnType<typeof initConfig>,
   onProverClick: (value: Status) => void,
@@ -283,9 +295,8 @@ export function buildStatusIndicators(
           provider
         );
         const decimals = await tko.decimals();
-        return `${ethers.utils.formatUnits(fee, decimals)} ${
-          import.meta.env.VITE_FEE_TOKEN_SYMBOL ?? "TKO"
-        }`;
+        return `${ethers.utils.formatUnits(fee, decimals)} ${import.meta.env.VITE_FEE_TOKEN_SYMBOL ?? "TKO"
+          }`;
       },
       watchStatusFunc: null,
       provider: config.l1Provider,

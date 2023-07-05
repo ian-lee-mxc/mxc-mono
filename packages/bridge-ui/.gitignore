@@ -1,6 +1,3 @@
-
-.vercel
-
 # Logs
 logs
 *.log
@@ -30,3 +27,4 @@ dist-ssr
 
 # vite
 vite.config.ts.timestamp-*.mjs
+.vercel

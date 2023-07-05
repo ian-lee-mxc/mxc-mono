@@ -39,8 +39,9 @@ export default async function handler(req, res) {
   }
 
   // recaptcha check
-  let getToken = await redis.get(token);
-  if (!getToken) {
+  // let getToken = await redis.get(token);
+  let getToken = await redis.hget('token', token);
+  if (!getToken || getToken != '1') {
     return res
       .status(200)
       .send({ status: 13, msg: `This reCAPTCHA is not allowed.` });
@@ -50,9 +51,10 @@ export default async function handler(req, res) {
   let receHashVal = await redis.hget('address', address);
   if (receHashVal == '1') {
     await redis.del(token);
-    return res
-      .status(200)
-      .send({ status: 12, msg: `This address has already received ETH from the faucet` });
+    return res.status(200).send({
+      status: 12,
+      msg: `This address has already received ETH from the faucet`,
+    });
   }
 
   // ip check
@@ -60,9 +62,10 @@ export default async function handler(req, res) {
   let ipVal = await redis.hget('ips', ipAddress);
   if (ipVal == '1') {
     await redis.del(token);
-    return res
-      .status(200)
-      .send({ status: 11, msg: `Try to use your mobile data to claim the token.` });
+    return res.status(200).send({
+      status: 11,
+      msg: `Try to use your mobile data to claim the faucet.`,
+    });
   }
 
   try {

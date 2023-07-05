@@ -1,18 +1,16 @@
+import type { Address } from '@wagmi/core';
 import type { ComponentType } from 'svelte';
 
-type Address = {
-  chainId: number;
-  address: string;
-};
+import type { ChainID } from './chain';
 
 export type Token = {
   name: string;
-  addresses: Address[];
+  addresses: Record<ChainID, Address>;
   symbol: string;
   decimals: number;
   logoUrl?: string;
   // is chain token
-  isETHToken?: boolean;
+  isChainToken?: boolean;
   // faucet get number
   tokenFaucet?: number;
   logoComponent: ComponentType;
@@ -22,7 +20,7 @@ export type TokenDetails = {
   symbol: string;
   decimals: number;
   address: string;
-  userTokenBalance: string;
+  balance: string;
 };
 
 export interface TokenService {

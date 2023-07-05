@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import config from '../../config.js';
-let { RPC_URL, private_key, c_faucet, abiFaucet } = config;
+let { RPC_URL, private_key, c_faucet, abiFaucet, gasPrice, gasLimit } = config;
 
 const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
 const wallet = new ethers.Wallet(private_key, provider);
@@ -24,10 +24,11 @@ export default async function handler(req, res) {
 
   const contractFaucet = new ethers.Contract(c_faucet, abiFaucet, wallet);
   try {
-    await contractFaucet.callStatic.requestMXC(address, {
-      gasPrice: 9000000000000,
-      gasLimit: 3000000,
-    });
+    // await contractFaucet.callStatic.requestMXC(address, {
+    //   gasPrice,
+    //   gasLimit,
+    // });
+    await contractFaucet.callStatic.requestMXC(address);
   } catch (error) {
     console.log(error);
     return res.status(200).send({
@@ -36,10 +37,12 @@ export default async function handler(req, res) {
     });
   }
 
-  let tx = await contractFaucet.requestMXC(address, {
-    gasPrice: 9000000000000,
-    gasLimit: 3000000,
-  });
+  // let tx = await contractFaucet.requestMXC(address, {
+  //   gasPrice,
+  //   gasLimit,
+  // });
+  let tx = await contractFaucet.requestMXC(address);
   await tx.wait();
+
   return res.status(200).send({ status: 200, msg: `Request successful!` });
 }

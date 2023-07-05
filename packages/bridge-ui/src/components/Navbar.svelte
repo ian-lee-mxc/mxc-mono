@@ -1,13 +1,15 @@
 <script lang="ts">
-  import Connect from './buttons/Connect.svelte';
-  // import TaikoLogo from './icons/TaikoLogo.svelte';
-  // import TaikoLight from './icons/TaikoLight.svelte';
+  import { fly } from 'svelte/transition';
+  import { Moon, Sun } from 'svelte-heros-v2';
+
   import { signer } from '../store/signer';
   import AddressDropdown from './AddressDropdown.svelte';
   import ChainDropdown from './ChainDropdown.svelte';
-  // import TaikoLogoFluo from './icons/TaikoLogoFluo.svelte';
-  import { Sun, Moon } from 'svelte-heros-v2';
-  import { fly } from 'svelte/transition';
+  import ConnectWallet from './ConnectWallet.svelte';
+  import TaikoLight from './icons/TaikoLight.svelte';
+  import TaikoLogo from './icons/TaikoLogo.svelte';
+  import Tko from './icons/TKO.svelte';
+
   import Logo from '../assets/mxc-logo.svg'
 
   let isDarkMode = localStorage.getItem('theme') === 'dark';
@@ -31,32 +33,56 @@
   }
 </script>
 
-<div class="navbar bg-base-100">
-  <div class="flex-1">
+<div class="navbar md:px-6 bg-base-100">
+  <div class="flex-1 items-end">
     <span class="taiko-light-logo">
       <!-- <TaikoLight width={120} /> -->
-      <img src="{Logo}"  alt="">
+      <img src="{Logo}"  width={120}  alt="">
     </span>
     <span class="taiko-logo">
       <!-- <TaikoLogo width={120} /> -->
-      <img src="{Logo}"  alt="">
+      <img src="{Logo}"  width={120}  alt="">
     </span>
     <span class="md:hidden">
-      <!-- <TaikoLogoFluo width={50} /> -->
+      <!-- <Tko width={50} /> -->
       <img src="{Logo}" width="50"  alt="">
     </span>
-    <a
-      class="pl-3 font-medium hover:text-[#fc0fc0]"
+    <!-- <a
+      class="
+        hidden 
+        text-sm 
+        leading-none
+        md:inline-block 
+        md:pl-4 
+        md:font-medium 
+        md:text-lg 
+        hover:text-[#E81899]
+      "
+      href="https://taiko.xyz/docs/guides/use-the-bridge"
+      target="_blank"
+      rel="noreferrer">Guide ↗</a> -->
+      <a
+      class="
+        hidden 
+        text-sm 
+        leading-none
+        md:inline-block 
+        md:pl-4 
+        md:font-medium 
+        md:text-lg 
+        hover:text-[#E81899]
+        pb-2
+      "
       href="https://wannsee.mxc.com/docs/Tutorials/use-the-bridge"
       target="_blank"
-      rel="noreferrer">Guide</a>
+      rel="noreferrer">Guide ↗</a>
   </div>
   <div class="flex-none">
     {#if $signer}
       <ChainDropdown />
       <AddressDropdown />
     {:else}
-      <Connect />
+      <ConnectWallet />
     {/if}
 
     <div class="ml-2">

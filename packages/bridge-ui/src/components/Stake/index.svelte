@@ -2,15 +2,15 @@
 	import { _ } from 'svelte-i18n';
 	import { onMount } from 'svelte';
 	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
-	import { errorToast, successToast } from '../Toast.svelte';
-	import Button from '../buttons/Button.svelte';
+    import { errorToast, successToast } from '../NotificationToast.svelte';
+    import Button from '../Button.svelte';
 	import { signer } from '../../store/signer';
   	import { BigNumber, Contract, ethers, Signer } from 'ethers';
-	import { fromChain, toChain } from '../../store/chain';
-	import { L1_HEADER_SYNC_ADDRESS, TEST_ERC20 } from '../../constants/envVars';
+    import { srcChain } from '../../store/chain';
+	import { L1_CROSS_CHAIN_SYNC_ADDRESS, TEST_ERC20 } from '../../constants/envVars';
 	import { truncateString } from '../../utils/truncateString';
-	import MXCL1_ABI from '../../constants/abi/MxcL1';
-	import ERC20_ABI from '../../constants/abi/ERC20';
+	import MXCL1_ABI from '../../constants/abis/MXCL1';
+	import {erc20ABI} from '../../constants/abi/';
 	import { L1_CHAIN_ID } from '../../constants/envVars';
 	import type { Chain } from '../../domain/chain';
 	// import { format } from 'prettier';
@@ -19,7 +19,8 @@
 		pendingTransactions,
 		// transactioner,
 		transactions as transactionsStore,
-	} from '../../store/transactions';
+	} from '../../store/transaction';
+
 	const parseEther = ethers.utils.parseEther
 	const mxcAddr = TEST_ERC20.filter(item=>item.symbol=="MXC")[0].address
 	let amountInput: HTMLInputElement;
@@ -32,32 +33,34 @@
 
 	async function getUserStack(
 		signer: ethers.Signer,
-		fromChain: Chain,
+		srcChain: Chain,
 	) {
-		if (signer && fromChain && fromChain.id==L1_CHAIN_ID) {
+		if (signer && srcChain && srcChain.id==L1_CHAIN_ID) {
 			let _addr = await signer.getAddress()
 			// const addr = await addrForToken();
 			if (_addr == ethers.constants.AddressZero) {
 				stakeBalance = '0';
 				return;
 			}
-			const contract = new Contract(L1_HEADER_SYNC_ADDRESS, MXCL1_ABI, signer);
-			const userBalance = await contract.getStakeAmount();
+			const contract = new Contract(L1_CROSS_CHAIN_SYNC_ADDRESS, MXCL1_ABI, signer);
+			// const userBalance = await contract.getStakeAmount();
+            let addr = await signer.getAddress()
+			const userBalance = await contract.getMxcTokenBalance(addr);
 			stakeBalance = ethers.utils.formatUnits(userBalance, 18);
 		}
 	}
 
 	async function getUserBalance(
 		signer: ethers.Signer,
-		fromChain: Chain,
+		srcChain: Chain,
 	) {
-		if (signer && fromChain && fromChain.id==L1_CHAIN_ID) {
+		if (signer && srcChain && srcChain.id==L1_CHAIN_ID) {
 			let _addr = await signer.getAddress()
 			if (_addr == ethers.constants.AddressZero) {
 				tokenBalance = '0';
 				return;
 			}
-			const contract = new Contract(mxcAddr, ERC20_ABI, signer);
+			const contract = new Contract(mxcAddr, erc20ABI, signer);
 			const userBalance = await contract.balanceOf(await signer.getAddress());
 			tokenBalance = ethers.utils.formatUnits(userBalance, 18);
 		}
@@ -65,14 +68,14 @@
 
 	async function checkAllowance(
 		amt: string,
-		fromChain: Chain,
+		srcChain: Chain,
 		signer: Signer,
 	) {
-		if (!fromChain || !amt || !signer) return false;
+		if (!srcChain || !amt || !signer) return false;
 
 		let signer_addr = await signer.getAddress()
-		const mxcToken = new Contract(mxcAddr, ERC20_ABI, signer);
-		let allowance = await mxcToken.allowance(signer_addr, L1_HEADER_SYNC_ADDRESS)
+		const mxcToken = new Contract(mxcAddr, erc20ABI, signer);
+		let allowance = await mxcToken.allowance(signer_addr, L1_CROSS_CHAIN_SYNC_ADDRESS)
 		// console.log(parseFloat(amt) >= parseFloat(formatEther(allowance)))
 		// need allowance return true, 
 		return parseFloat(amt) > parseFloat(formatEther(allowance));
@@ -81,8 +84,8 @@
 	async function approve() {
 		try {
 			loading = true;
-			const mxcToken = new Contract(mxcAddr, ERC20_ABI, $signer);
-			await mxcToken.approve(L1_HEADER_SYNC_ADDRESS, parseEther(amount));
+			const mxcToken = new Contract(mxcAddr, erc20ABI, $signer);
+			await mxcToken.approve(L1_CROSS_CHAIN_SYNC_ADDRESS, parseEther(amount));
 
 			requiresAllowance = false;
 		} catch (e) {
@@ -95,24 +98,22 @@
 
 	async function stake() {
 		try {
-			const mxcL1 = new Contract(L1_HEADER_SYNC_ADDRESS, MXCL1_ABI, $signer);
-			let mockData = await mxcL1.callStatic.stake(parseEther(amount))
+			const mxcL1 = new Contract(L1_CROSS_CHAIN_SYNC_ADDRESS, MXCL1_ABI, $signer);
+			let mockData = await mxcL1.callStatic.depositMxcToken(parseEther(amount))
 			if(!mockData) {
 				errorToast($_('toast.errorSendingTransaction'));
 			}
 
-			const tx = await mxcL1.stake(parseEther(amount))
-			pendingTransactions.update((store) => {
-				store.push(tx);
-				return store;
-			});
+			// console.log("success")
+			const tx = await mxcL1.depositMxcToken(parseEther(amount))
+			pendingTransactions.add(tx, $signer);
 
 			successToast($_('toast.transactionSent'));
 			amountInput.value = ""
 			await $signer.provider.waitForTransaction(tx.hash, 1);
 
-			await getUserStack($signer, $fromChain)
-			await getUserBalance($signer, $fromChain)
+			await getUserStack($signer, $srcChain)
+			await getUserBalance($signer, $srcChain)
 
 		} catch (e) {
 			console.error(e);
@@ -122,18 +123,18 @@
 		}
 	}
 
-	$: getUserStack($signer, $fromChain);
-	$: getUserBalance($signer, $fromChain);
+	$: getUserStack($signer, $srcChain);
+	$: getUserBalance($signer, $srcChain);
 	$: isBtnDisabled(
 		$signer,
 		amount,
 		tokenBalance,
-		$fromChain,
+		$srcChain,
 	)
     .then((d) => (btnDisabled = d))
     .catch((e) => console.error(e));
 
-	$: checkAllowance(amount, $fromChain, $signer)
+	$: checkAllowance(amount, $srcChain, $signer)
     .then((a) => (requiresAllowance = a))
     .catch((e) => console.error(e));
 
@@ -141,12 +142,12 @@
 		signer: Signer,
 		amount: string,
 		tokenBalance: string,
-		fromChain: Chain,
+		srcChain: Chain,
 	) {
 		if (!signer) return true;
 		if (!tokenBalance) return true;
-		if (!fromChain) return true;
-		const chainId = fromChain.id;
+		if (!srcChain) return true;
+		const chainId = srcChain.id;
 		if (!chainId || chainId!==L1_CHAIN_ID) return true;
 
 		if (!amount || ethers.utils.parseUnits(amount).eq(BigNumber.from(0)))
@@ -200,7 +201,7 @@
 		  class="input-group relative rounded-lg bg-dark-2 justify-between items-center pr-4">
 		  <input
 			type="number"
-			placeholder="5000"
+			placeholder="6000000"
 			min="0"
 			on:input={updateAmount}
 			class="input input-primary bg-dark-2 input-md md:input-lg w-full focus:ring-0 border-dark-2"
@@ -208,7 +209,7 @@
 			bind:this={amountInput} />
 		</label>
 		<!-- svelte-ignore a11y-label-has-associated-control -->
-		<label class="label label-text text-left">At least stake 5000 MXC</label>
+		<label class="label label-text text-left">At least stake 6,000,000 MXC</label>
 	</div>
 	
 	{#if loading}
