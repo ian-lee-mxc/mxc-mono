@@ -1,7 +1,7 @@
 <script lang="ts">
   // import { UserRejectedRequestError } from '@wagmi/core';
   // import { chains } from '../../chain/chains';
-  import { ethers, type Signer } from 'ethers';
+  import { ethers, Contract, type Signer } from 'ethers';
   import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
   import axios from 'axios';
   import { onMount } from 'svelte';
@@ -29,13 +29,12 @@
     warningToast,
   } from '../NotificationToast.svelte';
   import TestTokenDropdown from './TestTokenDropdown.svelte';
-  import { SITE_KEY  } from '../../constants/envVars';
+  import { SITE_KEY } from '../../constants/envVars';
+  import { L2Contracts, L2Abis } from '../../constants/config';
 
-  
   // import { selectChain } from '../../utils/selectChain';
   // import Eth from '../icons/ETH.svelte';
   // import Tko from '../icons/TKO.svelte';
-  
 
   const log = getLogger('component:Faucet');
 
@@ -50,129 +49,146 @@
   let allowCaptcha: boolean = false;
   let isFaucetEth: boolean = true;
   let capToken: string;
+  let mxcAllowed: string = 0;
 
-
-  const getMXCTokenApi = async (address:string) => {
+  const getMXCTokenApi = async (address: string) => {
     const response = await axios.get(`/api/faucet/mxc/${address}`);
     return response.data;
   };
 
-  const getMoonTokenApi = async (address:string) => {
+  const getMoonTokenApi = async (address: string) => {
     const response = await axios.get(`/api/faucet/moon/${address}`);
     return response.data;
   };
 
-  const getEthApi = async (address:string) => {
-    const response = await axios.post(`/api/faucet/arbgoerli`,{address, token: capToken});
+  const getEthApi = async (address: string) => {
+    const response = await axios.post(`/api/faucet/arbgoerli`, {
+      address,
+      token: capToken,
+    });
     return response.data;
   };
 
-  const recaptchaApi = async (token:string) => {
-    const response = await axios.post(`/api/recaptcha`,{token});
+  const recaptchaApi = async (token: string) => {
+    const response = await axios.post(`/api/recaptcha`, { token });
     return response.data;
   };
-
 
   $: setAddress($signer).catch((e) => console.error(e));
   async function setAddress(signer: Signer) {
     try {
       address = await signer.getAddress();
-    } catch (error) {
-      
-    }
+    } catch (error) {}
   }
 
   async function getEth() {
     loading3 = true;
-    if(!address) {
-      errorToast("No address account!");
-      return
+    if (!address) {
+      errorToast('No address account!');
+      return;
     }
-    let res =  await getEthApi(address);
-    if(res.status==200) {
-      isFaucetEth = false
-      successToast("Request successful!");
+    let res = await getEthApi(address);
+    if (res.status == 200) {
+      isFaucetEth = false;
+      successToast('Request successful!');
     } else {
-      isFaucetEth = true
+      isFaucetEth = true;
       errorToast(res.msg);
     }
-    
-    loading3 = false
-    if((window as any).grecaptcha) {
-      (window as any).grecaptcha.reset()
+
+    loading3 = false;
+    if ((window as any).grecaptcha) {
+      (window as any).grecaptcha.reset();
     }
   }
 
   async function getMxcToken() {
     loading = true;
 
-    if(!address) {
-      errorToast("No address account!");
-      return
+    if (!address) {
+      errorToast('No address account!');
+      return;
     }
 
-    let res =  await getMXCTokenApi(address);
-    if(res.status==200) {
-      successToast("Request successful!");
+    let res = await getMXCTokenApi(address);
+    if (res.status == 200) {
+      successToast('Request successful!');
     } else {
       errorToast(res.msg);
     }
-    loading = false
+    loading = false;
   }
 
   async function getMoonToken() {
     loading2 = true;
 
-    if(!address) {
-      errorToast("No address account!");
-      return
+    if (!address) {
+      errorToast('No address account!');
+      return;
     }
 
-    let res =  await getMoonTokenApi(address);
-    if(res.status==200) {
-      successToast("Request successful!");
+    let res = await getMoonTokenApi(address);
+    if (res.status == 200) {
+      successToast('Request successful!');
     } else {
       errorToast(res.msg);
     }
-    loading2 = false
-  }  
+    loading2 = false;
+  }
 
   function getCaptcha() {
     setTimeout(() => {
-      try{
-        (window as any).grecaptcha.render("grecaptcha", {
+      try {
+        (window as any).grecaptcha.render('grecaptcha', {
           sitekey: SITE_KEY,
-          callback: async(token)=>{
-            let res = await recaptchaApi(token)
-            if(res.data && res.data.success) {
-              allowCaptcha = true
-              isFaucetEth = true
-              capToken = res.data.token || ""
+          callback: async (token) => {
+            let res = await recaptchaApi(token);
+            if (res.data && res.data.success) {
+              allowCaptcha = true;
+              isFaucetEth = true;
+              capToken = res.data.token || '';
             } else {
-              allowCaptcha = false
+              allowCaptcha = false;
             }
-          }
+          },
         });
-      }catch(error){
-        console.log(error)
+      } catch (error) {
+        console.log(error);
         // getCaptcha()
       }
     }, 1000);
   }
 
   $: if ($srcChain && $srcChain.id === L1_CHAIN_ID) {
-    getCaptcha()
+    getCaptcha();
   }
 
-  onMount(async() => {
+  async function getFaucetAmount(signer: ethers.Signer, srcChain: Chain) {
+    if (signer && srcChain && srcChain.id == L2_CHAIN_ID) {
+
+      const contract = new Contract(L2Contracts.faucet, L2Abis.faucet, signer);
+      let getMxcAllowed = await contract.mxcAllowed();
+      mxcAllowed = ethers.utils.formatUnits(getMxcAllowed, 18);
+    }
+  }
+
+  $: getFaucetAmount($signer, $srcChain);
+
+  onMount(async () => {
     (async () => {
       await setAddress($signer);
-      getCaptcha()
+      getCaptcha();
     })();
   });
 
   async function shouldDisableButton(signer: Signer, _token: Token) {
-    if (!signer || !_token || !isTestToken(_token) || $srcChain.id===L2_CHAIN_ID || _token.symbol === "WETH") {
+    if (
+      !signer ||
+      !_token ||
+      !isTestToken(_token) ||
+      $srcChain.id === L2_CHAIN_ID ||
+      _token.symbol === 'WETH'
+    ) {
       // If signer or token is missing, the button
       // should remained disabled
       return true;
@@ -339,11 +355,13 @@
           class="w-6/12"
           disabled={!address}
           on:click={getMxcToken}>
-          Claim 1000 MXC
+          Claim {mxcAllowed} MXC
         </Button>
       {/if}
-      
-      <p class="mb-5 mt-1 text-sm">Limit the use of a single address to once per day.</p>
+
+      <p class="mb-5 mt-1 text-sm">
+        Limit the use of a single address to once per day.
+      </p>
     </div>
 
     <div>
@@ -370,15 +388,17 @@
           Claim 1 Moon
         </Button>
       {/if}
-      <p class="mt-1 text-sm">Limit the token redemption to a single occurrence </p>
+      <p class="mt-1 text-sm">
+        Limit the token redemption to a single occurrence
+      </p>
       <p class="text-sm">for a specific wallet address.</p>
     </div>
-    
   {:else}
     {#if loading3}
       <Button type="accent" size="lg" class="w-6/12" disabled={true}>
         <LottiePlayer
-          src='/lottie/loader.json',
+          src="/lottie/loader.json"
+          ,
           autoplay={true}
           loop={true}
           controls={false}
@@ -398,8 +418,11 @@
         Claim 0.02 ETH
       </Button>
     {/if}
-    <p class="mt-1">The Arbitrum-Goerli eth can be received only once  by an address account in the Wannsee network.</p>
-    <div class="mt-4 flex justify-center" id="grecaptcha"></div>
+    <p class="mt-1">
+      The Arbitrum-Goerli eth can be received only once by an address account in
+      the Wannsee network.
+    </p>
+    <div class="mt-4 flex justify-center" id="grecaptcha" />
 
     <TestTokenDropdown bind:selectedToken={$token} />
 
@@ -410,7 +433,11 @@
         network will be changed first. You must have a small amount of ETH in
         your {L1_CHAIN_NAME}
         wallet to send the transaction. -->
-         MXC Arbitrum Faucet - This faucet is only for running MXC supernodes. Each address will get {$token.tokenFaucet} {$token.symbol}. If you want to get MXC faucet on Wannsee, you need to change your network first. Please make sure you get the Arbitrum Goerli ETH first in this faucet.
+        MXC Arbitrum Faucet - This faucet is only for running MXC supernodes. Each
+        address will get {$token.tokenFaucet}
+        {$token.symbol}. If you want to get MXC faucet on Wannsee, you need to
+        change your network first. Please make sure you get the Arbitrum Goerli
+        ETH first in this faucet.
       </p>
     {:else}
       <p>No token selected to mint.</p>
@@ -431,8 +458,5 @@
         {/if}
       </span>
     </Button>
-
-    
-    
   {/if}
 </div>

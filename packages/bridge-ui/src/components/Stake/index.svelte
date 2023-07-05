@@ -104,17 +104,16 @@
 				errorToast($_('toast.errorSendingTransaction'));
 			}
 
-			console.log("success")
+			// console.log("success")
+			const tx = await mxcL1.depositMxcToken(parseEther(amount))
+			pendingTransactions.add(tx, $signer);
 
-			// const tx = await mxcL1.stake(parseEther(amount))
-			// pendingTransactions.add(tx, $signer);
+			successToast($_('toast.transactionSent'));
+			amountInput.value = ""
+			await $signer.provider.waitForTransaction(tx.hash, 1);
 
-			// successToast($_('toast.transactionSent'));
-			// amountInput.value = ""
-			// await $signer.provider.waitForTransaction(tx.hash, 1);
-
-			// await getUserStack($signer, $srcChain)
-			// await getUserBalance($signer, $srcChain)
+			await getUserStack($signer, $srcChain)
+			await getUserBalance($signer, $srcChain)
 
 		} catch (e) {
 			console.error(e);
