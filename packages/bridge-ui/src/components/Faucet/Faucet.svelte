@@ -433,11 +433,15 @@
         network will be changed first. You must have a small amount of ETH in
         your {L1_CHAIN_NAME}
         wallet to send the transaction. -->
+<<<<<<< HEAD
         MXC Arbitrum Faucet - This faucet is only for running MXC supernodes. Each
         address will get {$token.tokenFaucet}
         {$token.symbol}. If you want to get MXC faucet on Wannsee, you need to
         change your network first. Please make sure you get the Arbitrum Goerli
         ETH first in this faucet.
+=======
+         MXC Arbitrum Faucet - This faucet is only for running MXC supernodes. Each address will get {$token.tokenFaucet} {$token.symbol}. If you want to get MXC faucet on Wannsee, you need to change your network first. Please make sure you get the Arbitrum Goerli ETH first in this faucet.
+>>>>>>> da0e863 (merge)
       </p>
     {:else}
       <p>No token selected to mint.</p>

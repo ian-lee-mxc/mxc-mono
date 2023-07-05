@@ -23,8 +23,8 @@ export default {
   // c_moonToken: `0x6c3c72297C448A4BAa6Fc45552657Ad68378E3E1`,
   // c_faucet: `0x3c195C14D329C6B91Fd241d09a960d5A31eA8742`,
 
-  // RPC_URL: `https://wannsee-rpc.mxc.com`,
-  RPC_URL: `http://207.246.99.8:8545`,
+  RPC_URL: `https://wannsee-rpc.mxc.com`,
+  // RPC_URL: `http://207.246.99.8:8545`,
   L1_RPC_URL: `https://goerli-rollup.arbitrum.io/rpc`,
   c_moonToken: `0x13d65548C25A7448fDBb95ae1CC48266DfE0fc51`,
   c_faucet: `0xcD641fd19E4C792531fB7A4a61C075E68309285d`,
