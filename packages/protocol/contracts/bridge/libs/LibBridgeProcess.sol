@@ -181,7 +181,7 @@ library LibBridgeProcess {
                 }
             }else {
                 if(message.processingFee > 0) {
-                    tokenVault.receiveMXC(message.sender, message.processingFee);
+                    tokenVault.receiveMXC(msg.sender, message.processingFee);
                 }
                 if(refundAmount > 0) {
                     tokenVault.receiveWETH(message.owner, refundAmount);
