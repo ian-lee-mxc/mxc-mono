@@ -210,8 +210,11 @@ library LibProving {
         }
         uint256 reward = LibTokenomics.getProofReward(resolver, config, state, uint64(fc.provenAt - blk.proposedAt));
 
-        // pending reward add to next propose block meta
-        state.mxcTokenBalances[address(1)] += reward;
+        if(reward > 0) {
+            // pending reward add to next propose block meta
+            state.proveMetaReward += uint64(reward / 1e16);
+        }
+
 
         emit BlockProven({
             id: blk.blockId,

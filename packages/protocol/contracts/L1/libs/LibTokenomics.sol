@@ -35,6 +35,7 @@ library LibTokenomics {
 
         unchecked {
             state.mxcTokenBalances[msg.sender] -= amount;
+            state.totalStakeMxcTokenBalances -= amount;
         }
 
         state.mxcTokenWithdrawalReleaseTime[msg.sender] = 0;
@@ -64,6 +65,7 @@ library LibTokenomics {
             MxcToken(resolver.resolve("mxc_token", false)).burn(msg.sender, amount);
             state.mxcTokenWithdrawalReleaseTime[msg.sender] = 0;
             state.mxcTokenBalances[msg.sender] += amount;
+            state.totalStakeMxcTokenBalances += amount;
         }
     }
 
@@ -80,18 +82,13 @@ library LibTokenomics {
         returns (uint256)
     {
         uint64 numBlocksUnverified = state.numBlocks - state.lastVerifiedBlockId - 1;
+        uint64 avgBlockTime = (uint64(block.timestamp) - state.blocks[state.lastVerifiedBlockId].proposedAt) / numBlocksUnverified;
 
         if (numBlocksUnverified == 0 || state.lastVerifiedBlockId == 0) {
             return 0;
         } else {
             // CHANGE(MXC): proof reward
-            uint256 baseReward = (MxcToken(resolver.resolve("mxc_token", false)).totalSupply() / 42 / 365 days);
-
-            if(numBlocksUnverified > 1000) {
-                return baseReward;
-            }
-            // Add an additional reward proportional to the number of unverified blocks  max = baseReward
-            uint256 additionalReward = baseReward * (1000 - numBlocksUnverified + 1) / (1000 + 5 * numBlocksUnverified - 1);
+            uint256 baseReward = (MxcToken(resolver.resolve("mxc_token", false)).totalSupply() / 14 / 365 days) * avgBlockTime / 2;
 
             uint proofRate = 1;
             if (proofTime != 0) {
@@ -102,8 +99,7 @@ library LibTokenomics {
             }
             uint256 proofTimeAddtionReward = baseReward * proofRate;
 
-
-            return baseReward + additionalReward + proofTimeAddtionReward;
+            return ((baseReward + proofTimeAddtionReward) / 1e16) * 1e16;
         }
     }
 
@@ -119,7 +115,7 @@ library LibTokenomics {
         if(elapsedSeconds == 0) {
             elapsedSeconds = 1;
         }
-        return (MxcToken(resolver.resolve("mxc_token", false)).totalSupply() / 20 / 365 days) * elapsedSeconds;
+        return ((MxcToken(resolver.resolve("mxc_token", false)).totalSupply() / 20 / 365 days) * elapsedSeconds / 1e16) * 1e16;
     }
 
     /**

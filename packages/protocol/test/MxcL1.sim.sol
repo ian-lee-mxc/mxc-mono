@@ -106,6 +106,7 @@ contract MxcL1Simulation is MxcL1TestBase {
         assertEq(time, 1);
 
         depositMxcToken(Alice, 1e9 * 1e18, 10000 ether);
+        depositMxcToken(Bob, 1e9 * 1e18, 10000 ether);
 
         MxcData.BlockMetadata[] memory metas = new MxcData.BlockMetadata[](
             blocksToSimulate

@@ -13,6 +13,7 @@ import {Proxied} from "../common/Proxied.sol";
 import {LibEthDepositing} from "./libs/LibEthDepositing.sol";
 import {LibTokenomics} from "./libs/LibTokenomics.sol";
 import {LibProposing} from "./libs/LibProposing.sol";
+import {LibElection} from "./libs/LibElection.sol";
 import {LibProving} from "./libs/LibProving.sol";
 import {LibUtils} from "./libs/LibUtils.sol";
 import {LibVerifying} from "./libs/LibVerifying.sol";
@@ -88,6 +89,7 @@ contract MxcL1 is EssentialContract, ICrossChainSync, MxcEvents, MxcErrors {
         returns (MxcData.BlockMetadata memory meta)
     {
         MxcData.Config memory config = getConfig();
+        LibElection.electionBlock({state: state, config: config});
         meta = LibProposing.proposeBlock({
             state: state,
             config: config,

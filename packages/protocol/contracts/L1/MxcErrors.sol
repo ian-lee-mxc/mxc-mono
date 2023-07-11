@@ -30,4 +30,6 @@ abstract contract MxcErrors {
     error L1_TX_LIST_HASH();
     error L1_TX_LIST_RANGE();
     error L1_TX_LIST();
+    error L1_ELECTION_INVALID_PROPOSER();
+    error L1_ELECTION_SPEED();
 }

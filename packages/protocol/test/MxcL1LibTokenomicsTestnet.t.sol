@@ -775,6 +775,7 @@ contract MxcL1LibTokenomicsTestnet is MxcL1TestBase {
         // Run another session with huge times
         for (uint256 blockId = 1; blockId < 110; blockId++) {
             {
+                skip(12);
                 meta[blockId] = proposeBlock(Alice, 1000000, 1024);
                 proposedAt[blockId] = (uint64(block.timestamp));
                 printVariables("after propose");
