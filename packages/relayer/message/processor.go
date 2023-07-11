@@ -9,8 +9,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 
-	"github.com/taikoxyz/taiko-mono/packages/relayer"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/proof"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/proof"
 )
 
 type ethClient interface {
@@ -19,6 +19,7 @@ type ethClient interface {
 	BlockNumber(ctx context.Context) (uint64, error)
 	HeaderByHash(ctx context.Context, hash common.Hash) (*types.Header, error)
 	SuggestGasPrice(ctx context.Context) (*big.Int, error)
+	SuggestGasTipCap(ctx context.Context) (*big.Int, error)
 }
 
 type Processor struct {
@@ -95,7 +96,7 @@ func NewProcessor(opts NewProcessorOpts) (*Processor, error) {
 	}
 
 	if opts.DestHeaderSyncer == nil {
-		return nil, relayer.ErrNoTaikoL2
+		return nil, relayer.ErrNoMxcL2
 	}
 
 	if opts.Confirmations == 0 {

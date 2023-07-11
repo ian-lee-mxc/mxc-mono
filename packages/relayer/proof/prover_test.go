@@ -1,11 +1,12 @@
 package proof
 
 import (
+	"github.com/ethereum/go-ethereum/rpc"
 	"testing"
 
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/mock"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/taikoxyz/taiko-mono/packages/relayer"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/mock"
 	"gopkg.in/go-playground/assert.v1"
 )
 
@@ -19,15 +20,18 @@ func Test_New(t *testing.T) {
 	tests := []struct {
 		name    string
 		blocker blocker
+		client  *rpc.Client
 		wantErr error
 	}{
 		{
 			"success",
 			&ethclient.Client{},
+			&rpc.Client{},
 			nil,
 		},
 		{
 			"noEthClient",
+			nil,
 			nil,
 			relayer.ErrNoEthClient,
 		},
@@ -35,7 +39,7 @@ func Test_New(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := New(tt.blocker)
+			_, err := New(tt.blocker, tt.client)
 			assert.Equal(t, tt.wantErr, err)
 		})
 	}

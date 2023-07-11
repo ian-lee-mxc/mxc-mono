@@ -6,12 +6,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/mock"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/repo"
 	"github.com/joho/godotenv"
 	echo "github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
-	"github.com/taikoxyz/taiko-mono/packages/relayer"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/mock"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/repo"
 )
 
 func newTestServer(url string) *Server {

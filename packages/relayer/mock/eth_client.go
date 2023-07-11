@@ -6,10 +6,10 @@ import (
 	"math/big"
 	"time"
 
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/taikoxyz/taiko-mono/packages/relayer"
 )
 
 var (
@@ -26,6 +26,10 @@ type EthClient struct {
 }
 
 func (c *EthClient) SuggestGasPrice(ctx context.Context) (*big.Int, error) {
+	return big.NewInt(100), nil
+}
+
+func (c *EthClient) SuggestGasTipCap(ctx context.Context) (*big.Int, error) {
 	return big.NewInt(100), nil
 }
 

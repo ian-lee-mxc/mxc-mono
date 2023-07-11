@@ -3,7 +3,7 @@ package mock
 import (
 	"context"
 
-	"github.com/taikoxyz/taiko-mono/packages/eventindexer"
+	"github.com/MXCzkEVM/mxc-mono/packages/eventindexer"
 )
 
 type StatRepository struct {

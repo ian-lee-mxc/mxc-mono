@@ -5,15 +5,15 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/contracts/bridge"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/contracts/icrosschainsync"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/mock"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/proof"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/repo"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/taikoxyz/taiko-mono/packages/relayer"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/contracts/bridge"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/contracts/icrosschainsync"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/mock"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/proof"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/repo"
 	"gopkg.in/go-playground/assert.v1"
 )
 
@@ -201,7 +201,7 @@ func Test_NewProcessor(t *testing.T) {
 			relayer.ErrNoEventRepository,
 		},
 		{
-			"errNoTaikoL2",
+			"errNoMxcL2",
 			NewProcessorOpts{
 				Prover:                        &proof.Prover{},
 				ECDSAKey:                      &ecdsa.PrivateKey{},
@@ -213,7 +213,7 @@ func Test_NewProcessor(t *testing.T) {
 				Confirmations:                 1,
 				ConfirmationsTimeoutInSeconds: 900,
 			},
-			relayer.ErrNoTaikoL2,
+			relayer.ErrNoMxcL2,
 		},
 	}
 

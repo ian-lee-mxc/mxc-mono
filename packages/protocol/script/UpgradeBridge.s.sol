@@ -34,6 +34,7 @@ contract UpgradeBridge is Script {
 
         if(l2ChainId == block.chainid) {
             vm.startBroadcast(deployerPrivateKey);
+            addressManagerProxy = address(0x1000777700000000000000000000000000000006);
             bridgeAddress = payable(0x1000777700000000000000000000000000000004);
             tokenVaultAddress = payable(0x1000777700000000000000000000000000000002);
         }else {
@@ -42,11 +43,13 @@ contract UpgradeBridge is Script {
             bridgeAddress = payable(vm.parseJsonAddress(deployL1Json, ".bridge"));
             tokenVaultAddress = payable(vm.parseJsonAddress(deployL1Json, ".token_vault"));
         }
-//        ProxiedBridge newBridge = new ProxiedBridge();
-//        TransparentUpgradeableProxy(bridgeAddress).upgradeTo(address(newBridge));
 
-        ProxiedTokenVault newTokenVault = new ProxiedTokenVault();
-        TransparentUpgradeableProxy(tokenVaultAddress).upgradeTo(address(newTokenVault));
+//        setAddress("weth",address(0x343788cd13Fb71a3DE3E6a2149D880c29F7A3E75));
+        ProxiedBridge newBridge = new ProxiedBridge();
+        TransparentUpgradeableProxy(bridgeAddress).upgradeTo(address(newBridge));
+//
+//        ProxiedTokenVault newTokenVault = new ProxiedTokenVault();
+//        TransparentUpgradeableProxy(tokenVaultAddress).upgradeTo(address(newTokenVault));
 
         vm.stopBroadcast();
 

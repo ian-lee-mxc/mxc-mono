@@ -6,14 +6,14 @@ import (
 	"math/big"
 	"time"
 
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/contracts/bridge"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/contracts/tokenvault"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/contracts/bridge"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/contracts/tokenvault"
 )
 
 var (

@@ -6,7 +6,10 @@ import (
 	"fmt"
 	"math/big"
 	"strings"
+	"time"
 
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/contracts/bridge"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -14,8 +17,6 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"github.com/taikoxyz/taiko-mono/packages/relayer"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/contracts/bridge"
 )
 
 // Process prepares and calls `processMessage` on the bridge.
@@ -44,7 +45,7 @@ func (p *Processor) ProcessMessage(
 	// and later blocks still have the storage trie proof from previous blocks.
 	latestSyncedHeader, err := p.destHeaderSyncer.GetCrossChainBlockHash(&bind.CallOpts{}, big.NewInt(0))
 	if err != nil {
-		return errors.Wrap(err, "taiko.GetSyncedHeader")
+		return errors.Wrap(err, "mxc.GetSyncedHeader")
 	}
 
 	hashed := crypto.Keccak256(
@@ -98,6 +99,10 @@ func (p *Processor) ProcessMessage(
 	}
 
 	relayer.EventsProcessed.Inc()
+
+	ctx, cancel := context.WithTimeout(ctx, 4*time.Minute)
+
+	defer cancel()
 
 	receipt, err := relayer.WaitReceipt(ctx, p.destEthClient, tx.Hash())
 	if err != nil {
@@ -200,12 +205,21 @@ func (p *Processor) sendProcessMessageCall(
 		}
 	}
 
-	gasPrice, err := p.destEthClient.SuggestGasPrice(context.Background())
+	gasTipCap, err := p.destEthClient.SuggestGasTipCap(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "p.destBridge.SuggestGasPrice")
-	}
+		if IsMaxPriorityFeePerGasNotFoundError(err) {
+			auth.GasTipCap = FallbackGasTipCap
+		} else {
+			gasPrice, err := p.destEthClient.SuggestGasPrice(context.Background())
+			if err != nil {
+				return nil, errors.Wrap(err, "p.destBridge.SuggestGasPrice")
+			}
 
-	auth.GasPrice = gasPrice
+			auth.GasPrice = gasPrice
+		}
+	} else {
+		auth.GasTipCap = gasTipCap
+	}
 
 	if bool(p.profitableOnly) {
 		profitable, err := p.isProfitable(ctx, event.Message, cost)

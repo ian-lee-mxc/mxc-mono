@@ -154,6 +154,7 @@ abstract contract MxcL1TestBase is Test {
         internal
         returns (MxcData.BlockMetadata memory meta)
     {
+        skip(12);
         bytes memory txList = new bytes(txListSize);
         MxcData.BlockMetadataInput memory input = MxcData.BlockMetadataInput({
             beneficiary: proposer,

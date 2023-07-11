@@ -134,19 +134,22 @@ library MxcData {
         // address 1  => uint256 accProvenReward;
         mapping(address account => uint256 balance) mxcTokenBalances;
         mapping(bytes32 txListHash => TxListInfo) txListInfo;
-        EthDeposit[] ethDeposits;
+//        EthDeposit[] ethDeposits;
+        uint256 totalStakeMxcTokenBalances;
         // Never or rarely changed
         // Slot 7: never or rarely changed
         uint64 genesisHeight;
         uint64 genesisTimestamp;
         uint16 adjustmentQuotient;
         uint48 prevBaseFee;
-        uint64 __reserved72;
+//        uint64 __reserved72;
+        uint64 proposerElectionTimeoutOffset;
         // Slot 8
         uint64 accProposedAt;
         uint64 accBlockFees;
         uint64 numBlocks;
-        uint64 nextEthDepositToProcess;
+//        uint64 nextEthDepositToProcess;
+        uint64 proveMetaReward;
         // Slot 9
         uint64 blockFee;
         uint64 proofTimeIssued;
@@ -154,6 +157,8 @@ library MxcData {
         uint64 proofTimeTarget;
         // Reserved
         mapping(address account => uint256 unlockTime) mxcTokenWithdrawalReleaseTime;
-        uint256[41] __gap;
+        mapping(uint blockId_ringPerEpoch => address proposer) proposerElections;
+        address[] candidate;
+        uint256[39] __gap;
     }
 }

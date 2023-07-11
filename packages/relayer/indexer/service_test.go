@@ -4,16 +4,16 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/message"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/mock"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/proof"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/repo"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/stretchr/testify/assert"
-	"github.com/taikoxyz/taiko-mono/packages/relayer"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/message"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/mock"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/proof"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/repo"
 )
 
 var dummyEcdsaKey = "8da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f"
@@ -26,6 +26,7 @@ func newTestService() (*Service, relayer.Bridge) {
 
 	prover, _ := proof.New(
 		&mock.Blocker{},
+		&rpc.Client{},
 	)
 
 	processor, _ := message.NewProcessor(message.NewProcessorOpts{

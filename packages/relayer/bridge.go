@@ -3,10 +3,10 @@ package relayer
 import (
 	"math/big"
 
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/contracts/bridge"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/event"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/contracts/bridge"
 )
 
 type Bridge interface {

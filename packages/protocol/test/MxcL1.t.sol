@@ -51,8 +51,8 @@ contract MxcL1Test is MxcL1TestBase {
         bytes32 parentHash = GENESIS_BLOCK_HASH;
         uint32 parentGasUsed = 0;
         uint32 gasUsed = 1000000;
-
         for (uint256 blockId = 1; blockId < conf.maxNumProposedBlocks * 10; blockId++) {
+            skip(12);
             printVariables("before propose");
             MxcData.BlockMetadata memory meta = proposeBlock(Alice, 1000000, 1024);
             printVariables("after propose");
@@ -79,6 +79,7 @@ contract MxcL1Test is MxcL1TestBase {
         uint32 gasUsed = 1000000;
 
         for (uint256 blockId = 1; blockId <= 2; blockId++) {
+            skip(12);
             printVariables("before propose");
             MxcData.BlockMetadata memory meta = proposeBlock(Alice, 1000000, 1024);
             printVariables("after propose");
@@ -104,6 +105,7 @@ contract MxcL1Test is MxcL1TestBase {
         uint32 gasUsed = 1000000;
 
         for (uint256 blockId = 1; blockId <= conf.maxNumProposedBlocks; blockId++) {
+            skip(12);
             printVariables("before propose");
             MxcData.BlockMetadata memory meta = proposeBlock(Alice, 1000000, 1024);
             printVariables("after propose");
@@ -211,6 +213,7 @@ contract MxcL1Test is MxcL1TestBase {
 
         // Propose blocks
         for (uint256 blockId = 1; blockId < iterationCnt; blockId++) {
+            skip(12);
             //printVariables("before propose");
             meta = proposeBlock(Alice, 1000000, 1024);
             mine(5);

@@ -102,6 +102,7 @@ contract MxcL1OracleTest is MxcL1TestBase {
         MxcData.BlockMetadata memory meta = proposeBlock(Alice, 1000000, 1024);
 
         for (uint256 i = 0; i < 5; ++i) {
+            skip(12);
             uint32 parentGasUsed = uint32(10000 + i);
 
             // Bob proves the block
@@ -171,6 +172,7 @@ contract MxcL1OracleTest is MxcL1TestBase {
         MxcData.BlockMetadata memory meta = proposeBlock(Alice, 1000000, 1024);
 
         for (uint256 i = 0; i < 5; ++i) {
+            skip(12);
             uint32 parentGasUsed = uint32(10000 + i);
 
             // Bob proves the block

@@ -2,11 +2,12 @@ package proof
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/encoding"
 	"github.com/labstack/gommon/log"
-	"github.com/taikoxyz/taiko-mono/packages/relayer"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/encoding"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -23,18 +24,22 @@ func (p *Prover) EncodedSignalProof(
 	key string,
 	blockHash common.Hash,
 ) ([]byte, error) {
-	blockHeader, err := p.blockHeader(ctx, blockHash)
+	//blockHeader, err := p.blockHeader(ctx, blockHash)
+	//if err != nil {
+	//	return nil, errors.Wrap(err, "p.blockHeader")
+	//}
+	blockNumber, err := p.BlockNumberByHash(ctx, blockHash)
 	if err != nil {
+		fmt.Println(blockHash.String())
 		return nil, errors.Wrap(err, "p.blockHeader")
 	}
-
-	encodedStorageProof, err := p.encodedStorageProof(ctx, caller, signalServiceAddress, key, blockHeader.Height.Int64())
+	encodedStorageProof, err := p.encodedStorageProof(ctx, caller, signalServiceAddress, key, blockNumber.Int64())
 	if err != nil {
 		return nil, errors.Wrap(err, "p.getEncodedStorageProof")
 	}
 
 	signalProof := encoding.SignalProof{
-		Height: blockHeader.Height,
+		Height: blockNumber,
 		Proof:  encodedStorageProof,
 	}
 

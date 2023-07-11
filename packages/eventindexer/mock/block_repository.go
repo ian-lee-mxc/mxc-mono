@@ -4,7 +4,7 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/taikoxyz/taiko-mono/packages/eventindexer"
+	"github.com/MXCzkEVM/mxc-mono/packages/eventindexer"
 )
 
 var (

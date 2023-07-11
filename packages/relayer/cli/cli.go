@@ -12,15 +12,15 @@ import (
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/labstack/echo/v4"
 
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/db"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/http"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/indexer"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/repo"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/joho/godotenv"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"github.com/taikoxyz/taiko-mono/packages/relayer"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/db"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/http"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/indexer"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/repo"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -31,7 +31,7 @@ var (
 		"HTTP_PORT",
 		"L1_BRIDGE_ADDRESS",
 		"L2_BRIDGE_ADDRESS",
-		"L2_TAIKO_ADDRESS",
+		"L2_MXC_ADDRESS",
 		"L1_TOKEN_VAULT_ADDRESS",
 		"L2_TOKEN_VAULT_ADDRESS",
 		"L1_RPC_URL",
@@ -219,8 +219,8 @@ func makeIndexers(
 			ECDSAKey:                      os.Getenv("RELAYER_ECDSA_KEY"),
 			BridgeAddress:                 common.HexToAddress(os.Getenv("L1_BRIDGE_ADDRESS")),
 			DestBridgeAddress:             common.HexToAddress(os.Getenv("L2_BRIDGE_ADDRESS")),
-			DestTaikoAddress:              common.HexToAddress(os.Getenv("L2_TAIKO_ADDRESS")),
-			SrcTaikoAddress:               common.HexToAddress(os.Getenv("L1_TAIKO_ADDRESS")),
+			DestMxcAddress:                common.HexToAddress(os.Getenv("L2_MXC_ADDRESS")),
+			SrcMxcAddress:                 common.HexToAddress(os.Getenv("L1_MXC_ADDRESS")),
 			SrcSignalServiceAddress:       common.HexToAddress(os.Getenv("L1_SIGNAL_SERVICE_ADDRESS")),
 			DestTokenVaultAddress:         common.HexToAddress(os.Getenv("L2_TOKEN_VAULT_ADDRESS")),
 			BlockBatchSize:                uint64(blockBatchSize),
@@ -250,7 +250,7 @@ func makeIndexers(
 			ECDSAKey:                      os.Getenv("RELAYER_ECDSA_KEY"),
 			BridgeAddress:                 common.HexToAddress(os.Getenv("L2_BRIDGE_ADDRESS")),
 			DestBridgeAddress:             common.HexToAddress(os.Getenv("L1_BRIDGE_ADDRESS")),
-			DestTaikoAddress:              common.HexToAddress(os.Getenv("L1_TAIKO_ADDRESS")),
+			DestMxcAddress:                common.HexToAddress(os.Getenv("L1_MXC_ADDRESS")),
 			SrcSignalServiceAddress:       common.HexToAddress(os.Getenv("L2_SIGNAL_SERVICE_ADDRESS")),
 			DestTokenVaultAddress:         common.HexToAddress(os.Getenv("L1_TOKEN_VAULT_ADDRESS")),
 			BlockBatchSize:                uint64(blockBatchSize),

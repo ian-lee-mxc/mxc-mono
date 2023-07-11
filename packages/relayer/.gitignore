@@ -44,5 +44,6 @@ terraform.rc
 .idea
 
 Bridge.json
-TaikoL2.json
+MxcL2.json
 IHeaderSync.json
+data

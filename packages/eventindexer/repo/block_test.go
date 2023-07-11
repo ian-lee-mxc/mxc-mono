@@ -4,9 +4,9 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/MXCzkEVM/mxc-mono/packages/eventindexer"
+	"github.com/MXCzkEVM/mxc-mono/packages/eventindexer/db"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/taikoxyz/taiko-mono/packages/eventindexer"
-	"github.com/taikoxyz/taiko-mono/packages/eventindexer/db"
 	"gopkg.in/go-playground/assert.v1"
 )
 

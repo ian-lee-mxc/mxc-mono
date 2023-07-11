@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/contracts/bridge"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/stretchr/testify/assert"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/contracts/bridge"
 )
 
 func Test_waitHeaderSynced(t *testing.T) {

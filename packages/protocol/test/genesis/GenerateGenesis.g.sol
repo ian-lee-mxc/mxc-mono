@@ -32,7 +32,7 @@ contract TestGenerateGenesis is Test, AddressResolver {
     uint64 public constant BLOCK_GAS_LIMIT = 30000000;
 
     function testContractDeployment() public {
-        assertEq(block.chainid, 5167003);
+        assertEq(block.chainid, 31337);
 
         checkDeployedCode("ProxiedMxcL2");
         checkDeployedCode("ProxiedTokenVault");
