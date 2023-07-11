@@ -76,8 +76,10 @@ contract DeployOnL1 is Script {
     address public treasury = vm.envAddress("TREASURY");
 
     address public mxcTokenPremintRecipient = vm.envAddress("MXC_TOKEN_PREMINT_RECIPIENT");
-
+//
     uint256 public mxcTokenPremintAmount = vm.envUint("MXC_TOKEN_PREMINT_AMOUNT");
+
+    address public deployedMxcTokenAddress = vm.envAddress("MXC_TOKEN_ADDRESS");
 
     // Change it based on 'consensus' / experience / expected result
     // Based in seconds. Please set carefully.
@@ -118,28 +120,29 @@ contract DeployOnL1 is Script {
 
         setAddress(l2ChainId, "mxczkevm", mxcL2Address);
         setAddress(l2ChainId, "signal_service", l2SignalService);
-        setAddress("oracle_prover", oracleProver);
-        setAddress("system_prover", systemProver);
+//        setAddress("oracle_prover", oracleProver);
+//        setAddress("system_prover", systemProver);
         setAddress(l2ChainId, "treasury", treasury);
 
         // MxcToken
-        MxcToken mxcToken = new ProxiedMxcToken();
+//        MxcToken mxcToken = new ProxiedMxcToken();
 
         address[] memory premintRecipients = new address[](1);
         uint256[] memory premintAmounts = new uint256[](1);
         premintRecipients[0] = mxcTokenPremintRecipient;
         premintAmounts[0] = mxcTokenPremintAmount;
 
-        deployProxy(
-            "mxc_token",
-            address(mxcToken),
-            bytes.concat(
-                mxcToken.init.selector,
-                abi.encode(
-                    addressManagerProxy, "MXC Token", "MXC", premintRecipients, premintAmounts
-                )
-            )
-        );
+//        deployProxy(
+//            "mxc_token",
+//            address(mxcToken),
+//            bytes.concat(
+//                mxcToken.init.selector,
+//                abi.encode(
+//                    addressManagerProxy, "MXC Token", "MXC", premintRecipients, premintAmounts
+//                )
+//            )
+//        );
+        setAddress(l2ChainId, "mxc_token", deployedMxcTokenAddress);
 
 //        // HorseToken && BullToken
 //        address horseToken = address(new FreeMintERC20("Horse Token", "HORSE"));

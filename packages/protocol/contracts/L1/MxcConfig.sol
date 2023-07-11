@@ -11,10 +11,10 @@ import {MxcData} from "../L1/MxcData.sol";
 library MxcConfig {
     function getConfig() internal pure returns (MxcData.Config memory) {
         return MxcData.Config({
-            chainId: 5167003,
-            // Two weeks if avg block time is 2 seconds
-            maxNumProposedBlocks: 604800,
-            ringBufferSize: 604800 + 10,
+            chainId: 18686,
+            // Two weeks if avg block time is 12 seconds
+            maxNumProposedBlocks: 100800,
+            ringBufferSize: 100800 + 10,
             // Each time one more block is verified, there will be ~20k
             // more gas cost.
             maxVerificationsPerTx: 10,
@@ -37,7 +37,7 @@ library MxcConfig {
             // Only need 1 real zkp per 10 blocks.
             // If block number is N, then only when N % 10 == 0, the real ZKP
             // is needed. For mainnet, this must be 0 or 1.
-            realProofSkipSize: 100,
+            realProofSkipSize: 0,
             ethDepositGas: 21000,
             ethDepositMaxFee: 1 ether / 10,
             txListCacheExpiry: 0,
