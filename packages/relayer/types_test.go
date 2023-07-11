@@ -8,11 +8,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/contracts/bridge"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/stretchr/testify/assert"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/contracts/bridge"
 )
 
 func Test_IsInSlice(t *testing.T) {

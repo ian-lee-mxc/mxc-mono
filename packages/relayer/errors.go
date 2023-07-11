@@ -15,7 +15,7 @@ var (
 	ErrNoProver      = errors.Validation.NewWithKeyAndDetail("ERR_NO_PROVER", "Prover is required")
 	ErrNoRPCClient   = errors.Validation.NewWithKeyAndDetail("ERR_NO_RPC_CLIENT", "RPCClient is required")
 	ErrNoBridge      = errors.Validation.NewWithKeyAndDetail("ERR_NO_BRIDGE", "Bridge is required")
-	ErrNoTaikoL2     = errors.Validation.NewWithKeyAndDetail("ERR_NO_TAIKO_L2", "TaikoL2 is required")
+	ErrNoMxcL2       = errors.Validation.NewWithKeyAndDetail("ERR_NO_MXC_L2", "MxcL2 is required")
 
 	ErrInvalidConfirmations = errors.Validation.NewWithKeyAndDetail(
 		"ERR_INVALID_CONFIRMATIONS",

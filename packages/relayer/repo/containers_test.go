@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/db"
 	"github.com/pressly/goose/v3"
-	"github.com/taikoxyz/taiko-mono/packages/relayer"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/db"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"gorm.io/driver/mysql"

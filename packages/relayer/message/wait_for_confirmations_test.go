@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/mock"
 	"github.com/stretchr/testify/assert"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/mock"
 )
 
 func Test_waitForConfirmations(t *testing.T) {

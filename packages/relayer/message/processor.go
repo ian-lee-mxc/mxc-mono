@@ -9,8 +9,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 
-	"github.com/taikoxyz/taiko-mono/packages/relayer"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/proof"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/proof"
 )
 
 type ethClient interface {
@@ -95,7 +95,7 @@ func NewProcessor(opts NewProcessorOpts) (*Processor, error) {
 	}
 
 	if opts.DestHeaderSyncer == nil {
-		return nil, relayer.ErrNoTaikoL2
+		return nil, relayer.ErrNoMxcL2
 	}
 
 	if opts.Confirmations == 0 {

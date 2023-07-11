@@ -4,8 +4,8 @@ import (
 	"flag"
 	"log"
 
-	"github.com/taikoxyz/taiko-mono/packages/relayer"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/cli"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/cli"
 )
 
 func main() {

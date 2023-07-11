@@ -3,7 +3,7 @@ package repo
 import (
 	"math/big"
 
-	"github.com/taikoxyz/taiko-mono/packages/eventindexer"
+	"github.com/MXCzkEVM/mxc-mono/packages/eventindexer"
 	"gorm.io/gorm"
 )
 

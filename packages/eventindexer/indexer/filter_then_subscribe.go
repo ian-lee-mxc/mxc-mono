@@ -4,10 +4,10 @@ import (
 	"context"
 	"math/big"
 
+	"github.com/MXCzkEVM/mxc-mono/packages/eventindexer"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"github.com/taikoxyz/taiko-mono/packages/eventindexer"
 )
 
 func (svc *Service) FilterThenSubscribe(

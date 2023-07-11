@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/mock"
 	"github.com/stretchr/testify/assert"
-	"github.com/taikoxyz/taiko-mono/packages/relayer"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/mock"
 )
 
 var dummyEcdsaKey = "8da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f"
@@ -102,8 +102,8 @@ func Test_makeIndexers(t *testing.T) {
 				os.Setenv("L2_RPC_URL", "https://l2rpc.a1.taiko.xyz")
 				os.Setenv("L1_BRIDGE_ADDRESS", dummyAddress)
 				os.Setenv("L2_BRIDGE_ADDRESS", dummyAddress)
-				os.Setenv("L1_TAIKO_ADDRESS", dummyAddress)
-				os.Setenv("L2_TAIKO_ADDRESS", dummyAddress)
+				os.Setenv("L1_MXC_ADDRESS", dummyAddress)
+				os.Setenv("L2_MXC_ADDRESS", dummyAddress)
 				os.Setenv("RELAYER_ECDSA_KEY", dummyEcdsaKey)
 
 				return func() {
@@ -111,8 +111,8 @@ func Test_makeIndexers(t *testing.T) {
 					os.Setenv("L2_RPC_URL", "")
 					os.Setenv("L1_BRIDGE_ADDRESS", "")
 					os.Setenv("L2_BRIDGE_ADDRESS", "")
-					os.Setenv("L1_TAIKO_ADDRESS", "")
-					os.Setenv("L2_TAIKO_ADDRESS", "")
+					os.Setenv("L1_MXC_ADDRESS", "")
+					os.Setenv("L2_MXC_ADDRESS", "")
 					os.Setenv("RELAYER_ECDSA_KEY", "")
 				}
 			},
@@ -128,8 +128,8 @@ func Test_makeIndexers(t *testing.T) {
 				os.Setenv("L2_RPC_URL", "https://l2rpc.a1.taiko.xyz")
 				os.Setenv("L1_BRIDGE_ADDRESS", dummyAddress)
 				os.Setenv("L2_BRIDGE_ADDRESS", dummyAddress)
-				os.Setenv("L1_TAIKO_ADDRESS", dummyAddress)
-				os.Setenv("L2_TAIKO_ADDRESS", dummyAddress)
+				os.Setenv("L1_MXC_ADDRESS", dummyAddress)
+				os.Setenv("L2_MXC_ADDRESS", dummyAddress)
 				os.Setenv("RELAYER_ECDSA_KEY", dummyEcdsaKey)
 
 				return func() {
@@ -137,8 +137,8 @@ func Test_makeIndexers(t *testing.T) {
 					os.Setenv("L2_RPC_URL", "")
 					os.Setenv("L1_BRIDGE_ADDRESS", "")
 					os.Setenv("L2_BRIDGE_ADDRESS", "")
-					os.Setenv("L1_TAIKO_ADDRESS", "")
-					os.Setenv("L2_TAIKO_ADDRESS", "")
+					os.Setenv("L1_MXC_ADDRESS", "")
+					os.Setenv("L2_MXC_ADDRESS", "")
 					os.Setenv("RELAYER_ECDSA_KEY", "")
 				}
 			},
@@ -154,8 +154,8 @@ func Test_makeIndexers(t *testing.T) {
 				os.Setenv("L2_RPC_URL", "https://l2rpc.a1.taiko.xyz")
 				os.Setenv("L1_BRIDGE_ADDRESS", dummyAddress)
 				os.Setenv("L2_BRIDGE_ADDRESS", dummyAddress)
-				os.Setenv("L1_TAIKO_ADDRESS", dummyAddress)
-				os.Setenv("L2_TAIKO_ADDRESS", dummyAddress)
+				os.Setenv("L1_MXC_ADDRESS", dummyAddress)
+				os.Setenv("L2_MXC_ADDRESS", dummyAddress)
 				os.Setenv("RELAYER_ECDSA_KEY", dummyEcdsaKey)
 
 				return func() {
@@ -163,8 +163,8 @@ func Test_makeIndexers(t *testing.T) {
 					os.Setenv("L2_RPC_URL", "")
 					os.Setenv("L1_BRIDGE_ADDRESS", "")
 					os.Setenv("L2_BRIDGE_ADDRESS", "")
-					os.Setenv("L1_TAIKO_ADDRESS", "")
-					os.Setenv("L2_TAIKO_ADDRESS", "")
+					os.Setenv("L1_MXC_ADDRESS", "")
+					os.Setenv("L2_MXC_ADDRESS", "")
 					os.Setenv("RELAYER_ECDSA_KEY", "")
 				}
 			},

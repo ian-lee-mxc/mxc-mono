@@ -1,4 +1,4 @@
-module github.com/taikoxyz/taiko-mono
+module github.com/MXCzkEVM/mxc-mono
 
 go 1.19
 

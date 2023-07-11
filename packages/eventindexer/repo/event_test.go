@@ -5,8 +5,8 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/MXCzkEVM/mxc-mono/packages/eventindexer"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/taikoxyz/taiko-mono/packages/eventindexer"
 	"gotest.tools/assert"
 )
 

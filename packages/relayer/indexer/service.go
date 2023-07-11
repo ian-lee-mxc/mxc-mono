@@ -6,6 +6,13 @@ import (
 	"math/big"
 	"time"
 
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/contracts/bridge"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/contracts/icrosschainsync"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/contracts/mxcl1"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/contracts/tokenvault"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/message"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/proof"
 	"github.com/cyberhorsey/errors"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
@@ -13,13 +20,6 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/taikoxyz/taiko-mono/packages/relayer"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/contracts/bridge"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/contracts/icrosschainsync"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/contracts/taikol1"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/contracts/tokenvault"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/message"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/proof"
 )
 
 var (
@@ -51,7 +51,7 @@ type Service struct {
 	numGoroutines       int
 	subscriptionBackoff time.Duration
 
-	taikol1 *taikol1.TaikoL1
+	mxcL1 *mxcl1.MxcL1
 }
 
 type NewServiceOpts struct {
@@ -64,8 +64,8 @@ type NewServiceOpts struct {
 	ECDSAKey                      string
 	BridgeAddress                 common.Address
 	DestBridgeAddress             common.Address
-	SrcTaikoAddress               common.Address
-	DestTaikoAddress              common.Address
+	SrcMxcAddress                 common.Address
+	DestMxcAddress                common.Address
 	DestTokenVaultAddress         common.Address
 	SrcSignalServiceAddress       common.Address
 	BlockBatchSize                uint64
@@ -134,21 +134,21 @@ func NewService(opts NewServiceOpts) (*Service, error) {
 		return nil, errors.Wrap(err, "bridge.NewBridge")
 	}
 
-	prover, err := proof.New(opts.EthClient)
+	prover, err := proof.New(opts.EthClient, opts.RPCClient)
 	if err != nil {
 		return nil, errors.Wrap(err, "proof.New")
 	}
 
-	destHeaderSyncer, err := icrosschainsync.NewICrossChainSync(opts.DestTaikoAddress, opts.DestEthClient)
+	destHeaderSyncer, err := icrosschainsync.NewICrossChainSync(opts.DestMxcAddress, opts.DestEthClient)
 	if err != nil {
-		return nil, errors.Wrap(err, "icrosschainsync.NewTaikoL2")
+		return nil, errors.Wrap(err, "icrosschainsync.NewMxcL2")
 	}
 
-	var taikoL1 *taikol1.TaikoL1
-	if opts.SrcTaikoAddress != ZeroAddress {
-		taikoL1, err = taikol1.NewTaikoL1(opts.SrcTaikoAddress, opts.EthClient)
+	var mxcL1 *mxcl1.MxcL1
+	if opts.SrcMxcAddress != ZeroAddress {
+		mxcL1, err = mxcl1.NewMxcL1(opts.SrcMxcAddress, opts.EthClient)
 		if err != nil {
-			return nil, errors.Wrap(err, "taikol1.NewTaikoL1")
+			return nil, errors.Wrap(err, "mxcL1.NewMxcL1")
 		}
 	}
 
@@ -186,7 +186,7 @@ func NewService(opts NewServiceOpts) (*Service, error) {
 
 		bridge:     srcBridge,
 		destBridge: destBridge,
-		taikol1:    taikoL1,
+		mxcL1:      mxcL1,
 
 		processor: processor,
 

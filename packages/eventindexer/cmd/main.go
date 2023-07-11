@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 
-	"github.com/taikoxyz/taiko-mono/packages/eventindexer"
-	"github.com/taikoxyz/taiko-mono/packages/eventindexer/cli"
+	"github.com/MXCzkEVM/mxc-mono/packages/eventindexer"
+	"github.com/MXCzkEVM/mxc-mono/packages/eventindexer/cli"
 )
 
 func main() {

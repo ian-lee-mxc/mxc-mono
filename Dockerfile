@@ -4,17 +4,17 @@ ARG PACKAGE=eventindexer
 
 RUN apt install git curl
 
-RUN mkdir /taiko-mono
+RUN mkdir /mxc-mono
 
-WORKDIR /taiko-mono
+WORKDIR /mxc-mono
 
 COPY . .
 
 RUN go mod download
 
-WORKDIR /taiko-mono/packages/$PACKAGE
+WORKDIR /mxc-mono/packages/$PACKAGE
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /taiko-mono/packages/$PACKAGE/bin/${PACKAGE} /taiko-mono/packages/$PACKAGE/cmd/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o /mxc-mono/packages/$PACKAGE/bin/${PACKAGE} /mxc-mono/packages/$PACKAGE/cmd/main.go
 
 FROM alpine:latest
 
@@ -22,6 +22,6 @@ ARG PACKAGE
 
 RUN apk add --no-cache ca-certificates
 
-COPY --from=builder /taiko-mono/packages/$PACKAGE/bin/$PACKAGE /usr/local/bin/
+COPY --from=builder /mxc-mono/packages/$PACKAGE/bin/$PACKAGE /usr/local/bin/
 
 ENTRYPOINT ["$PACKAGE"]

@@ -6,12 +6,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/MXCzkEVM/mxc-mono/packages/eventindexer"
+	"github.com/MXCzkEVM/mxc-mono/packages/eventindexer/mock"
+	"github.com/MXCzkEVM/mxc-mono/packages/eventindexer/repo"
 	"github.com/joho/godotenv"
 	echo "github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
-	"github.com/taikoxyz/taiko-mono/packages/eventindexer"
-	"github.com/taikoxyz/taiko-mono/packages/eventindexer/mock"
-	"github.com/taikoxyz/taiko-mono/packages/eventindexer/repo"
 )
 
 func newTestServer(url string) *Server {

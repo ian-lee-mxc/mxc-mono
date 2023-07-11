@@ -3,8 +3,8 @@ package repo
 import (
 	"context"
 
+	"github.com/MXCzkEVM/mxc-mono/packages/eventindexer"
 	"github.com/pkg/errors"
-	"github.com/taikoxyz/taiko-mono/packages/eventindexer"
 	"gorm.io/datatypes"
 )
 

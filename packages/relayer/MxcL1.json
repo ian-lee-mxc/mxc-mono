@@ -25,6 +25,26 @@
     "type": "error"
   },
   {
+    "inputs": [],
+    "name": "L1_DEPOSIT_REQUIREMENT",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "L1_ELECTION_INVALID_PROPOSER",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "L1_ELECTION_SPEED",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "L1_ELECTION_SPEED",
+    "type": "error"
+  },
+  {
     "inputs": [
       {
         "internalType": "bytes32",
@@ -83,7 +103,7 @@
   },
   {
     "inputs": [],
-    "name": "L1_INVALID_CONFIG",
+    "name": "L1_INSUFFICIENT_TOKEN",
     "type": "error"
   },
   {
@@ -93,7 +113,7 @@
   },
   {
     "inputs": [],
-    "name": "L1_INVALID_ETH_DEPOSIT",
+    "name": "L1_INVALID_CONFIG",
     "type": "error"
   },
   {
@@ -154,6 +174,11 @@
   {
     "inputs": [],
     "name": "L1_NOT_SPECIAL_PROVER",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "L1_NOT_UNLOCK",
     "type": "error"
   },
   {
@@ -281,6 +306,44 @@
     "anonymous": false,
     "inputs": [
       {
+        "indexed": false,
+        "internalType": "address",
+        "name": "addressManager",
+        "type": "address"
+      }
+    ],
+    "name": "AddressManagerChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "proposer",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "reward",
+        "type": "uint256"
+      }
+    ],
+    "name": "BlockProposeReward",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
         "indexed": true,
         "internalType": "uint256",
         "name": "id",
@@ -315,11 +378,6 @@
           },
           {
             "internalType": "bytes32",
-            "name": "depositsRoot",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "bytes32",
             "name": "txListHash",
             "type": "bytes32"
           },
@@ -344,13 +402,8 @@
             "type": "address"
           },
           {
-            "internalType": "uint8",
-            "name": "cacheTxListInfo",
-            "type": "uint8"
-          },
-          {
             "internalType": "address",
-            "name": "treasure",
+            "name": "treasury",
             "type": "address"
           },
           {
@@ -364,17 +417,38 @@
                 "internalType": "uint96",
                 "name": "amount",
                 "type": "uint96"
+              },
+              {
+                "internalType": "uint64",
+                "name": "id",
+                "type": "uint64"
               }
             ],
-            "internalType": "struct TaikoData.EthDeposit[]",
+            "internalType": "struct MxcData.EthDeposit[]",
             "name": "depositsProcessed",
             "type": "tuple[]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "baseFee",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "blockReward",
+            "type": "uint256"
           }
         ],
         "indexed": false,
-        "internalType": "struct TaikoData.BlockMetadata",
+        "internalType": "struct MxcData.BlockMetadata",
         "name": "meta",
         "type": "tuple"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint64",
+        "name": "blockFee",
+        "type": "uint64"
       }
     ],
     "name": "BlockProposed",
@@ -434,9 +508,40 @@
       },
       {
         "indexed": false,
+        "internalType": "address",
+        "name": "prover",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "reward",
+        "type": "uint256"
+      }
+    ],
+    "name": "BlockProvenReward",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
         "internalType": "bytes32",
         "name": "blockHash",
         "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "reward",
+        "type": "uint256"
       }
     ],
     "name": "BlockVerified",
@@ -481,10 +586,15 @@
             "internalType": "uint96",
             "name": "amount",
             "type": "uint96"
+          },
+          {
+            "internalType": "uint64",
+            "name": "id",
+            "type": "uint64"
           }
         ],
         "indexed": false,
-        "internalType": "struct TaikoData.EthDeposit",
+        "internalType": "struct MxcData.EthDeposit",
         "name": "deposit",
         "type": "tuple"
       }
@@ -525,6 +635,37 @@
     "type": "event"
   },
   {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint64",
+        "name": "proofTimeTarget",
+        "type": "uint64"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint64",
+        "name": "proofTimeIssued",
+        "type": "uint64"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint64",
+        "name": "blockFee",
+        "type": "uint64"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint16",
+        "name": "adjustmentQuotient",
+        "type": "uint16"
+      }
+    ],
+    "name": "ProofParamsChanged",
+    "type": "event"
+  },
+  {
     "inputs": [],
     "name": "addressManager",
     "outputs": [
@@ -552,7 +693,7 @@
         "type": "uint256"
       }
     ],
-    "name": "depositTaikoToken",
+    "name": "depositMxcToken",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -626,24 +767,19 @@
             "type": "uint256"
           },
           {
-            "internalType": "uint256",
+            "internalType": "uint64",
             "name": "blockMaxGasLimit",
-            "type": "uint256"
+            "type": "uint64"
           },
           {
-            "internalType": "uint256",
+            "internalType": "uint64",
             "name": "maxTransactionsPerBlock",
-            "type": "uint256"
+            "type": "uint64"
           },
           {
-            "internalType": "uint256",
+            "internalType": "uint64",
             "name": "maxBytesPerTxList",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "minTxGasLimit",
-            "type": "uint256"
+            "type": "uint64"
           },
           {
             "internalType": "uint256",
@@ -696,22 +832,12 @@
             "type": "uint96"
           },
           {
-            "internalType": "uint64",
-            "name": "proofTimeTarget",
-            "type": "uint64"
-          },
-          {
-            "internalType": "uint8",
-            "name": "adjustmentQuotient",
-            "type": "uint8"
-          },
-          {
             "internalType": "bool",
             "name": "relaySignalRoot",
             "type": "bool"
           }
         ],
-        "internalType": "struct TaikoData.Config",
+        "internalType": "struct MxcData.Config",
         "name": "",
         "type": "tuple"
       }
@@ -810,7 +936,7 @@
             "type": "uint32"
           }
         ],
-        "internalType": "struct TaikoData.ForkChoice",
+        "internalType": "struct MxcData.ForkChoice",
         "name": "",
         "type": "tuple"
       }
@@ -821,22 +947,49 @@
   {
     "inputs": [
       {
-        "internalType": "uint64",
-        "name": "provenAt",
-        "type": "uint64"
-      },
+        "internalType": "address",
+        "name": "addr",
+        "type": "address"
+      }
+    ],
+    "name": "getMxcTokenBalance",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
       {
         "internalType": "uint64",
-        "name": "proposedAt",
+        "name": "proofTime",
         "type": "uint64"
       }
     ],
     "name": "getProofReward",
     "outputs": [
       {
-        "internalType": "uint64",
+        "internalType": "uint256",
         "name": "",
-        "type": "uint64"
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getProposeReward",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -880,6 +1033,11 @@
           },
           {
             "internalType": "uint64",
+            "name": "proofTimeTarget",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
             "name": "lastVerifiedBlockId",
             "type": "uint64"
           },
@@ -899,28 +1057,9 @@
             "type": "uint64"
           }
         ],
-        "internalType": "struct TaikoData.StateVariables",
+        "internalType": "struct MxcData.StateVariables",
         "name": "",
         "type": "tuple"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "addr",
-        "type": "address"
-      }
-    ],
-    "name": "getTaikoTokenBalance",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -964,8 +1103,18 @@
       },
       {
         "internalType": "uint64",
+        "name": "_initProofTimeTarget",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
         "name": "_initProofTimeIssued",
         "type": "uint64"
+      },
+      {
+        "internalType": "uint16",
+        "name": "_adjustmentQuotient",
+        "type": "uint16"
       }
     ],
     "name": "init",
@@ -1030,11 +1179,6 @@
           },
           {
             "internalType": "bytes32",
-            "name": "depositsRoot",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "bytes32",
             "name": "txListHash",
             "type": "bytes32"
           },
@@ -1059,13 +1203,8 @@
             "type": "address"
           },
           {
-            "internalType": "uint8",
-            "name": "cacheTxListInfo",
-            "type": "uint8"
-          },
-          {
             "internalType": "address",
-            "name": "treasure",
+            "name": "treasury",
             "type": "address"
           },
           {
@@ -1079,14 +1218,29 @@
                 "internalType": "uint96",
                 "name": "amount",
                 "type": "uint96"
+              },
+              {
+                "internalType": "uint64",
+                "name": "id",
+                "type": "uint64"
               }
             ],
-            "internalType": "struct TaikoData.EthDeposit[]",
+            "internalType": "struct MxcData.EthDeposit[]",
             "name": "depositsProcessed",
             "type": "tuple[]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "baseFee",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "blockReward",
+            "type": "uint256"
           }
         ],
-        "internalType": "struct TaikoData.BlockMetadata",
+        "internalType": "struct MxcData.BlockMetadata",
         "name": "meta",
         "type": "tuple"
       }
@@ -1173,9 +1327,55 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newAddressManager",
+        "type": "address"
+      }
+    ],
+    "name": "setAddressManager",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint64",
+        "name": "newProofTimeTarget",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
+        "name": "newProofTimeIssued",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
+        "name": "newBlockFee",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint16",
+        "name": "newAdjustmentQuotient",
+        "type": "uint16"
+      }
+    ],
+    "name": "setProofParams",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "state",
     "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "totalStakeMxcTokenBalances",
+        "type": "uint256"
+      },
       {
         "internalType": "uint64",
         "name": "genesisHeight",
@@ -1187,13 +1387,18 @@
         "type": "uint64"
       },
       {
-        "internalType": "uint64",
-        "name": "__reserved71",
-        "type": "uint64"
+        "internalType": "uint16",
+        "name": "adjustmentQuotient",
+        "type": "uint16"
+      },
+      {
+        "internalType": "uint48",
+        "name": "prevBaseFee",
+        "type": "uint48"
       },
       {
         "internalType": "uint64",
-        "name": "__reserved72",
+        "name": "proposerElectionTimeoutOffset",
         "type": "uint64"
       },
       {
@@ -1213,7 +1418,7 @@
       },
       {
         "internalType": "uint64",
-        "name": "nextEthDepositToProcess",
+        "name": "proveMetaReward",
         "type": "uint64"
       },
       {
@@ -1233,7 +1438,7 @@
       },
       {
         "internalType": "uint64",
-        "name": "__reserved91",
+        "name": "proofTimeTarget",
         "type": "uint64"
       }
     ],
@@ -1274,7 +1479,7 @@
         "type": "uint256"
       }
     ],
-    "name": "withdrawTaikoToken",
+    "name": "withdrawMxcToken",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

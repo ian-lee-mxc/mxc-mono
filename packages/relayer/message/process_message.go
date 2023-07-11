@@ -7,6 +7,8 @@ import (
 	"math/big"
 	"strings"
 
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/contracts/bridge"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -14,8 +16,6 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"github.com/taikoxyz/taiko-mono/packages/relayer"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/contracts/bridge"
 )
 
 // Process prepares and calls `processMessage` on the bridge.
@@ -44,7 +44,7 @@ func (p *Processor) ProcessMessage(
 	// and later blocks still have the storage trie proof from previous blocks.
 	latestSyncedHeader, err := p.destHeaderSyncer.GetCrossChainBlockHash(&bind.CallOpts{}, big.NewInt(0))
 	if err != nil {
-		return errors.Wrap(err, "taiko.GetSyncedHeader")
+		return errors.Wrap(err, "mxc.GetSyncedHeader")
 	}
 
 	hashed := crypto.Keccak256(

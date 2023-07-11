@@ -5,9 +5,9 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/contracts/bridge"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/mock"
 	"github.com/stretchr/testify/assert"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/contracts/bridge"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/mock"
 )
 
 func Test_isProfitable(t *testing.T) {

@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/encoding"
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer/mock"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/encoding"
-	"github.com/taikoxyz/taiko-mono/packages/relayer/mock"
 	"gopkg.in/go-playground/assert.v1"
 )
 

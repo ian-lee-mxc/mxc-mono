@@ -4,12 +4,12 @@ import (
 	"context"
 	"math/big"
 
+	"github.com/MXCzkEVM/mxc-mono/packages/eventindexer"
+	"github.com/MXCzkEVM/mxc-mono/packages/eventindexer/contracts/taikol1"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"github.com/taikoxyz/taiko-mono/packages/eventindexer"
-	"github.com/taikoxyz/taiko-mono/packages/eventindexer/contracts/taikol1"
 )
 
 // subscribe subscribes to latest events

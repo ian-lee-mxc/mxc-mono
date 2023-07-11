@@ -4,8 +4,8 @@ import (
 	"context"
 	"math/big"
 
+	"github.com/MXCzkEVM/mxc-mono/packages/relayer"
 	"github.com/pkg/errors"
-	"github.com/taikoxyz/taiko-mono/packages/relayer"
 )
 
 func (svc *Service) setInitialProcessingBlockByMode(
@@ -15,10 +15,10 @@ func (svc *Service) setInitialProcessingBlockByMode(
 ) error {
 	var startingBlock uint64 = 0
 
-	if svc.taikol1 != nil {
-		stateVars, err := svc.taikol1.GetStateVariables(nil)
+	if svc.mxcL1 != nil {
+		stateVars, err := svc.mxcL1.GetStateVariables(nil)
 		if err != nil {
-			return errors.Wrap(err, "svc.taikoL1.GetStateVariables")
+			return errors.Wrap(err, "svc.mxcL1.GetStateVariables")
 		}
 
 		startingBlock = stateVars.GenesisHeight
