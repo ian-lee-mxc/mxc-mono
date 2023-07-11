@@ -7,6 +7,7 @@ services:
     environment:
       TZ: Asia/Shanghai
       MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: relayer
     ports:
       - 3306:3306
     volumes:
@@ -35,5 +36,6 @@ services:
     working_dir: /app
     depends_on:
       - mysql
+      - migrate
     entrypoint:
       relayer
