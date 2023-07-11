@@ -26,6 +26,7 @@ func newTestService() (*Service, relayer.Bridge) {
 
 	prover, _ := proof.New(
 		&mock.Blocker{},
+		&rpc.Client{},
 	)
 
 	processor, _ := message.NewProcessor(message.NewProcessorOpts{
