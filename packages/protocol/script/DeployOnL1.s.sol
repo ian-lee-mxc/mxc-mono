@@ -235,6 +235,7 @@ contract DeployOnL1 is Script {
             bytes.concat(ethMxcPriceAggregator.init.selector, abi.encode(addressManagerProxy, price))
         );
         setAddress("relayer", address(relayer));
+        setAddress("weth", address(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1));
 
         setAddress(l2ChainId, "bridge", address(0x1000777700000000000000000000000000000004));
         setAddress(l2ChainId, "ether_vault", address(0x1000777700000000000000000000000000000003));
