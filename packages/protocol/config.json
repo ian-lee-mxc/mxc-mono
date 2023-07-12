@@ -1,8 +1,11 @@
 {
   "contractOwner": "0xC6D7522f7B012b22Bc365C9C43b3DBf13B9aAfF9",
   "contractAdmin": "0x75c4b5c07c6285cb2a14c512eebaf4a6aed09be6",
-  "chainId": 5167003,
+  "chainId": 18686,
   "seedAccounts": [
+    {
+      "0x0000777735367b36bC9B61C50022d9D0700dB4Ec": 1000
+    },
     {
       "0x75c4b5c07c6285cb2a14c512eebaf4a6aed09be6": 100000000
     }

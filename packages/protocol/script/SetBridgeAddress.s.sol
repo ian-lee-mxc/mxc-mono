@@ -41,7 +41,7 @@ contract SetBridgeAddress is Script {
         if(l2ChainId == block.chainid) {
             addressManagerProxy = address(0x1000777700000000000000000000000000000006);
             console2.log(AddressManager(addressManagerProxy).owner());
-            vm.startBroadcast(ownerPrivateKey);
+            vm.startBroadcast(deployerPrivateKey);
             setAddress(421613, "mxczkevm", headerSyncAddr);
             setAddress(421613, "bridge", bridgeAddr);
             setAddress(421613, "token_vault", tokenVaultAddr);
