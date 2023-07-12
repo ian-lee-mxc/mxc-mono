@@ -42,11 +42,11 @@ contract SetBridgeAddress is Script {
             addressManagerProxy = address(0x1000777700000000000000000000000000000006);
             console2.log(AddressManager(addressManagerProxy).owner());
             vm.startBroadcast(deployerPrivateKey);
-            setAddress(421613, "mxczkevm", headerSyncAddr);
-            setAddress(421613, "bridge", bridgeAddr);
-            setAddress(421613, "token_vault", tokenVaultAddr);
-            setAddress(421613, "mxc_token", mxcTokenAddr);
-            setAddress(421613, "signal_service", signalServiceAddr);
+            setAddress(42161, "mxczkevm", headerSyncAddr);
+            setAddress(42161, "bridge", bridgeAddr);
+            setAddress(42161, "token_vault", tokenVaultAddr);
+            setAddress(42161, "mxc_token", mxcTokenAddr);
+            setAddress(42161, "signal_service", signalServiceAddr);
         }
         vm.stopBroadcast();
 
