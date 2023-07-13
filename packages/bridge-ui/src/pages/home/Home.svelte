@@ -17,7 +17,7 @@
   import { BridgeType } from '../../domain/bridge';
 
   import { ethers, Contract, type Signer, BigNumber } from 'ethers';
-  import { L1MXCCROSSTOKEN, L1MXCTOKEN } from '../../constants/envVars';
+  import { L1MXCCROSSTOKEN, L1MXCTOKEN, ISTESTNET } from '../../constants/envVars';
   import TooltipModal from '../../components/TooltipModal.svelte';
   import Button from '../../components/Button.svelte';
   import MXCCrossTokenAbi from '../../constants/abis/MXCCrossToken';
@@ -33,6 +33,9 @@
     successToast,
     warningToast,
   } from '../../components/NotificationToast.svelte';
+
+  const is_testnet = ISTESTNET == "1"
+  console.log(is_testnet)
 
   enum LogLevel {
     DEBUG = 'DEBUG',
@@ -165,7 +168,7 @@
   const tabsRoute = [
     { name: 'bridge', href: '/' },
     { name: 'transactions', href: '/transactions' },
-    { name: 'faucet', href: '/faucet' },
+    // { name: 'faucet', href: '/faucet' },
     { name: 'stake', href: '/stake' },
     // Add more tabs if needed
   ];
@@ -203,7 +206,7 @@
     {@const tab1 = tabsRoute[0]}
     {@const tab2 = tabsRoute[1]}
     {@const tab3 = tabsRoute[2]}
-    {@const tab4 = tabsRoute[3]}
+    <!-- {@const tab4 = tabsRoute[3]} -->
 
     <TabList class="block mb-4 w-full">
       <Tab name={tab1.name} href={tab1.href}>Bridge</Tab>
@@ -215,9 +218,10 @@
           (<Loading />)
         {/if}
       </Tab>
-      <Tab name={tab3.name} href={tab3.href}>Faucet</Tab>
+      <!-- <Tab name={tab3.name} href={tab3.href}>Faucet</Tab> -->
       {#if $srcChain && $srcChain.id == L1_CHAIN_ID}
-        <Tab name={tab4.name} href={tab4.href}>Stake</Tab>
+        <!-- <Tab name={tab4.name} href={tab4.href}>Stake</Tab> -->
+        <Tab name={tab3.name} href={tab3.href}>Stake</Tab>
       {/if}
     </TabList>
 
@@ -236,13 +240,16 @@
       </div>
     </TabPanel>
 
-    <TabPanel tab={tab3.name}>
+    <!-- <TabPanel tab={tab3.name}>
       <div class="md:w-[440px] px-4 flex flex-col items-center justify-center">
         <Faucet />
       </div>
-    </TabPanel>
+    </TabPanel> -->
 
-    <TabPanel tab={tab4.name}>
+    <!-- <TabPanel tab={tab4.name}>
+      <Stake />
+    </TabPanel> -->
+    <TabPanel tab={tab3.name}>
       <Stake />
     </TabPanel>
   </Tabs>

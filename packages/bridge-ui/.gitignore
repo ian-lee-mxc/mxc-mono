@@ -22,6 +22,7 @@ dist-ssr
 *.sln
 *.sw?
 .env
+.env.*
 .a1.env
 .s.env
 
