@@ -22,9 +22,12 @@ dist-ssr
 *.sln
 *.sw?
 .env
+.env.*
 .a1.env
 .s.env
 
 # vite
 vite.config.ts.timestamp-*.mjs
 .vercel
+vercel.mainnet.json
+vercel.testnet.json

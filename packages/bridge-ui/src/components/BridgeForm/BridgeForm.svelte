@@ -624,7 +624,7 @@
   </div>
 
   <div>
-    <ProcessingFee bind:method={feeMethod} bind:amount={feeAmount}/>
+   <ProcessingFee bind:method={feeMethod} bind:amount={feeAmount}/>
   </div>
 
   <div>

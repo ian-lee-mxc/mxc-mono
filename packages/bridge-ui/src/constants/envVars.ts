@@ -59,3 +59,5 @@ export const L1MXCCROSSTOKEN: Address = import.meta.env?.VITE_L1MXCCROSSTOKEN;
 export const SITE_KEY: string = import.meta.env?.VITE_RECAPTCHA_SITEKEY;
 
 export const L2_ETHMXCPRICE_ADDRESS = import.meta.env?.VITE_L2_ETHMXCPRICE_ADDRESS;
+
+export const ISTESTNET = import.meta.env?.VITE_ISTESTNET;
