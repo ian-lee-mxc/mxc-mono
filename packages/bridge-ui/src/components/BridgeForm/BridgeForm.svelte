@@ -623,9 +623,9 @@
     <To bind:to bind:show={showTo} />
   </div>
 
-  <!-- <div>
-    <ProcessingFee bind:method={feeMethod} bind:amount={feeAmount}/>
-  </div> -->
+  <div>
+   <ProcessingFee bind:method={feeMethod} bind:amount={feeAmount}/>
+  </div>
 
   <div>
     <Memo bind:memo bind:error={memoError} bind:show={showMemo} />
