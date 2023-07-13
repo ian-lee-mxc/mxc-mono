@@ -29,4 +29,5 @@ dist-ssr
 # vite
 vite.config.ts.timestamp-*.mjs
 .vercel
-vercel.*
+vercel.mainnet.json
+vercel.testnet.json
