@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "pnpm run dev",
-    "dev": "vite",
+    "dev": "cp .env.testnet .env && vite",
+    "dev-mainnet": "cp .env.mainnet .env && vite",
     "build": "vite build",
     "preview": "vite preview",
     "svelte:check": "svelte-check --tsconfig ./tsconfig.json --ignore ./wagmi.config.ts",
@@ -16,7 +17,9 @@
     "prettier:check": "pnpm run prettier '**/*.{js,ts,svelte}' --check",
     "lint": "pnpm exec eslint './**/*.{js,ts,svelte}' --ignore-path .eslintignore",
     "lint:fix": "pnpm exec eslint --fix './**/*.{js,ts,svelte}' --ignore-path .eslintignore",
-    "generate-abi": "pnpm exec wagmi generate"
+    "generate-abi": "pnpm exec wagmi generate",
+    "vercel:mainnet": "cp src/pages/home/HomeMainnet.svelte src/pages/home/Home.svelte && cp vercel.mainnet.json .vercel/project.json && cp .env.mainnet .env && vercel --prod",
+    "vercel:testnet": "cp src/pages/home/HomeTestnet.svelte src/pages/home/Home.svelte && cp vercel.testnet.json .vercel/project.json && cp .env.testnet .env && vercel --prod"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.16.0",

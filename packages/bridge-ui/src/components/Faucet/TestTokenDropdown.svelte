@@ -24,7 +24,10 @@
 </script>
 
 <div class="dropdown dropdown-bottom">
-  <button class="btn btn-md justify-around w-[194px]">
+  <!-- 这里不能使用button -->
+  <!-- svelte-ignore a11y-label-has-associated-control -->
+  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+  <label tabindex="0" class="btn btn-md justify-around w-[194px]">
     <span class="font-normal flex items-center flex-1 text-left mr-2">
       {#if selectedToken && isTestToken(selectedToken)}
         <!-- {#if selectedToken.logoComponent}
@@ -35,7 +38,10 @@
         {#if selectedToken.logoUrl}
           <img src={selectedToken.logoUrl} height={22} width={22} alt="" />
         {:else}
-          <svelte:component this={selectedToken.logoComponent} height={22} width={22} />
+          <svelte:component
+            this={selectedToken.logoComponent}
+            height={22}
+            width={22} />
         {/if}
         <span class="ml-2 inline-block">{selectedToken.name}</span>
       {:else}
@@ -43,7 +49,7 @@
       {/if}
     </span>
     <ChevronDown size="20" />
-  </button>
+  </label>
 
   <ul
     role="listbox"
@@ -58,7 +64,10 @@
           {#if token.logoUrl}
             <img src={token.logoUrl} height={22} width={22} alt="" />
           {:else}
-            <svelte:component this={token.logoComponent} height={22} width={22} />
+            <svelte:component
+              this={token.logoComponent}
+              height={22}
+              width={22} />
           {/if}
 
           <span class="pl-1.5 text-left flex-1">

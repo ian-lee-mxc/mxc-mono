@@ -17,7 +17,6 @@
   import { errorToast, successToast } from './NotificationToast.svelte';
   import { L2_CHAIN_ID } from '../constants/envVars';
 
-
   let address: string = '';
   let addressAvatarImgData: string = '';
   let tokenBalance: string = '';
@@ -81,7 +80,9 @@
 <!-- Makes no sense to render anything here without signer  -->
 {#if $signer}
   <div class="dropdown dropdown-bottom dropdown-end">
-    <button class="btn justify-around">
+    <!-- svelte-ignore a11y-label-has-associated-control -->
+    <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+    <label tabindex="0" class="btn justify-around">
       <span class="font-normal flex-1 text-left flex items-center">
         {#if pendingTx}
           <div class="inline-block ml-2">
@@ -101,7 +102,7 @@
         {/if}
       </span>
       <ChevronDown size="20" />
-    </button>
+    </label>
     <ul
       role="listbox"
       tabindex="0"
@@ -112,8 +113,8 @@
           <div class="text-lg mt-2">
             {tokenBalance.length > 10
               ? `${truncateString(tokenBalance)}…`
-              : tokenBalance} 
-              {$srcChain.id == L2_CHAIN_ID ? 'MXC' : 'ETH'}
+              : tokenBalance}
+            {$srcChain.id == L2_CHAIN_ID ? 'MXC' : 'ETH'}
           </div>
         {:else}
           <!-- <div class="text-lg mt-2">-- ETH</div> -->
