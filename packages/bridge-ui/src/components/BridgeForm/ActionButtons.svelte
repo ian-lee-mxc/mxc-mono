@@ -10,7 +10,8 @@
   import Button from '../Button.svelte';
   import Loading from '../Loading.svelte';
   import { L1_CHAIN_ID } from '../../constants/envVars';
-
+  import { _ } from 'svelte-i18n';
+  import { get } from 'svelte/store';
 
   export let token: Token;
 
@@ -28,6 +29,10 @@
 
   export let approve: (token: Token, isMxc: boolean = false) => Promise<void>;
   export let bridge: (token: Token) => Promise<void>;
+
+  /* 
+  remove button type="accent"
+  */
 
   let approving = false;
   let bridging = false;
@@ -93,67 +98,61 @@
 {#if showSteps}
   <div class="flex space-x-4 items-center">
     {#if loading}
-      <Button type="accent" class="flex-1" disabled={true}>
+      <Button class="action-button flex-1" disabled={true}>
         {#if approving}
-          <Loading text="Approving…" />
+          <Loading text={$_("bridgeForm.approving")} />
         {:else}
-          ✓ Approved
+          ✓ {$_('bridgeForm.approved')}
         {/if}
       </Button>
       <ArrowRight />
-      <Button type="accent" class="flex-1" disabled={true}>
+      <Button class="action-button flex-1" disabled={true}>
         {#if bridging}
-          <Loading text="Bridging…" />
+          <Loading text={$_('bridgeForm.bridging')}  />
         {:else}
-          Bridge
+          {$_('bridgeForm.bridge')}
         {/if}
       </Button>
     {:else}
-      <Button
-        type="accent"
-        class="flex-1"
+      <Button class="action-button flex-1"
         on:click={clickApprove}
         disabled={!requiresAllowance || actionDisabled}>
         {requiresAllowance
-          ? 'Approve token'
+          ? get(_)('bridgeForm.approveToken')
           : !computingAllowance && amountEntered
-          ? '✓ Approved'
-          : 'Approve'}
+          ? `✓ ${get(_)('bridgeForm.approved')}`
+          : get(_)('bridgeForm.approve')}
       </Button>
       <ArrowRight />
       {#if requiresAllowanceMxc}
-        <Button
-                type="accent"
-                class="flex-1"
+        <Button class="action-button flex-1"
                 on:click={clickApproveMxc}
                 disabled={!requiresAllowanceMxc || actionDisabled}>
           {requiresAllowanceMxc
-                  ? 'Approve MXC'
+                  ? `${get(_)('bridgeForm.approve')} MXC`
                   : !computingAllowance && amountEntered
-                          ? '✓ Approved MXC'
-                          : 'Approve MXC'}
+                          ? `✓ ${get(_)('bridgeForm.approved')}} MXC`
+                          : `${get(_)('bridgeForm.approve')} MXC`}
         </Button>
         <ArrowRight />
       {/if}
       <Button
-        type="accent"
-        class="flex-1"
+        class="action-button flex-1"
         on:click={clickBridge}
         disabled={requiresAllowance || actionDisabled}>
-        Bridge
+        {$_('bridgeForm.bridge')}
       </Button>
     {/if}
   </div>
 {:else if bridging}
-  <Button type="accent" class="w-full" disabled={true}>
-    <Loading text="Bridging…" />
+  <Button class="action-button w-full" disabled={true}>
+    <Loading text={$_('bridgeForm.bridging')} />
   </Button>
 {:else}
   <Button
-    type="accent"
-    class="w-full"
+    class="action-button w-full"
     on:click={clickBridge}
     disabled={actionDisabled}>
-    Bridge
+    {$_('bridgeForm.bridge')}
   </Button>
 {/if}

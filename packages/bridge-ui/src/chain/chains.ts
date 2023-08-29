@@ -66,12 +66,19 @@ export const mainnetWagmiChain: WagmiChain = {
     default: {
       http: [L1_RPC],
     },
+    public: {
+      http: [L1_RPC],
+    }
   },
   blockExplorers: {
     default: {
       name: 'Main',
       url: L1_EXPLORER_URL,
     },
+    public: {
+      name: 'Main',
+      url: L1_EXPLORER_URL,
+    }
   },
 };
 

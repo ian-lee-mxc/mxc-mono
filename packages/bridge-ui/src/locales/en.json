@@ -1,0 +1,66 @@
+{
+    "home": {
+        "title": "Wannsee Bridge",
+        "selectToken": "Select Token",
+        "to": "To",
+        "bridge": "Bridge",
+        "approve": "Approve"
+    },
+    "buttton": {
+        "add": "Add",
+        "confirm": "Confirm"
+    },
+    "bridgeForm": {
+        "fieldLabel": "Amount",
+        "maxLabel": "Max",
+        "balance": "Balance",
+        "processingFeeLabel": "Processing Fee",
+        "bridge": "Bridge",
+        "approve": "Approve",
+        "approved": "Approved",
+        "approving": "Approving…",
+        "bridging": "Bridging…",
+        "approveToken": "Approve token",
+        "notFetchToken": "Could not fetch token details.",
+        "invalidAddress": "Invalid token address.",
+        "enterAddress": "Enter valid ERC20 Address",
+        "tokenAreadyAdd": "Tokens already added",
+        "memo": "Memo",
+        "enterMemo": "Enter memo here…",
+        "mxcLimit": "Max limit reached",
+        "memoDesc": "You can attach an arbitrary message to your bridge transaction by using a memo — it will slightly increase gas costs.",
+        "errorComp": "Error computing",
+        "selectNoneDesc": "Selecting <strong>None</strong> means that you'll require MXC on the receiving chain in order to claim the bridged token. Please, come back later to manually claim.",
+        "notShowMessage": "Do not show this message again"
+    },
+    "nav": {
+        "connect": "Connect Wallet"
+    },
+    "transaction": {
+        "pending": "Pending",
+        "claim": "Claim",
+        "retry": "Retry",
+        "release": "Release",
+        "claimed": "Claimed",
+        "released": "Released",
+        "failed": "Failed"
+    },
+    "toast": {
+        "transactionSent": "Transaction sent",
+        "transactionCompleted": "Transaction completed!",
+        "errorWrongNetwork": "You are connected to the wrong chain in your wallet",
+        "errorSendingTransaction": "Error sending transaction",
+        "errorDisconnecting": "Could not disconnect",
+        "errorInsufficientBalance": "Insufficient ETH balance",
+        "errorCheckingAllowance": "Error checking allowance",
+        "fundsClaimed": "Funds claimed successfully!",
+        "fundsReleased": "Funds released successfully!"
+    },
+    "switchChainModal": {
+        "title": "Not on the right network",
+        "subtitle": "Your current network is not supported. Please select one:"
+    },
+    "connectModal": {
+        "title": "Connect Wallet"
+    }
+}

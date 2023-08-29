@@ -102,7 +102,7 @@
     <div class="px-1 py-0 flex flex-row">
       <span class="mt-2 text-sm">
         {#if cannotCompute}
-          <span class="text-error">⚠ Error computing</span>
+          <span class="text-error">⚠ {$_('bridgeForm.errorComp')}</span>
         {:else}
           <!-- {amount} ETH -->
           {amount}
@@ -131,8 +131,6 @@
 <NoticeModal bind:show={showNoneFeeTooltip} name="NoneFeeTooltip">
   <!-- TODO: translations? -->
   <div class="text-center">
-    Selecting <strong>None</strong> means that you'll require MXC on the receiving
-    chain in order to claim the bridged token. Please, come back later to manually
-    claim.
+    {@html $_('bridgeForm.selectNoneDesc')}
   </div>
 </NoticeModal>

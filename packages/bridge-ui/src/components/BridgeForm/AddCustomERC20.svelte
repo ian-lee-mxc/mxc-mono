@@ -15,6 +15,8 @@
   import Loading from '../Loading.svelte';
   import Modal from '../Modal.svelte';
   import { errorToast } from '../NotificationToast.svelte';
+  import { get } from 'svelte/store';
+  import { _ } from 'svelte-i18n';
 
   const log = getLogger('component:AddCustomERC20');
 
@@ -69,13 +71,13 @@
       } catch (error) {
         console.error(error);
 
-        tokenError = 'Could not fetch token details.';
+        tokenError = get(_)('bridgeForm.notFetchToken');
         errorToast(tokenError);
       } finally {
         loadingTokenDetails = false;
       }
     } else {
-      tokenError = tokenAddress ? 'Invalid token address.' : '';
+      tokenError = tokenAddress ? get(_)('bridgeForm.invalidAddress') : '';
       tokenDetails = null;
     }
   }
@@ -90,7 +92,7 @@
     <div class="mt-4 mb-2">
       <input
         type="text"
-        placeholder="Enter valid ERC20 Address"
+        placeholder={$_('bridgeForm.enterAddress')}
         class="input input-primary bg-dark-2 input-md md:input-lg w-full focus:ring-0 border-dark-2 rounded-md"
         name="customTokenAddress"
         bind:value={tokenAddress} />
@@ -118,14 +120,14 @@
       </button>
     {:else}
       <button class="btn" type="submit" disabled={Boolean(tokenError)}>
-        Add
+        {$_('button.add')}
       </button>
     {/if}
   </form>
 
   {#if customTokens.length > 0}
     <div class="flex h-full w-full flex-col justify-between bg-none mt-6">
-      <h3>Tokens already added</h3>
+      <h3>{$_('bridgeForm.tokenAreadyAdd')}</h3>
       {#each customTokens as customToken (customToken.symbol)}
         <div class="flex items-center justify-between">
           <div class="flex items-center">

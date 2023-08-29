@@ -3,7 +3,7 @@
 
   import BridgeForm from '../../components/BridgeForm';
   import SelectChain from '../../components/BridgeForm/SelectChain.svelte';
-  //   import Faucet from '../../components/Faucet/Faucet.svelte';
+  import Faucet from '../../components/Faucet/Faucet.svelte';
   import Loading from '../../components/Loading.svelte';
   import { Tab, TabList, TabPanel, Tabs } from '../../components/Tabs';
   import Transactions from '../../components/Transactions';
@@ -38,7 +38,10 @@
     warningToast,
   } from '../../components/NotificationToast.svelte';
 
-  // const is_testnet = ISTESTNET == '1';
+  import { _ } from 'svelte-i18n';
+  import { get } from 'svelte/store';
+
+  const isTestnet = ISTESTNET == '1';
 
   enum LogLevel {
     DEBUG = 'DEBUG',
@@ -167,9 +170,9 @@
   const tabsRoute = [
     { name: 'bridge', href: '/' },
     { name: 'transactions', href: '/transactions' },
+    { name: 'faucet', href: '/faucet' },
     { name: 'stake', href: '/stake' },
-    // Add more tabs if needed
-  ];
+  ]
 
   async function setBridge() {
     // in l1, set the BridgeType.ERC20
@@ -200,9 +203,11 @@
         md:min-h-[650px]
         p-2"
     bind:activeTab>
+    
     {@const tab1 = tabsRoute[0]}
     {@const tab2 = tabsRoute[1]}
     {@const tab3 = tabsRoute[2]}
+    {@const tab4 = tabsRoute[3]}
 
     <TabList class="block mb-4 w-full">
       <Tab name={tab1.name} href={tab1.href}>Bridge</Tab>
@@ -214,8 +219,11 @@
           (<Loading />)
         {/if}
       </Tab>
+      {#if isTestnet}
+        <Tab name={tab3.name} href={tab3.href}>Faucet</Tab>
+      {/if}
       {#if $srcChain && $srcChain.id == L1_CHAIN_ID}
-        <Tab name={tab3.name} href={tab3.href}>Stake</Tab>
+        <Tab name={tab4.name} href={tab4.href}>Stake</Tab>
       {/if}
     </TabList>
 
@@ -235,6 +243,12 @@
     </TabPanel>
 
     <TabPanel tab={tab3.name}>
+      <div class="md:w-[440px] px-4 flex flex-col items-center justify-center">
+        <Faucet />
+      </div>
+    </TabPanel>
+
+    <TabPanel tab={tab4.name}>
       <Stake />
     </TabPanel>
   </Tabs>
