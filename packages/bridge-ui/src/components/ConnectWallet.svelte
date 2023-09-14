@@ -11,6 +11,7 @@
   import { client as wagmiClient } from '../wagmi/client';
   import CoinbaseWallet from './icons/CoinbaseWallet.svelte';
   import MetaMask from './icons/MetaMask.svelte';
+  import AXS from './icons/AXS.svelte';
   import WalletConnect from './icons/WalletConnect.svelte';
   import Modal from './Modal.svelte';
   import {
@@ -51,6 +52,7 @@
     metamask: MetaMask,
     walletconnect: WalletConnect,
     'coinbase wallet': CoinbaseWallet,
+    'axs wallet': AXS
   };
 </script>
 
