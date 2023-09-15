@@ -4,6 +4,7 @@ import { MetaMaskConnector } from '@wagmi/core/connectors/metaMask';
 import { WalletConnectConnector } from '@wagmi/core/connectors/walletConnect';
 import { jsonRpcProvider } from '@wagmi/core/providers/jsonRpc';
 import { publicProvider } from '@wagmi/core/providers/public';
+import { InjectedConnector } from '@wagmi/connectors/injected'
 
 import {
   L1_CHAIN_ID,
@@ -69,6 +70,11 @@ export const client = createClient({
   autoConnect: true,
   provider,
   connectors: [
+    new InjectedConnector({
+      options: {
+        name: 'AXS Wallet',
+      },
+    }),
     new MetaMaskConnector({ chains }),
     new CoinbaseWalletConnector({
       chains,
