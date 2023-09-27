@@ -12,9 +12,9 @@ library MxcConfig {
     function getConfig() internal pure returns (MxcData.Config memory) {
         return MxcData.Config({
             chainId: 18686,
-            // Two weeks if avg block time is 12 seconds
-            maxNumProposedBlocks: 100800,
-            ringBufferSize: 100800 + 10,
+            // Two weeks if avg block time is 2 seconds
+            maxNumProposedBlocks: 604800,
+            ringBufferSize: 604800 + 10,
             // Each time one more block is verified, there will be ~20k
             // more gas cost.
             maxVerificationsPerTx: 10,
