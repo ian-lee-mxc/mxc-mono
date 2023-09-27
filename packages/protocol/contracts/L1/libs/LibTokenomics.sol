@@ -82,7 +82,11 @@ library LibTokenomics {
         returns (uint256)
     {
         uint64 numBlocksUnverified = state.numBlocks - state.lastVerifiedBlockId - 1;
-        uint64 avgBlockTime = (uint64(block.timestamp) - state.blocks[state.lastVerifiedBlockId].proposedAt) / numBlocksUnverified;
+        uint64 avgBlockTime = (uint64(block.timestamp) - state.blocks[state.lastVerifiedBlockId % config.ringBufferSize].proposedAt) / numBlocksUnverified;
+
+        if(avgBlockTime > state.proofTimeTarget * 2) {
+            avgBlockTime = state.proofTimeTarget * 2;
+        }
 
         if (numBlocksUnverified == 0 || state.lastVerifiedBlockId == 0) {
             return 0;
@@ -99,7 +103,12 @@ library LibTokenomics {
             }
             uint256 proofTimeAddtionReward = baseReward * proofRate;
 
-            return ((baseReward + proofTimeAddtionReward) / 1e16) * 1e16;
+            uint256 reward = (baseReward + proofTimeAddtionReward);
+            if(reward > 1e22) {
+                reward = 1e22;
+            }
+
+            return (reward / 1e16) * 1e16;
         }
     }
 
@@ -115,7 +124,11 @@ library LibTokenomics {
         if(elapsedSeconds == 0) {
             elapsedSeconds = 1;
         }
-        return ((MxcToken(resolver.resolve("mxc_token", false)).totalSupply() / 20 / 365 days) * elapsedSeconds / 1e16) * 1e16;
+        uint reward = (MxcToken(resolver.resolve("mxc_token", false)).totalSupply() / 20 / 365 days) * elapsedSeconds;
+        if(reward > 1e22) {
+            reward = 1e22;
+        }
+        return (reward / 1e16) * 1e16;
     }
 
     /**
