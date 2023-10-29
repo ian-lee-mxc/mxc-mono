@@ -4,6 +4,7 @@
   import type { NoticeModalOpenMethod } from '../domain/modal';
   import Button from './Button.svelte';
   import Modal from './Modal.svelte';
+  import { _ } from 'svelte-i18n';
 
   const STORAGE_PREFIX = 'notice-modal';
 
@@ -99,11 +100,11 @@
         id="noShowAgain_{name}"
         bind:checked={noShowAgainCheckbox}
         class="checkbox checkbox-secundary mr-2" />
-      <label for="noShowAgain_{name}">Do not show this message again</label>
+      <label for="noShowAgain_{name}">{$_("bridgeForm.notShowMessage")}</label>
     </div>
 
     <div class="flex justify-center">
-      <Button type="accent" on:click={onConfirmNotice}>Confirm</Button>
+      <Button type="accent" on:click={onConfirmNotice}>{$_("button.confirm")}</Button>
     </div>
   </div>
 </Modal>

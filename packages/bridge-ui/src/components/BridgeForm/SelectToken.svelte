@@ -18,19 +18,18 @@
   import AddCustomErc20 from './AddCustomERC20.svelte';
   import { L1_CHAIN_ID } from '../../constants/envVars';
 
-
   let dropdownElement: HTMLDivElement;
   let showAddressField = false;
   let loading = false;
 
   // l1 => MXC is erc20
-  const l1Token = tokens.filter(item=>{
-    return !item.isChainToken
-  })
+  const l1Token = tokens.filter((item) => {
+    return !item.isChainToken;
+  });
   // l2 => MXC is ethToken
-  const l2Token = tokens.filter(item=>{
-    return item.isChainToken && item.symbol=='MXC' ? false: true
-  })
+  const l2Token = tokens.filter((item) => {
+    return item.isChainToken && item.symbol == 'MXC' ? false : true;
+  });
 
   function closeDropdown() {
     dropdownElement?.classList.remove('dropdown-open');
@@ -105,7 +104,11 @@
 </script>
 
 <div class="dropdown dropdown-bottom dropdown-end" bind:this={dropdownElement}>
-  <button class="flex items-center justify-center hover:cursor-pointer">
+  <!-- svelte-ignore a11y-label-has-associated-control -->
+  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+  <label
+    tabindex="0"
+    class="flex items-center justify-center hover:cursor-pointer">
     <!-- {#if $token.logoComponent}
       <svelte:component this={$token.logoComponent} />
     {:else}
@@ -115,10 +118,10 @@
     <ChevronDown size="20" /> -->
     {#if $token.logoUrl}
       <div class="flex pr-5">
-        <img src={$token.logoUrl} height={22} width={22} alt="" />      
+        <img src={$token.logoUrl} height={22} width={22} alt="" />
         <p class="px-2 text-sm">{$token.symbol}</p>
       </div>
-      {:else}
+    {:else}
       <div class="flex">
         <svelte:component this={$token.logoComponent} height={22} width={22} />
         <p class="px-2 text-sm">{$token.symbol}</p>
@@ -127,7 +130,8 @@
     <div>
       <ChevronDown size="20" />
     </div>
-  </button>
+  </label>
+  <!-- <label tabindex="0" class="btn m-1">Click</label> -->
 
   <ul
     role="listbox"
@@ -148,7 +152,7 @@
         </button>
       </li>
     {/each} -->
-    {#if $srcChain && $srcChain.id==L1_CHAIN_ID}
+    {#if $srcChain && $srcChain.id == L1_CHAIN_ID}
       {#each l1Token as _token (_token.symbol)}
         <li>
           <button
@@ -161,7 +165,10 @@
             {#if _token.logoUrl}
               <img src={_token.logoUrl} height={22} width={22} alt="" />
             {:else}
-              <svelte:component this={_token.logoComponent} height={22} width={22} />
+              <svelte:component
+                this={_token.logoComponent}
+                height={22}
+                width={22} />
             {/if}
             <span class="text-sm font-medium bg-transparent px-2">
               {_token.symbol}
@@ -182,7 +189,10 @@
             {#if _token.logoUrl}
               <img src={_token.logoUrl} height={22} width={22} alt="" />
             {:else}
-              <svelte:component this={_token.logoComponent} height={22} width={22} />
+              <svelte:component
+                this={_token.logoComponent}
+                height={22}
+                width={22} />
             {/if}
 
             <span class="text-sm font-medium bg-transparent px-2">
@@ -214,12 +224,12 @@
         <PlusCircle size="25" />
         <span
           class="
-            text-sm 
-            font-medium 
-            bg-transparent 
-            flex-1 
-            w-[100px] 
-            px-0 
+            text-sm
+            font-medium
+            bg-transparent
+            flex-1
+            w-[100px]
+            px-0
             pl-2">
           Add Custom
         </span>

@@ -4,6 +4,8 @@
 
 @import './override.css';
 @import './logo.css';
+@import './common.css';
+@import './lanuageModal.css';
 
 [data-theme='dark'] .switch-to-dark-mode {
   display: none;
@@ -11,4 +13,21 @@
 
 [data-theme='light'] .switch-to-light-mode {
   display: none;
+}
+
+.connect-button,
+.connect-button:hover {
+  background-color: #f43178;
+}
+
+button.border-accent {
+  border: 1px solid #6300ff;
+}
+
+button.action-button {
+  background-color: #6300ff;
+}
+
+button[disabled].action-button {
+  background-color: #5b5b5b38;
 }

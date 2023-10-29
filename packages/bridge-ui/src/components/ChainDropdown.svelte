@@ -14,8 +14,8 @@
     warningToast,
   } from './NotificationToast.svelte';
 
-  import MxcIcon from "../assets/token/mxc.png"
-  import EthIcon from "../assets/ether.png"
+  import MxcIcon from '../assets/token/mxc.png';
+  import EthIcon from '../assets/ether.png';
 
   const switchChains = async (chain: Chain) => {
     if (!$signer) {
@@ -38,7 +38,9 @@
         warningToast('Switch chain request rejected.');
       } else {
         // errorToast('Error switching chain.');
-        errorToast('Error Switching Chain. Try Switching Manually On Your Wallet');
+        errorToast(
+          'Error Switching Chain. Try Switching Manually On Your Wallet',
+        );
       }
     }
   };
@@ -47,11 +49,15 @@
 </script>
 
 <div class="dropdown dropdown-end mr-4">
-  <button class="btn justify-around md:w-[210px]" disabled={cannotSwitch}>
-    <span class="font-normal flex-1 text-left mr-2 flex items-center justify-center">
+  <!-- disabled={cannotSwitch} -->
+  <!-- svelte-ignore a11y-label-has-associated-control -->
+  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+  <label tabindex="0" class="btn justify-around md:w-[210px]">
+    <span
+      class="font-normal flex-1 text-left mr-2 flex items-center justify-center">
       {#if $srcChain}
         <!-- <svelte:component this={$srcChain.icon} /> -->
-        <img src={$srcChain.logoUrl} height={30} width={30} alt="" >
+        <img src={$srcChain.logoUrl} height={30} width={30} alt="" />
         <span class="ml-2 hidden md:inline-block">{$srcChain.name}</span>
       {:else}
         <span class="ml-2 flex items-center">
@@ -61,7 +67,7 @@
       {/if}
     </span>
     <ChevronDown size="20" />
-  </button>
+  </label>
   <ul
     role="listbox"
     tabindex="0"

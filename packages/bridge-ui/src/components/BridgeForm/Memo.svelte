@@ -1,6 +1,8 @@
 <script lang="ts">
   import ButtonWithTooltip from '../ButtonWithTooltip.svelte';
   import TooltipModal from '../TooltipModal.svelte';
+  import { get } from 'svelte/store';
+  import { _ } from 'svelte-i18n';
 
   export let memo: string = '';
   export let error: string = '';
@@ -11,7 +13,7 @@
   function checkSizeLimit(input: string) {
     const bytes = new TextEncoder().encode(input).length;
     if (bytes > 128) {
-      error = 'Max limit reached';
+      error = get(_)('bridgeForm.mxcLimit')
     } else {
       error = null;
     }
@@ -23,7 +25,7 @@
 <div class="label flex flex-row justify-between items-center">
   <label for="memo">
     <ButtonWithTooltip onClick={() => (tooltipOpen = true)}>
-      <span slot="buttonText">Memo</span>
+      <span slot="buttonText">{$_('bridgeForm.memo')}</span>
     </ButtonWithTooltip>
   </label>
 
@@ -41,7 +43,7 @@
   <div class="form-control">
     <input
       type="text"
-      placeholder="Enter memo here…"
+      placeholder={$_('bridgeForm.enterMemo')}
       class="input input-primary bg-dark-2 input-md md:input-lg w-full focus:ring-0 border-dark-2 rounded-md"
       name="memo"
       bind:value={memo} />
@@ -57,8 +59,7 @@
 <TooltipModal title="Memo" bind:isOpen={tooltipOpen}>
   <span slot="body">
     <p class="text-left">
-      You can attach an arbitrary message to your bridge transaction by using a
-      memo — it will slightly increase gas costs.
+      {$_('bridgeForm.memoDesc')}
     </p>
   </span>
 </TooltipModal>
