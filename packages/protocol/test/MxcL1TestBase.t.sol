@@ -41,9 +41,11 @@ contract ArbSysTest is ArbSys {
         return blockhash(blockNumber);
     }
 }
+
 interface IArbGasInfo {
     function getMinimumGasPrice() external view returns (uint256);
 }
+
 contract ArbGasInfoTest is IArbGasInfo {
     function getMinimumGasPrice() external view returns (uint256) {
         return 1e8;
@@ -94,7 +96,7 @@ abstract contract MxcL1TestBase is Test {
         vm.etch(address(100), address(arbSysTest).code);
         console2.log(ArbSys(arbSysTest).arbBlockNumber());
         ArbGasInfoTest arbGasInfoTest = new ArbGasInfoTest();
-        vm.etch(address(108),address(arbGasInfoTest).code);
+        vm.etch(address(108), address(arbGasInfoTest).code);
     }
 
     function setUp() public virtual {
@@ -185,7 +187,7 @@ abstract contract MxcL1TestBase is Test {
         meta.treasury = L2Treasury;
 
         vm.prank(proposer, proposer);
-        meta = L1.proposeBlock(abi.encode(input), txList);
+        meta = L1.proposeBlock(abi.encode(input), txList, 0);
     }
 
     function proveBlock(
