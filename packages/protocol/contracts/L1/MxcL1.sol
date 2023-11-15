@@ -30,9 +30,11 @@ contract MxcL1 is EssentialContract, ICrossChainSync, MxcEvents, MxcErrors {
     uint256[100] private __gap;
 
     modifier onlyEOA() {
-        uint size;
+        uint256 size;
         address sender = msg.sender;
-        assembly { size := extcodesize(sender) }
+        assembly {
+            size := extcodesize(sender)
+        }
         require(size == 0, "Only EOA accounts allowed");
         _;
     }
@@ -83,7 +85,7 @@ contract MxcL1 is EssentialContract, ICrossChainSync, MxcEvents, MxcErrors {
      *        `n` transactions in `txList`, then there will be up to `n + 1`
      *        transactions in the L2 block.
      */
-    function proposeBlock(bytes calldata input, bytes calldata txList)
+    function proposeBlock(bytes calldata input, bytes calldata txList, uint256 estimateGas)
         external
         nonReentrant onlyEOA
         returns (MxcData.BlockMetadata memory meta)
@@ -95,7 +97,8 @@ contract MxcL1 is EssentialContract, ICrossChainSync, MxcEvents, MxcErrors {
             config: config,
             resolver: AddressResolver(this),
             input: abi.decode(input, (MxcData.BlockMetadataInput)),
-            txList: txList
+            txList: txList,
+            estimateGas: estimateGas
         });
         if (config.maxVerificationsPerTx > 0) {
             LibVerifying.verifyBlocks({

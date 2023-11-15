@@ -20,7 +20,6 @@ interface IArbGasInfo {
     function getMinimumGasPrice() external view returns (uint256);
 }
 
-
 library LibProposing {
     using SafeCastUpgradeable for uint256;
     using LibAddress for address;
@@ -44,7 +43,8 @@ library LibProposing {
         MxcData.Config memory config,
         AddressResolver resolver,
         MxcData.BlockMetadataInput memory input,
-        bytes calldata txList
+        bytes calldata txList,
+        uint256 estimateGas
     ) internal returns (MxcData.BlockMetadata memory meta) {
         uint256 gasStart = gasleft();
 
@@ -70,12 +70,12 @@ library LibProposing {
         meta.gasLimit = input.gasLimit;
         meta.beneficiary = input.beneficiary;
         meta.treasury = resolver.resolve(config.chainId, "treasury", false);
-//        meta.depositsProcessed = LibEthDepositing.processDeposits(state, config, input.beneficiary);
+        //        meta.depositsProcessed = LibEthDepositing.processDeposits(state, config, input.beneficiary);
 
         uint256 proposeReward = LibTokenomics.getProposeReward(resolver, config, state);
         meta.blockReward = uint256(state.proveMetaReward) * 1e16 + proposeReward;
         state.proveMetaReward = 0;
-        if(meta.blockReward > 0) {
+        if (meta.blockReward > 0) {
             LibTokenomics.mintReward(resolver, meta.blockReward);
         }
 
@@ -106,22 +106,24 @@ library LibProposing {
             state.accProposedAt += meta.timestamp;
         }
 
-        uint256 l2G = input.gasLimit;
-        if(l2G < 21000) {
-            l2G = 21000;
+        if (input.gasLimit < 21000) {
+            input.gasLimit = 21000;
         }
         uint256 ethMxcPrice = 90000;
         {
-            address oracle = resolver.resolve("oracle_ethmxc",true);
-            if(oracle != address(0)) {
+            address oracle = resolver.resolve("oracle_ethmxc", true);
+            if (oracle != address(0)) {
                 ethMxcPrice = uint256(AggregatorInterface(oracle).latestAnswer());
-                if(ethMxcPrice == 0) {
+                if (ethMxcPrice == 0) {
                     ethMxcPrice = 90000;
                 }
             }
         }
+        if (estimateGas < gasStart) {
+            estimateGas = gasStart;
+        }
         // baseFee relay on arbitrum
-        meta.baseFee = (block.basefee * (gasStart - gasleft()) * 4 * ethMxcPrice / l2G) / 1 gwei;
+        meta.baseFee = (block.basefee * estimateGas * 4 * ethMxcPrice / input.gasLimit) / 1 gwei;
 
         if (state.prevBaseFee != 0) {
             if (meta.baseFee > (state.prevBaseFee * 105) / 100) {
