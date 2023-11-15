@@ -11,7 +11,7 @@ import {MxcData} from "../L1/MxcData.sol";
 library MxcConfig {
     function getConfig() internal pure returns (MxcData.Config memory) {
         return MxcData.Config({
-            chainId: 18686,
+            chainId: 5167003,
             // Two weeks if avg block time is 2 seconds
             maxNumProposedBlocks: 604800,
             ringBufferSize: 604800 + 10,
@@ -32,12 +32,12 @@ library MxcConfig {
             // of a geth transaction, so using 120KB for the proposed
             // transactions list calldata, 8K for the remaining tx fields.
             maxBytesPerTxList: 120000,
-            proofCooldownPeriod: 2 hours,
-            systemProofCooldownPeriod: 1 hours,
+            proofCooldownPeriod: 0 minutes,
+            systemProofCooldownPeriod: 0 minutes,
             // Only need 1 real zkp per 10 blocks.
             // If block number is N, then only when N % 10 == 0, the real ZKP
             // is needed. For mainnet, this must be 0 or 1.
-            realProofSkipSize: 0,
+            realProofSkipSize: 100,
             ethDepositGas: 21000,
             ethDepositMaxFee: 1 ether / 10,
             txListCacheExpiry: 0,
