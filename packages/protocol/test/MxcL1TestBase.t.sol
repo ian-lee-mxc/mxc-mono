@@ -187,7 +187,7 @@ abstract contract MxcL1TestBase is Test {
         meta.treasury = L2Treasury;
 
         vm.prank(proposer, proposer);
-        meta = L1.proposeBlock(abi.encode(input), txList, 0);
+        meta = L1.proposeBlock(abi.encode(input), txList, txList, 0, 0);
     }
 
     function proveBlock(

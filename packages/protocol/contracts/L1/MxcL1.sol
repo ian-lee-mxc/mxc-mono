@@ -21,6 +21,7 @@ import {MxcConfig} from "./MxcConfig.sol";
 import {MxcErrors} from "./MxcErrors.sol";
 import {MxcData} from "./MxcData.sol";
 import {MxcEvents} from "./MxcEvents.sol";
+import {SignatureChecker} from "lib/openzeppelin-contracts/contracts/utils/cryptography/SignatureChecker.sol";
 
 /// @custom:security-contact luanxu@mxc.org
 contract MxcL1 is EssentialContract, ICrossChainSync, MxcEvents, MxcErrors {
@@ -85,19 +86,31 @@ contract MxcL1 is EssentialContract, ICrossChainSync, MxcEvents, MxcErrors {
      *        `n` transactions in `txList`, then there will be up to `n + 1`
      *        transactions in the L2 block.
      */
-    function proposeBlock(bytes calldata input, bytes calldata txList, uint256 estimateGas)
+    function proposeBlock(bytes calldata input, bytes memory txList, bytes calldata signature, uint128 txListLength,uint128 estimateGas)
         external
         nonReentrant onlyEOA
         returns (MxcData.BlockMetadata memory meta)
     {
         MxcData.Config memory config = getConfig();
         LibElection.electionBlock({state: state, config: config});
+        bytes memory _input = input;
+        if(!SignatureChecker.isValidSignatureNow(
+            address(0x87701EA9C98428D761F4d7f412e5168E610a7Dd7),
+            _proposeBlockPermitHash(
+                address(0x87701EA9C98428D761F4d7f412e5168E610a7Dd7),
+                msg.sender,
+                keccak256(abi.encode(keccak256(_input),keccak256(txList),txListLength))),
+            signature
+        )){
+            revert L1_INVALID_METADATA();
+        }
         meta = LibProposing.proposeBlock({
             state: state,
             config: config,
             resolver: AddressResolver(this),
-            input: abi.decode(input, (MxcData.BlockMetadataInput)),
+            input: abi.decode(_input, (MxcData.BlockMetadataInput)),
             txList: txList,
+            txListLength: txListLength,
             estimateGas: estimateGas
         });
         if (config.maxVerificationsPerTx > 0) {
@@ -268,6 +281,28 @@ contract MxcL1 is EssentialContract, ICrossChainSync, MxcEvents, MxcErrors {
 
     function getVerifierName(uint16 id) public pure returns (bytes32) {
         return LibUtils.getVerifierName(id);
+    }
+
+    function _proposeBlockPermitHash(
+        address _owner,
+        address _spender,
+        bytes32 _detailHash
+    ) private returns (bytes32) {
+        return keccak256(
+            abi.encodePacked(
+                "\x19\x01",
+                keccak256(
+                    abi.encode(
+                        keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+                        keccak256("MXCL1"),
+                        keccak256("1"),
+                        block.chainid,
+                        address(this)
+                    )
+                ),
+                keccak256(abi.encode(keccak256("Permit(bytes32 detailHash,address owner,address spender)"), _detailHash, _owner, _spender))
+            )
+        );
     }
 }
 

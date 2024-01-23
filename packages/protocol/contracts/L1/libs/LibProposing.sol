@@ -43,18 +43,19 @@ library LibProposing {
         MxcData.Config memory config,
         AddressResolver resolver,
         MxcData.BlockMetadataInput memory input,
-        bytes calldata txList,
-        uint256 estimateGas
+        bytes memory txList,
+        uint128 txListLength,
+        uint128 estimateGas
     ) internal returns (MxcData.BlockMetadata memory meta) {
         uint256 gasStart = gasleft();
 
         uint8 cacheTxListInfo =
-            _validateBlock({state: state, config: config, input: input, txList: txList});
+            _validateBlock({state: state, config: config, input: input, txList: txList, txListLength: uint256(txListLength)});
 
         if (cacheTxListInfo != 0) {
             state.txListInfo[input.txListHash] = MxcData.TxListInfo({
                 validSince: uint64(block.timestamp),
-                size: uint24(txList.length)
+                size: uint24(txListLength)
             });
         }
 
@@ -119,11 +120,11 @@ library LibProposing {
                 }
             }
         }
-        if (estimateGas < gasStart) {
-            estimateGas = gasStart;
+        if (uint256(estimateGas) < gasStart) {
+            estimateGas = uint128(gasStart);
         }
         // baseFee relay on arbitrum
-        meta.baseFee = (block.basefee * estimateGas * 4 * ethMxcPrice / input.gasLimit) / 1 gwei;
+        meta.baseFee = (block.basefee * uint256(estimateGas) * ethMxcPrice / input.gasLimit) / 1 gwei;
 
         if (state.prevBaseFee != 0) {
             if (meta.baseFee > (state.prevBaseFee * 105) / 100) {
@@ -162,7 +163,8 @@ library LibProposing {
         MxcData.State storage state,
         MxcData.Config memory config,
         MxcData.BlockMetadataInput memory input,
-        bytes calldata txList
+        bytes memory txList,
+        uint256 txListLength
     ) private view returns (uint8 cacheTxListInfo) {
         if (
             input.beneficiary == address(0) || input.gasLimit == 0
@@ -176,7 +178,7 @@ library LibProposing {
         uint64 timeNow = uint64(block.timestamp);
         // handling txList
         {
-            uint24 size = uint24(txList.length);
+            uint24 size = uint24(txListLength);
             if (size > config.maxBytesPerTxList) revert L1_TX_LIST();
 
             if (input.txListByteStart > input.txListByteEnd) {
@@ -203,9 +205,10 @@ library LibProposing {
                     }
                 } else {
                     if (input.txListByteEnd > size) revert L1_TX_LIST_RANGE();
-                    if (input.txListHash != keccak256(txList)) {
-                        revert L1_TX_LIST_HASH();
-                    }
+//                    if (input.txListHash != keccak256(txList)) {
+//                        revert L1_TX_LIST_HASH();
+//                    }
+                    // CHANGE(MXC): verified on MXC DA Service
 
                     cacheTxListInfo = input.cacheTxListInfo;
                 }
