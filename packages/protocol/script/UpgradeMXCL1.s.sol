@@ -15,13 +15,12 @@ contract UpgradeMXCL1 is Script {
 
     uint256 public privateKey = vm.envUint("PRIVATE_KEY");
 
-    address payable public MXCL1 = payable(0x54D8864e8855A7B66eE42B8F2Eaa0F2E06bd641a);
+    address payable public MXCL1 = payable(0x92a78e9D3DfcfDe54d59845248508CAa59fe6d4f);
 
 
     function run() external {
         vm.startBroadcast(privateKey);
         TransparentUpgradeableProxy(MXCL1).upgradeTo(address(new ProxiedMxcL1()));
-
         vm.stopBroadcast();
 
     }
