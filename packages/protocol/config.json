@@ -1,13 +1,16 @@
 {
-  "contractOwner": "0xC6D7522f7B012b22Bc365C9C43b3DBf13B9aAfF9",
-  "contractAdmin": "0x75c4b5c07c6285cb2a14c512eebaf4a6aed09be6",
-  "chainId": 18686,
+  "contractOwner": "0x5D9f59F49B5E5C83c1776c5ADD039a3C955d3B02",
+  "contractAdmin": "0x52f60448790E485F38f2Aa9c867CD0DD647c0b73",
+  "chainId": 5167004,
   "seedAccounts": [
     {
-      "0x0000777735367b36bC9B61C50022d9D0700dB4Ec": 1000
+      "0x0000777735367b36bC9B61C50022d9D0700dB4Ec": 1024
     },
     {
-      "0x75c4b5c07c6285cb2a14c512eebaf4a6aed09be6": 100000000
+      "0x5D9f59F49B5E5C83c1776c5ADD039a3C955d3B02": 1024
+    },
+    {
+      "0x52f60448790E485F38f2Aa9c867CD0DD647c0b73": 1024000000
     }
   ],
   "contractAddresses": {
@@ -41,6 +44,6 @@
     "gasIssuedPerSecond": "12500000",
     "gasExcess": "45450000000"
   },
-  "predeployERC20": true,
-  "create2": true
+  "predeployERC20": false,
+  "create2": false
 }

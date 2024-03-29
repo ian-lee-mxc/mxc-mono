@@ -30,7 +30,7 @@ contract UpgradeBridge is Script {
 
     function run() external {
         string memory deployL1Json = vm.readFile(string.concat(vm.projectRoot(), "/deployments/deploy_l1.json"));
-        uint256 l2ChainId = 5167003;
+        uint256 l2ChainId = 5167004;
 
         if(l2ChainId == block.chainid) {
             vm.startBroadcast(deployerPrivateKey);

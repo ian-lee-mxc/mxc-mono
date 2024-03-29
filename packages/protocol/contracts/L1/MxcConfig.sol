@@ -11,7 +11,7 @@ import {MxcData} from "../L1/MxcData.sol";
 library MxcConfig {
     function getConfig() internal pure returns (MxcData.Config memory) {
         return MxcData.Config({
-            chainId: 5167003,
+            chainId: 5167004,
             // Two weeks if avg block time is 2 seconds
             maxNumProposedBlocks: 604800,
             ringBufferSize: 604800 + 10,

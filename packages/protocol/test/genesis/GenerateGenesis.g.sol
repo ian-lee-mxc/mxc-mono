@@ -136,7 +136,7 @@ contract TestGenerateGenesis is Test, AddressResolver {
                 id: 0,
                 sender: address(0),
                 srcChainId: 1,
-                destChainId: 5167003,
+                destChainId: 5167004,
                 owner: address(0),
                 to: address(0),
                 refundAddress: address(0),

@@ -12,7 +12,7 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 contract TestMxcL1EnableTokenomics is MxcL1 {
     function getConfig() public pure override returns (MxcData.Config memory config) {
-        config.chainId = 5167003;
+        config.chainId = 5167004;
         // up to 2048 pending blocks
         config.maxNumProposedBlocks = 6;
         config.ringBufferSize = 8;

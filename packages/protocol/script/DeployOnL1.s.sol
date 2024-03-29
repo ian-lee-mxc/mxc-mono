@@ -79,7 +79,7 @@ contract DeployOnL1 is Script {
 //
     uint256 public mxcTokenPremintAmount = vm.envUint("MXC_TOKEN_PREMINT_AMOUNT");
 
-    address public deployedMxcTokenAddress = vm.envAddress("MXC_TOKEN_ADDRESS");
+//    address public deployedMxcTokenAddress = vm.envAddress("MXC_TOKEN_ADDRESS");
 
     // Change it based on 'consensus' / experience / expected result
     // Based in seconds. Please set carefully.
@@ -114,42 +114,41 @@ contract DeployOnL1 is Script {
         );
 
         // MxcL1
-        mxcL1 = new ProxiedMxcL1();
-        uint256 l2ChainId = mxcL1.getConfig().chainId;
+        MxcL1 mxcL1Implement = new ProxiedMxcL1();
+        uint256 l2ChainId = mxcL1Implement.getConfig().chainId;
         require(l2ChainId != block.chainid, "same chainid");
 
         setAddress(l2ChainId, "mxczkevm", mxcL2Address);
         setAddress(l2ChainId, "signal_service", l2SignalService);
-//        setAddress("oracle_prover", oracleProver);
-//        setAddress("system_prover", systemProver);
+        setAddress("oracle_prover", oracleProver);
+        setAddress("system_prover", systemProver);
         setAddress(l2ChainId, "treasury", treasury);
 
         // MxcToken
-//        MxcToken mxcToken = new ProxiedMxcToken();
+        MxcToken mxcToken = new ProxiedMxcToken();
 
         address[] memory premintRecipients = new address[](1);
         uint256[] memory premintAmounts = new uint256[](1);
         premintRecipients[0] = mxcTokenPremintRecipient;
         premintAmounts[0] = mxcTokenPremintAmount;
 
-//        deployProxy(
-//            "mxc_token",
-//            address(mxcToken),
-//            bytes.concat(
-//                mxcToken.init.selector,
-//                abi.encode(
-//                    addressManagerProxy, "MXC Token", "MXC", premintRecipients, premintAmounts
-//                )
-//            )
-//        );
-        setAddress(l2ChainId, "mxc_token", deployedMxcTokenAddress);
+        deployProxy(
+            "mxc_token",
+            address(mxcToken),
+            bytes.concat(
+                mxcToken.init.selector,
+                abi.encode(
+                    addressManagerProxy, "MXC Token", "MXC", premintRecipients, premintAmounts
+                )
+            )
+        );
 
-//        // HorseToken && BullToken
-//        address horseToken = address(new FreeMintERC20("Horse Token", "HORSE"));
-//        console2.log("HorseToken", horseToken);
-//
-//        address bullToken = address(new MayFailFreeMintERC20("Bull Token", "BLL"));
-//        console2.log("BullToken", bullToken);
+        // Ride Token && Park Token
+        address rideToken = address(new FreeMintERC20("Ride Token", "RIDE"));
+        console2.log("Ride Token", rideToken);
+
+        address parkToken = address(new FreeMintERC20("Park Token", "PARK"));
+        console2.log("Park Token", parkToken);
 
         uint64 feeBase = uint64(1) ** 8;
 
@@ -166,9 +165,9 @@ contract DeployOnL1 is Script {
 
         address mxcL1Proxy = deployProxy(
             "mxczkevm",
-            address(mxcL1),
+            address(mxcL1Implement),
             bytes.concat(
-                mxcL1.init.selector,
+                mxcL1Implement.init.selector,
                 abi.encode(
                     addressManagerProxy,
                     genesisHash,
@@ -179,7 +178,7 @@ contract DeployOnL1 is Script {
                 )
             )
         );
-        setAddress("mxczkevm", mxcL1Proxy);
+        mxcL1 = MxcL1(payable(mxcL1Proxy));
         setAddress("proto_broker", mxcL1Proxy);
 
         // Bridge
@@ -214,18 +213,18 @@ contract DeployOnL1 is Script {
         setAddress(mxcL1.getVerifierName(100), address(new Verifier()));
         setAddress(mxcL1.getVerifierName(0), address(new Verifier()));
 
-//        WETH9 weth = new WETH9();
-//        deployProxy(
-//            "weth",
-//            address(weth),
-//            ""
-//        );
-//        EtherVault etherVault = new ProxiedEtherVault();
-//        deployProxy(
-//            "ether_vault",
-//            address(etherVault),
-//            bytes.concat(etherVault.init.selector, abi.encode(addressManagerProxy))
-//        );
+        WETH9 weth = new WETH9();
+        deployProxy(
+            "weth",
+            address(weth),
+            ""
+        );
+        EtherVault etherVault = new ProxiedEtherVault();
+        deployProxy(
+            "ether_vault",
+            address(etherVault),
+            bytes.concat(etherVault.init.selector, abi.encode(addressManagerProxy))
+        );
 
         EthMxcPriceAggregator ethMxcPriceAggregator = new EthMxcPriceAggregator();
         int price = 90000;
@@ -235,7 +234,7 @@ contract DeployOnL1 is Script {
             bytes.concat(ethMxcPriceAggregator.init.selector, abi.encode(addressManagerProxy, price))
         );
         setAddress("relayer", address(relayer));
-        setAddress("weth", address(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1));
+//        setAddress("weth", address(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1));
 
         setAddress(l2ChainId, "bridge", address(0x1000777700000000000000000000000000000004));
         setAddress(l2ChainId, "ether_vault", address(0x1000777700000000000000000000000000000003));
@@ -313,7 +312,7 @@ contract DeployOnL1 is Script {
     }
 
     function setAddress(uint256 chainId, bytes32 name, address addr) private {
-        console2.log(chainId, uint256(name), "--->", addr);
+        console2.log(chainId, string(abi.encodePacked(name)), "--->", addr);
         if (addr != address(0)) {
             AddressManager(addressManagerProxy).setAddress(chainId, name, addr);
         }

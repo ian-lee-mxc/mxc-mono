@@ -12,7 +12,7 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 contract TestMxcL1 is MxcL1 {
     function getConfig() public pure override returns (MxcData.Config memory config) {
-        config.chainId = 5167003;
+        config.chainId = 5167004;
         // up to 2048 pending blocks
         config.maxNumProposedBlocks = 4;
         config.ringBufferSize = 6;
