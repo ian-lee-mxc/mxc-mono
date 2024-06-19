@@ -54,8 +54,32 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents, TaikoErrors {
         initializer
     {
         __Essential_init(_owner, _addressManager);
-        LibVerifying.init(state, getConfig(), _genesisBlockHash);
+        // CHANGE(Moonchain): No need to init
+//        LibVerifying.init(state, getConfig(), _genesisBlockHash);
+        doMigrate(5);
         if (_toPause) _pause();
+    }
+
+    function doMigrate(uint64 l2MigrateHeight) internal {
+        TaikoData.Config memory _config = getConfig();
+        // Init state
+        state.slotA.genesisHeight = uint64(block.number);
+        state.slotA.genesisTimestamp = uint64(block.timestamp);
+        state.slotB.numBlocks = l2MigrateHeight + 1;
+        state.slotB.lastVerifiedBlockId = l2MigrateHeight;
+        TaikoData.SlotB memory b = state.slotB;
+
+        state.blocks[0].nextTransitionId = 1;
+        state.blocks[0].blockId = 0;
+        state.blocks[0].verifiedTransitionId = 1;
+
+        TaikoData.Block storage blk = state.blocks[(b.numBlocks - 1) % _config.blockRingBufferSize];
+        blk.metaHash = bytes32(uint256(1));
+        blk.blockId = l2MigrateHeight;
+        blk.verifiedTransitionId = 1;
+        blk.nextTransitionId = 2;
+
+        state.transitions[(b.numBlocks - 1) % _config.blockRingBufferSize][1].blockHash = bytes32(uint256(1));
     }
 
     function init2() external onlyOwner reinitializer(2) {
@@ -241,7 +265,7 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents, TaikoErrors {
         // - anchorGasLimit: 250_000 (based on internal devnet, its ~220_000
         // after 256 L2 blocks)
         return TaikoData.Config({
-            chainId: LibNetwork.TAIKO,
+            chainId: LibNetwork.TAIKO, // CHANGE(Moonchain): geneva testnet chainID
             // Assume the block time is 3s, the protocol will allow ~90 days of
             // new blocks without any verification.
             blockMaxProposals: 324_000, // = 45*86400/12, 45 days, 12 seconds avg block time

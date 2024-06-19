@@ -10,8 +10,12 @@ library LibNetwork {
     uint256 internal constant KOVAN = 42;
     uint256 internal constant HOLESKY = 17_000;
     uint256 internal constant SEPOLIA = 11_155_111;
+    uint256 internal constant ARBITRUM_SEPOLIA = 421614;
+    uint256 internal constant ARBITRUM = 42161;
 
+    uint64 internal constant GENEVA = 5167003;
     uint64 internal constant TAIKO = 167_000;
+    uint64 internal constant MOONCHAIN = 18686;
 
     /// @dev Checks if the chain ID represents an Ethereum testnet.
     /// @param _chainId The chain ID.
@@ -45,12 +49,16 @@ library LibNetwork {
         return _chainId >= 32_300 && _chainId <= 32_400;
     }
 
+    function isArbitrum(uint256 _chainId) internal pure returns (bool) {
+        return _chainId == LibNetwork.ARBITRUM || _chainId == LibNetwork.ARBITRUM_SEPOLIA;
+    }
+
     /// @dev Checks if the chain supports Dencun hardfork. Note that this check doesn't need to be
     /// exhaustive.
     /// @param _chainId The chain ID.
     /// @return true if the chain supports Dencun hardfork, false otherwise.
     function isDencunSupported(uint256 _chainId) internal pure returns (bool) {
         return _chainId == LibNetwork.MAINNET || _chainId == LibNetwork.HOLESKY
-            || _chainId == LibNetwork.SEPOLIA || isTaikoDevnet(_chainId);
+            || _chainId == LibNetwork.SEPOLIA || isTaikoDevnet(_chainId) || isArbitrum(_chainId);
     }
 }

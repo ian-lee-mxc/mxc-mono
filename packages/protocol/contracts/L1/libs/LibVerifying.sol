@@ -113,6 +113,18 @@ library LibVerifying {
                 // When `tid` is 0, it indicates that there is no proven
                 // transition with its parentHash equal to the blockHash of the
                 // most recently verified block.
+                // CHANGE(MOONCHAIN): do migrate blockHash
+               if(tid == 0 && _state.blocks[slot - 1].metaHash == bytes32(uint256(1))) {
+                   blk.verifiedTransitionId = 1;
+                   ++blockId;
+                   ++_state.slotB.lastVerifiedBlockId;
+                   continue;
+                //    ISignalService(_resolver.resolve(LibStrings.B_SIGNAL_SERVICE, false))
+                //         .syncChainData(
+                //         _config.chainId, LibStrings.H_STATE_ROOT, b.lastVerifiedBlockId, bytes32(uint256(1))
+                //     );
+               }
+
                 if (tid == 0) break;
 
                 // A transition with the correct `parentHash` has been located.

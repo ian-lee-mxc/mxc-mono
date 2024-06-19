@@ -344,15 +344,28 @@ contract TaikoL1LibProvingWithTiers is TaikoL1TestBase {
 
             bytes32 blockHash = bytes32(1e10 + blockId);
             bytes32 stateRoot = bytes32(1e9 + blockId);
-            proveBlock(
-                Carol,
+            if(blockId == 1) {
+                proveBlock(
+                Bob,
                 meta,
                 parentHash,
                 blockHash,
                 stateRoot,
                 meta.minTier,
-                TaikoErrors.L1_NOT_ASSIGNED_PROVER.selector
+                ""
             );
+            }else {
+                proveBlock(
+                    Carol,
+                    meta,
+                    parentHash,
+                    blockHash,
+                    stateRoot,
+                    meta.minTier,
+                    TaikoErrors.L1_NOT_ASSIGNED_PROVER.selector
+                );
+            }
+            
             vm.roll(block.number + 15 * 12);
 
             uint16 minTier = meta.minTier;

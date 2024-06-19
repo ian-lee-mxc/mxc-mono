@@ -102,9 +102,19 @@ library LibUtils {
     {
         if (_state.transitions[_slot][1].key == _parentHash) {
             tid_ = 1;
+            console2.log("block",tid_,_blk.blockId, _blk.nextTransitionId);
             if (tid_ >= _blk.nextTransitionId) revert L1_UNEXPECTED_TRANSITION_ID();
         } else {
+            console2.log("parentHashtesting",_slot);
+            console2.logBytes32(_parentHash);
             tid_ = _state.transitionIds[_blk.blockId][_parentHash];
+            if(tid_ == 0) {
+                // 已经create过了
+                if(_parentHash == bytes32(uint(1))) {
+                    return 1;
+                }
+            }
+            console2.log("block",tid_,_blk.blockId, _blk.nextTransitionId);
             if (tid_ != 0 && tid_ >= _blk.nextTransitionId) revert L1_UNEXPECTED_TRANSITION_ID();
         }
     }
