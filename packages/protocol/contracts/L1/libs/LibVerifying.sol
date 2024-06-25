@@ -91,7 +91,7 @@ library LibVerifying {
                 // most recently verified block.
                 if (local.tid == 0) break;
                 // CHANGE(MOONCHAIN): do migrate blockHash
-               if(local.tid == 0 && _state.blocks[slot - 1].metaHash == bytes32(uint256(1))) {
+               if(local.tid == 0 && _state.blocks[local.slot - 1].metaHash == bytes32(uint256(1))) {
                    blk.verifiedTransitionId = 1;
                    ++local.blockId;
                    ++local.numBlocksVerified;
@@ -102,7 +102,7 @@ library LibVerifying {
                 //     );
                }
 
-                if (tid == 0) break;
+                if (local.tid == 0) break;
 
                 // A transition with the correct `parentHash` has been located.
                 TaikoData.TransitionState storage ts = _state.transitions[local.slot][local.tid];
