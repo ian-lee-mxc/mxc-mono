@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import "../../common/EssentialContract.sol";
 import "../../common/LibStrings.sol";
 import "../../libs/LibAddress.sol";
+import "../libs/LibUtils.sol";
 import "../ITaikoL1.sol";
 import "./IHook.sol";
 
@@ -80,7 +81,7 @@ contract AssignmentHook is EssentialContract, IHook {
                 || assignment.metaHash != 0 && _blk.metaHash != assignment.metaHash
                 || assignment.parentMetaHash != 0 && _meta.parentMetaHash != assignment.parentMetaHash
                 || assignment.maxBlockId != 0 && _meta.id > assignment.maxBlockId
-                || assignment.maxProposedIn != 0 && block.number > assignment.maxProposedIn
+                || assignment.maxProposedIn != 0 && LibUtils.getBlockNumber() > assignment.maxProposedIn
         ) {
             revert HOOK_ASSIGNMENT_EXPIRED();
         }

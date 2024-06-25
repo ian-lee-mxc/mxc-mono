@@ -6,9 +6,21 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../../common/IAddressResolver.sol";
 import "../../common/LibStrings.sol";
 import "../../libs/LibMath.sol";
+import "../../libs/LibNetwork.sol";
 import "../tiers/ITierProvider.sol";
 import "../tiers/ITierRouter.sol";
 import "../TaikoData.sol";
+
+
+interface IArbSys {
+    /**
+     * @notice Get Arbitrum block number (distinct from L1 block number; Arbitrum genesis block has block number 0)
+     * @return block number as int
+     */
+    function arbBlockNumber() external view returns (uint256);
+
+    function arbBlockHash(uint256 blockNumber) external view returns (bytes32);
+}
 
 /// @title LibUtils
 /// @notice A library that offers helper functions.
@@ -102,11 +114,8 @@ library LibUtils {
     {
         if (_state.transitions[_slot][1].key == _parentHash) {
             tid_ = 1;
-            console2.log("block",tid_,_blk.blockId, _blk.nextTransitionId);
             if (tid_ >= _blk.nextTransitionId) revert L1_UNEXPECTED_TRANSITION_ID();
         } else {
-            console2.log("parentHashtesting",_slot);
-            console2.logBytes32(_parentHash);
             tid_ = _state.transitionIds[_blk.blockId][_parentHash];
             if(tid_ == 0) {
                 // 已经create过了
@@ -114,7 +123,6 @@ library LibUtils {
                     return 1;
                 }
             }
-            console2.log("block",tid_,_blk.blockId, _blk.nextTransitionId);
             if (tid_ != 0 && tid_ >= _blk.nextTransitionId) revert L1_UNEXPECTED_TRANSITION_ID();
         }
     }
@@ -153,4 +161,23 @@ library LibUtils {
             return block.timestamp >= deadline;
         }
     }
+
+    function getBlockNumber() internal view returns (uint256 blockNumber) {
+        if(LibNetwork.isArbitrum(block.chainid)) {
+            blockNumber = IArbSys(address(100)).arbBlockNumber();
+        }else {
+            blockNumber = block.number;
+        }
+        // eth l1 block number
+    }
+
+    function getBlockHash(uint256 blockNumber) internal view returns (bytes32 L1BlockHash) {
+        // eth l1 block number
+        if(LibNetwork.isArbitrum(block.chainid)) {
+            L1BlockHash = IArbSys(address(100)).arbBlockHash(blockNumber);
+        }else {
+            L1BlockHash = blockhash(blockNumber);
+        }
+    }
+
 }

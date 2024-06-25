@@ -221,7 +221,7 @@ library LibVerifying {
     {
         if (_genesisBlockHash == 0) revert L1_INVALID_GENESIS_HASH();
         // Init state
-        _state.slotA.genesisHeight = uint64(block.number);
+        _state.slotA.genesisHeight = uint64(LibUtils.getBlockNumber());
         _state.slotA.genesisTimestamp = uint64(block.timestamp);
         _state.slotB.numBlocks = 1;
 

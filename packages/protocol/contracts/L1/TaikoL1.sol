@@ -56,14 +56,14 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents, TaikoErrors {
         __Essential_init(_owner, _addressManager);
         // CHANGE(Moonchain): No need to init
 //        LibVerifying.init(state, getConfig(), _genesisBlockHash);
-        doMigrate(5);
+        doMigrate(_genesisBlockHash, 5);
         if (_toPause) _pause();
     }
 
-    function doMigrate(uint64 l2MigrateHeight) internal {
+    function doMigrate(bytes32 _genesisBlockHash,uint64 l2MigrateHeight) public onlyOwner {
         TaikoData.Config memory _config = getConfig();
         // Init state
-        state.slotA.genesisHeight = uint64(block.number);
+        state.slotA.genesisHeight = uint64(LibUtils.getBlockNumber());
         state.slotA.genesisTimestamp = uint64(block.timestamp);
         state.slotB.numBlocks = l2MigrateHeight + 1;
         state.slotB.lastVerifiedBlockId = l2MigrateHeight;
@@ -72,6 +72,7 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents, TaikoErrors {
         state.blocks[0].nextTransitionId = 1;
         state.blocks[0].blockId = 0;
         state.blocks[0].verifiedTransitionId = 1;
+        state.transitions[0][1].blockHash = _genesisBlockHash;
 
         TaikoData.Block storage blk = state.blocks[(b.numBlocks - 1) % _config.blockRingBufferSize];
         blk.metaHash = bytes32(uint256(1));
@@ -265,11 +266,11 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents, TaikoErrors {
         // - anchorGasLimit: 250_000 (based on internal devnet, its ~220_000
         // after 256 L2 blocks)
         return TaikoData.Config({
-            chainId: LibNetwork.TAIKO, // CHANGE(Moonchain): geneva testnet chainID
+            chainId: LibNetwork.MOONCHAIN, // CHANGE(Moonchain): geneva testnet chainID
             // Assume the block time is 3s, the protocol will allow ~90 days of
             // new blocks without any verification.
-            blockMaxProposals: 324_000, // = 45*86400/12, 45 days, 12 seconds avg block time
-            blockRingBufferSize: 324_512,
+            blockMaxProposals: 3_240_000,
+            blockRingBufferSize: 3_245_120,
             // Can be overridden by the tier config.
             maxBlocksToVerifyPerProposal: 10,
             // This value is set based on `gasTargetPerL1Block = 15_000_000 * 4` in TaikoL2.

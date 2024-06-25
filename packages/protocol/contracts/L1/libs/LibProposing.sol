@@ -99,7 +99,7 @@ library LibProposing {
         // require additional storage slots.
         unchecked {
             meta_ = TaikoData.BlockMetadata({
-                l1Hash: blockhash(block.number - 1),
+                l1Hash: LibUtils.getBlockHash(LibUtils.getBlockNumber() - 1),
                 difficulty: 0, // to be initialized below
                 blobHash: 0, // to be initialized below
                 extraData: params.extraData,
@@ -108,7 +108,7 @@ library LibProposing {
                 id: b.numBlocks,
                 gasLimit: _config.blockMaxGasLimit,
                 timestamp: uint64(block.timestamp),
-                l1Height: uint64(block.number - 1),
+                l1Height: uint64(LibUtils.getBlockNumber() - 1),
                 minTier: 0, // to be initialized below
                 blobUsed: _txList.length == 0,
                 parentMetaHash: parentMetaHash,
@@ -146,7 +146,7 @@ library LibProposing {
         // of multiple Taiko blocks being proposed within a single
         // Ethereum block, we choose to introduce a salt to this random
         // number as the L2 mixHash.
-        meta_.difficulty = keccak256(abi.encodePacked(block.prevrandao, b.numBlocks, block.number));
+        meta_.difficulty = keccak256(abi.encodePacked(block.prevrandao, b.numBlocks, LibUtils.getBlockNumber()));
 
         {
             ITierRouter tierRouter = ITierRouter(_resolver.resolve(LibStrings.B_TIER_ROUTER, false));
@@ -165,7 +165,7 @@ library LibProposing {
             livenessBond: _config.livenessBond,
             blockId: b.numBlocks,
             proposedAt: meta_.timestamp,
-            proposedIn: uint64(block.number),
+            proposedIn: uint64(LibUtils.getBlockNumber()),
             // For a new block, the next transition ID is always 1, not 0.
             nextTransitionId: 1,
             // For unverified block, its verifiedTransitionId is always 0.
@@ -183,9 +183,10 @@ library LibProposing {
 
         if (params.hookCalls.length == 0) {
             if (params.assignedProver != msg.sender) revert L1_NOT_SAME_ADDRESS();
-            _tko.transferFrom(msg.sender, address(this), _config.livenessBond);
+            // TODO: Moonchain reward
+//            _tko.transferFrom(msg.sender, address(this), _config.livenessBond);
         } else {
-            uint256 tkoBalance = _tko.balanceOf(address(this));
+//            uint256 tkoBalance = _tko.balanceOf(address(this));
 
             // Run all hooks.
             // Note that address(this).balance has been updated with msg.value,
@@ -211,9 +212,10 @@ library LibProposing {
             // have increased by the same amount as _config.livenessBond (to prevent)
             // multiple draining payments by a malicious proposer nesting the same
             // hook.
-            if (_tko.balanceOf(address(this)) != tkoBalance + _config.livenessBond) {
-                revert L1_LIVENESS_BOND_NOT_RECEIVED();
-            }
+            // TODO: Moonchain reward
+//            if (_tko.balanceOf(address(this)) != tkoBalance + _config.livenessBond) {
+//                revert L1_LIVENESS_BOND_NOT_RECEIVED();
+//            }
         }
 
         // Refund Ether
