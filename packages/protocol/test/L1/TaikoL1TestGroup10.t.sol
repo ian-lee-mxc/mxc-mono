@@ -44,7 +44,7 @@ contract TaikoL10TestGroup1 is TaikoL1TestGroupBase {
             console2.log(b.lastVerifiedBlockId,prevSlotB.lastVerifiedBlockId, prevSlotB.lastVerifiedBlockId+5);
             assertEq(b.lastVerifiedBlockId, prevSlotB.lastVerifiedBlockId+5);
 
-            assertEq(tko.balanceOf(Alice), 10_000 ether);
+            assertEq(totalTkoBalance(tko, L1, Alice), 10_000 ether);
         }
     }
 }

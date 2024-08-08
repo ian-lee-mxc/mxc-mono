@@ -1,6 +1,8 @@
 package flags
 
 import (
+	"time"
+
 	"github.com/urfave/cli/v2"
 )
 
@@ -100,6 +102,20 @@ var (
 		Category: indexerCategory,
 		EnvVars:  []string{"TARGET_BLOCK_NUMBER"},
 	}
+	MinFeeToIndex = &cli.Uint64Flag{
+		Name:     "minFeeToIndex",
+		Usage:    "Minimum fee to index and add to the queue (will still be saved to database)",
+		Category: indexerCategory,
+		Value:    0,
+		EnvVars:  []string{"MIN_FEE_TO_INDEX"},
+	}
+	WaitForConfirmationTimeout = &cli.DurationFlag{
+		Name:     "waitForConfirmationTimeout",
+		Usage:    "Timeout waiting for confirmations",
+		Value:    5 * time.Minute,
+		Category: indexerCategory,
+		EnvVars:  []string{"WAIT_FOR_CONFIRMATION_TIMEOUT"},
+	}
 )
 
 var IndexerFlags = MergeFlags(CommonFlags, QueueFlags, []cli.Flag{
@@ -115,5 +131,7 @@ var IndexerFlags = MergeFlags(CommonFlags, QueueFlags, []cli.Flag{
 	NumLatestBlocksEndWhenCrawling,
 	NumLatestBlocksStartWhenCrawling,
 	EventName,
+	MinFeeToIndex,
 	TargetBlockNumber,
+	WaitForConfirmationTimeout,
 })

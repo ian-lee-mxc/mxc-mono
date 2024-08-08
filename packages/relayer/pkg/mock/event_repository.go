@@ -22,7 +22,12 @@ func NewEventRepository() *EventRepository {
 		events: make([]*relayer.Event, 0),
 	}
 }
-func (r *EventRepository) Save(ctx context.Context, opts relayer.SaveEventOpts) (*relayer.Event, error) {
+
+func (r *EventRepository) Close() error {
+	return nil
+}
+
+func (r *EventRepository) Save(ctx context.Context, opts *relayer.SaveEventOpts) (*relayer.Event, error) {
 	r.events = append(r.events, &relayer.Event{
 		ID:           rand.Int(), // nolint: gosec
 		Data:         datatypes.JSON(opts.Data),
@@ -65,7 +70,7 @@ func (r *EventRepository) UpdateStatus(ctx context.Context, id int, status relay
 
 func (r *EventRepository) UpdateFeesAndProfitability(
 	ctx context.Context,
-	id int, opts relayer.UpdateFeesAndProfitabilityOpts,
+	id int, opts *relayer.UpdateFeesAndProfitabilityOpts,
 ) error {
 	var event *relayer.Event
 
@@ -105,7 +110,7 @@ func (r *EventRepository) FindAllByAddress(
 	ctx context.Context,
 	req *http.Request,
 	opts relayer.FindAllByAddressOpts,
-) (paginate.Page, error) {
+) (*paginate.Page, error) {
 	type d struct {
 		Owner string `json:"Owner"`
 	}
@@ -119,12 +124,12 @@ func (r *EventRepository) FindAllByAddress(
 	for _, e := range r.events {
 		m, err := e.Data.MarshalJSON()
 		if err != nil {
-			return paginate.Page{}, err
+			return nil, err
 		}
 
 		data := &d{}
 		if err := json.Unmarshal(m, data); err != nil {
-			return paginate.Page{}, err
+			return nil, err
 		}
 
 		if data.Owner == opts.Address.Hex() {
@@ -133,7 +138,7 @@ func (r *EventRepository) FindAllByAddress(
 		}
 	}
 
-	return paginate.Page{
+	return &paginate.Page{
 		Items: events,
 	}, nil
 }
@@ -205,6 +210,7 @@ func (r *EventRepository) DeleteAllAfterBlockID(blockID uint64, srcChainID uint6
 
 // GetLatestBlockID get latest block id
 func (r *EventRepository) FindLatestBlockID(
+	ctx context.Context,
 	event string,
 	srcChainID uint64,
 	destChainID uint64,

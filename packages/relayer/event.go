@@ -128,14 +128,15 @@ type FindAllByAddressOpts struct {
 
 // EventRepository is used to interact with events in the store
 type EventRepository interface {
-	Save(ctx context.Context, opts SaveEventOpts) (*Event, error)
+	Close() error
+	Save(ctx context.Context, opts *SaveEventOpts) (*Event, error)
 	UpdateStatus(ctx context.Context, id int, status EventStatus) error
-	UpdateFeesAndProfitability(ctx context.Context, id int, opts UpdateFeesAndProfitabilityOpts) error
+	UpdateFeesAndProfitability(ctx context.Context, id int, opts *UpdateFeesAndProfitabilityOpts) error
 	FindAllByAddress(
 		ctx context.Context,
 		req *http.Request,
 		opts FindAllByAddressOpts,
-	) (paginate.Page, error)
+	) (*paginate.Page, error)
 	FirstByMsgHash(
 		ctx context.Context,
 		msgHash string,
@@ -159,6 +160,7 @@ type EventRepository interface {
 	) (uint64, error)
 	DeleteAllAfterBlockID(blockID uint64, srcChainID uint64, destChainID uint64) error
 	FindLatestBlockID(
+		ctx context.Context,
 		event string,
 		srcChainID uint64,
 		destChainID uint64,

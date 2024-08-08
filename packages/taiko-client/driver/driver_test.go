@@ -93,7 +93,7 @@ func (s *DriverTestSuite) TestProcessL1Blocks() {
 
 		method, err := encoding.TaikoL2ABI.MethodById(anchorTx.Data())
 		s.Nil(err)
-		s.Equal("anchor", method.Name)
+		s.Contains(method.Name, "anchor")
 	}
 }
 
@@ -303,18 +303,11 @@ func (s *DriverTestSuite) InitProposer() {
 			TaikoL1Address:    common.HexToAddress(os.Getenv("TAIKO_L1_ADDRESS")),
 			TaikoL2Address:    common.HexToAddress(os.Getenv("TAIKO_L2_ADDRESS")),
 			TaikoTokenAddress: common.HexToAddress(os.Getenv("TAIKO_TOKEN_ADDRESS")),
-			ProverSetAddress:  common.HexToAddress(os.Getenv("PROVER_SET_ADDRESS")),
 		},
 		L1ProposerPrivKey:          l1ProposerPrivKey,
 		L2SuggestedFeeRecipient:    common.HexToAddress(os.Getenv("L2_SUGGESTED_FEE_RECIPIENT")),
 		ProposeInterval:            1024 * time.Hour,
 		MaxProposedTxListsPerEpoch: 1,
-		ProverEndpoints:            s.ProverEndpoints,
-		OptimisticTierFee:          common.Big256,
-		SgxTierFee:                 common.Big256,
-		MaxTierFeePriceBumps:       3,
-		TierFeePriceBump:           common.Big2,
-		L1BlockBuilderTip:          common.Big0,
 		TxmgrConfigs: &txmgr.CLIConfig{
 			L1RPCURL:                  os.Getenv("L1_NODE_WS_ENDPOINT"),
 			NumConfirmations:          0,
@@ -330,7 +323,7 @@ func (s *DriverTestSuite) InitProposer() {
 			TxSendTimeout:             txmgr.DefaultBatcherFlagValues.TxSendTimeout,
 			TxNotInMempoolTimeout:     txmgr.DefaultBatcherFlagValues.TxNotInMempoolTimeout,
 		},
-	}))
+	}, nil))
 	s.p = p
 }
 

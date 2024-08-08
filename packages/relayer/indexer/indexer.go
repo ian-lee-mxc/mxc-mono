@@ -2,7 +2,6 @@ package indexer
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"log/slog"
 	"math/big"
@@ -17,6 +16,9 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/urfave/cli/v2"
+	"golang.org/x/sync/errgroup"
+
 	"github.com/taikoxyz/taiko-mono/packages/relayer"
 	"github.com/taikoxyz/taiko-mono/packages/relayer/bindings/bridge"
 	"github.com/taikoxyz/taiko-mono/packages/relayer/bindings/signalservice"
@@ -24,9 +26,6 @@ import (
 	"github.com/taikoxyz/taiko-mono/packages/relayer/pkg/queue"
 	"github.com/taikoxyz/taiko-mono/packages/relayer/pkg/repo"
 	"github.com/taikoxyz/taiko-mono/packages/relayer/pkg/utils"
-	"github.com/urfave/cli/v2"
-	"golang.org/x/sync/errgroup"
-	"gorm.io/gorm"
 )
 
 var (
@@ -74,12 +73,6 @@ type ethClient interface {
 	TransactionByHash(ctx context.Context, txHash common.Hash) (*types.Transaction, bool, error)
 }
 
-// DB is a local interface that lets us narrow down a database type for testing.
-type DB interface {
-	DB() (*sql.DB, error)
-	GormDB() *gorm.DB
-}
-
 // Indexer is the main struct of this package, containing all dependencies necessary for indexing
 // relayer-related chain data. All database repositories, contract implementations,
 // and configurations will be injected here.
@@ -114,7 +107,7 @@ type Indexer struct {
 
 	ethClientTimeout time.Duration
 
-	wg *sync.WaitGroup
+	wg sync.WaitGroup
 
 	numLatestBlocksEndWhenCrawling   uint64
 	numLatestBlocksStartWhenCrawling uint64
@@ -123,9 +116,9 @@ type Indexer struct {
 
 	ctx context.Context
 
-	mu *sync.Mutex
-
 	eventName string
+
+	minFeeToIndex uint64
 
 	cfg *Config
 }
@@ -230,8 +223,6 @@ func InitFromConfig(ctx context.Context, i *Indexer, cfg *Config) (err error) {
 	i.syncMode = cfg.SyncMode
 	i.watchMode = cfg.WatchMode
 
-	i.wg = &sync.WaitGroup{}
-
 	i.ethClientTimeout = time.Duration(cfg.ETHClientTimeout) * time.Second
 
 	i.numLatestBlocksEndWhenCrawling = cfg.NumLatestBlocksEndWhenCrawling
@@ -239,13 +230,15 @@ func InitFromConfig(ctx context.Context, i *Indexer, cfg *Config) (err error) {
 
 	i.targetBlockNumber = cfg.TargetBlockNumber
 
-	i.mu = &sync.Mutex{}
-
 	i.eventName = cfg.EventName
 
 	i.cfg = cfg
 
 	i.ctx = ctx
+
+	i.minFeeToIndex = i.cfg.MinFeeToIndex
+
+	slog.Info("minFeeToIndex", "minFeeToIndex", i.minFeeToIndex)
 
 	return nil
 }
@@ -259,6 +252,11 @@ func (i *Indexer) Name() string {
 // context is stopped externally by cmd/main.go shutdown.
 func (i *Indexer) Close(ctx context.Context) {
 	i.wg.Wait()
+
+	// Close db connection.
+	if err := i.eventRepo.Close(); err != nil {
+		slog.Error("Failed to close db connection", "err", err)
+	}
 }
 
 // Start starts the indexer, which should initialize the queue, add to wait groups,
@@ -280,13 +278,11 @@ func (i *Indexer) Start() error {
 		return errors.Wrap(err, "i.setInitialIndexingBlockByMode")
 	}
 
-	i.wg.Add(1)
-
 	go i.eventLoop(i.ctx, i.latestIndexedBlockNumber)
 
 	go func() {
 		if err := backoff.Retry(func() error {
-			return utils.ScanBlocks(i.ctx, i.srcEthClient, i.wg)
+			return utils.ScanBlocks(i.ctx, i.srcEthClient, &i.wg)
 		}, backoff.NewConstantBackOff(5*time.Second)); err != nil {
 			slog.Error("scan blocks backoff retry", "error", err)
 		}
@@ -296,12 +292,10 @@ func (i *Indexer) Start() error {
 }
 
 func (i *Indexer) eventLoop(ctx context.Context, startBlockID uint64) {
+	i.wg.Add(1)
 	defer i.wg.Done()
 
-	var d time.Duration = 10 * time.Second
-
-	t := time.NewTicker(d)
-
+	t := time.NewTicker(10 * time.Second)
 	defer t.Stop()
 
 	for {
@@ -478,7 +472,7 @@ func (i *Indexer) indexMessageSentEvents(ctx context.Context,
 }
 
 func (i *Indexer) checkReorg(ctx context.Context, emittedInBlockNumber uint64) error {
-	n, err := i.eventRepo.FindLatestBlockID(i.eventName, i.srcChainId.Uint64(), i.destChainId.Uint64())
+	n, err := i.eventRepo.FindLatestBlockID(ctx, i.eventName, i.srcChainId.Uint64(), i.destChainId.Uint64())
 	if err != nil {
 		return err
 	}

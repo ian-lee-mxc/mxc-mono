@@ -11,7 +11,6 @@ contract TaikoL1Tiers is TaikoL1 {
         config.blockMaxProposals = 10;
         config.blockRingBufferSize = 12;
         config.livenessBond = 1e18; // 1 Taiko token
-        config.checkEOAForCalldataDA = false;
     }
 }
 
@@ -54,7 +53,7 @@ contract TaikoL1LibProvingWithTiers is TaikoL1TestBase {
         bytes32 parentHash = GENESIS_BLOCK_HASH;
         for (uint256 blockId = 1; blockId < conf.blockMaxProposals * 3; blockId++) {
             printVariables("before propose");
-            (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1_000_000, 1024);
+            (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1024);
             //printVariables("after propose");
             mine(1);
 
@@ -72,7 +71,7 @@ contract TaikoL1LibProvingWithTiers is TaikoL1TestBase {
                 blockHash,
                 stateRoot,
                 meta.minTier,
-                TaikoErrors.L1_ALREADY_PROVED.selector
+                LibProving.L1_ALREADY_PROVED.selector
             );
 
             vm.roll(block.number + 15 * 12);
@@ -95,7 +94,7 @@ contract TaikoL1LibProvingWithTiers is TaikoL1TestBase {
         bytes32 parentHash = GENESIS_BLOCK_HASH;
         for (uint256 blockId = 1; blockId < conf.blockMaxProposals * 3; blockId++) {
             printVariables("before propose");
-            (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1_000_000, 1024);
+            (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1024);
             //printVariables("after propose");
             mine(1);
 
@@ -140,7 +139,7 @@ contract TaikoL1LibProvingWithTiers is TaikoL1TestBase {
         bytes32 parentHash = GENESIS_BLOCK_HASH;
         for (uint256 blockId = 1; blockId < conf.blockMaxProposals * 3; blockId++) {
             printVariables("before propose");
-            (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1_000_000, 1024);
+            (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1024);
             //printVariables("after propose");
             mine(1);
 
@@ -184,7 +183,7 @@ contract TaikoL1LibProvingWithTiers is TaikoL1TestBase {
         bytes32 parentHash = GENESIS_BLOCK_HASH;
         for (uint256 blockId = 1; blockId < conf.blockMaxProposals * 3; blockId++) {
             printVariables("before propose");
-            (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1_000_000, 1024);
+            (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1024);
             //printVariables("after propose");
             mine(1);
 
@@ -233,7 +232,7 @@ contract TaikoL1LibProvingWithTiers is TaikoL1TestBase {
         bytes32 parentHash = GENESIS_BLOCK_HASH;
         for (uint256 blockId = 1; blockId < 10; blockId++) {
             printVariables("before propose");
-            (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1_000_000, 1024);
+            (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1024);
             //printVariables("after propose");
             mine(1);
 
@@ -265,7 +264,7 @@ contract TaikoL1LibProvingWithTiers is TaikoL1TestBase {
                     0,
                     stateRoot,
                     LibTiers.TIER_GUARDIAN,
-                    TaikoErrors.L1_INVALID_TRANSITION.selector
+                    LibProving.L1_INVALID_TRANSITION.selector
                 );
             }
 
@@ -289,11 +288,11 @@ contract TaikoL1LibProvingWithTiers is TaikoL1TestBase {
         giveEthAndTko(Carol, 1e8 ether, 100 ether);
 
         bytes32 parentHash = GENESIS_BLOCK_HASH;
-        (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1_000_000, 1024);
+        (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1024);
 
         for (uint256 blockId = 1; blockId < 10; blockId++) {
             //printVariables("before propose");
-            (meta,) = proposeBlock(Alice, 1_000_000, 1024);
+            (meta,) = proposeBlock(Alice, 1024);
             //printVariables("after propose");
             mine(1);
 
@@ -306,7 +305,7 @@ contract TaikoL1LibProvingWithTiers is TaikoL1TestBase {
                 blockHash,
                 stateRoot,
                 meta.minTier,
-                TaikoErrors.L1_NOT_ASSIGNED_PROVER.selector
+                LibProving.L1_NOT_ASSIGNED_PROVER.selector
             );
             vm.roll(block.number + 15 * 12);
 
@@ -327,7 +326,7 @@ contract TaikoL1LibProvingWithTiers is TaikoL1TestBase {
         bytes32 parentHash = GENESIS_BLOCK_HASH;
         for (uint256 blockId = 1; blockId < conf.blockMaxProposals * 3; blockId++) {
             printVariables("before propose");
-            (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1_000_000, 1024);
+            (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1024);
             //printVariables("after propose");
             mine(1);
 
@@ -381,7 +380,7 @@ contract TaikoL1LibProvingWithTiers is TaikoL1TestBase {
         bytes32 parentHash = GENESIS_BLOCK_HASH;
         for (uint256 blockId = 1; blockId < conf.blockMaxProposals * 3; blockId++) {
             printVariables("before propose");
-            (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1_000_000, 1024);
+            (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1024);
             //printVariables("after propose");
             mine(1);
 
@@ -399,7 +398,7 @@ contract TaikoL1LibProvingWithTiers is TaikoL1TestBase {
                 0,
                 stateRoot,
                 LibTiers.TIER_GUARDIAN,
-                TaikoErrors.L1_INVALID_TRANSITION.selector
+                LibProving.L1_INVALID_TRANSITION.selector
             );
 
             vm.roll(block.number + 15 * 12);
@@ -424,13 +423,12 @@ contract TaikoL1LibProvingWithTiers is TaikoL1TestBase {
 
         bytes32 parentHash = GENESIS_BLOCK_HASH;
         for (uint256 blockId = 1; blockId < conf.blockMaxProposals * 3; blockId++) {
-
-
-            printVariables("before propose");
-            (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1_000_000, 1024);
-            bool storeStateRoot = LibUtils.shouldSyncStateRoot(syncInternal, meta.id);
+            bool storeStateRoot = LibUtils.shouldSyncStateRoot(syncInternal, blockId);
             console2.log("blockId:", blockId);
             console2.log("storeStateRoot:", storeStateRoot);
+
+            printVariables("before propose");
+            (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1024);
             mine(1);
 
             bytes32 blockHash = bytes32(1_000_000 + blockId);
@@ -454,7 +452,7 @@ contract TaikoL1LibProvingWithTiers is TaikoL1TestBase {
                     blockHash,
                     stateRoot,
                     LibTiers.TIER_GUARDIAN,
-                    TaikoErrors.L1_ALREADY_PROVED.selector
+                    LibProving.L1_ALREADY_PROVED.selector
                 );
             }
             blockHash = bytes32(1_000_000 + blockId + 200);
@@ -482,7 +480,7 @@ contract TaikoL1LibProvingWithTiers is TaikoL1TestBase {
         bytes32 parentHash = GENESIS_BLOCK_HASH;
         for (uint256 blockId = 1; blockId < 10; blockId++) {
             printVariables("before propose");
-            (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1_000_000, 1024);
+            (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1024);
             //printVariables("after propose");
             mine(1);
 
@@ -497,7 +495,7 @@ contract TaikoL1LibProvingWithTiers is TaikoL1TestBase {
                 blockHash,
                 stateRoot,
                 LibTiers.TIER_SGX,
-                TaikoErrors.L1_INVALID_BLOCK_ID.selector
+                LibUtils.L1_INVALID_BLOCK_ID.selector
             );
 
             parentHash = blockHash;
@@ -518,7 +516,7 @@ contract TaikoL1LibProvingWithTiers is TaikoL1TestBase {
         bytes32 parentHash = GENESIS_BLOCK_HASH;
         for (uint256 blockId = 1; blockId < 10; blockId++) {
             printVariables("before propose");
-            (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1_000_000, 1024);
+            (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1024);
             //printVariables("after propose");
             mine(1);
 
@@ -534,7 +532,7 @@ contract TaikoL1LibProvingWithTiers is TaikoL1TestBase {
                 blockHash,
                 stateRoot,
                 LibTiers.TIER_SGX,
-                TaikoErrors.L1_BLOCK_MISMATCH.selector
+                LibUtils.L1_BLOCK_MISMATCH.selector
             );
 
             parentHash = blockHash;
@@ -550,7 +548,7 @@ contract TaikoL1LibProvingWithTiers is TaikoL1TestBase {
         bytes32 parentHash = GENESIS_BLOCK_HASH;
         for (uint256 blockId = 1; blockId < conf.blockMaxProposals * 3; blockId++) {
             printVariables("before propose");
-            (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1_000_000, 1024);
+            (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1024);
             //printVariables("after propose");
             mine(1);
 
@@ -571,7 +569,7 @@ contract TaikoL1LibProvingWithTiers is TaikoL1TestBase {
                 stateRoot,
                 stateRoot,
                 LibTiers.TIER_SGX,
-                TaikoErrors.L1_INVALID_TIER.selector
+                LibProving.L1_INVALID_TIER.selector
             );
 
             vm.roll(block.number + 15 * 12);
@@ -593,7 +591,7 @@ contract TaikoL1LibProvingWithTiers is TaikoL1TestBase {
 
         bytes32 parentHash = GENESIS_BLOCK_HASH;
         printVariables("before propose");
-        (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1_000_000, 1024);
+        (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1024);
         //printVariables("after propose");
         mine(1);
 
@@ -609,7 +607,7 @@ contract TaikoL1LibProvingWithTiers is TaikoL1TestBase {
             blockHash,
             stateRoot,
             LibTiers.TIER_SGX,
-            TaikoErrors.L1_INVALID_TIER.selector
+            LibProving.L1_INVALID_TIER.selector
         );
 
         printVariables("");

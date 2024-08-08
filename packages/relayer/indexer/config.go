@@ -50,8 +50,10 @@ type Config struct {
 	TargetBlockNumber                *uint64
 	BackOffRetryInterval             time.Duration
 	BackOffMaxRetries                uint64
+	MinFeeToIndex                    uint64
 	OpenQueueFunc                    func() (queue.Queue, error)
-	OpenDBFunc                       func() (DB, error)
+	OpenDBFunc                       func() (db.DB, error)
+	ConfirmationTimeout              time.Duration
 }
 
 // NewConfigFromCliContext creates a new config instance from command line flags.
@@ -85,6 +87,8 @@ func NewConfigFromCliContext(c *cli.Context) (*Config, error) {
 		EventName:                        c.String(flags.EventName.Name),
 		BackOffMaxRetries:                c.Uint64(flags.BackOffMaxRetrys.Name),
 		BackOffRetryInterval:             c.Duration(flags.BackOffRetryInterval.Name),
+		MinFeeToIndex:                    c.Uint64(flags.MinFeeToIndex.Name),
+		ConfirmationTimeout:              c.Duration(flags.WaitForConfirmationTimeout.Name),
 		TargetBlockNumber: func() *uint64 {
 			if c.IsSet(flags.TargetBlockNumber.Name) {
 				value := c.Uint64(flags.TargetBlockNumber.Name)
@@ -92,7 +96,7 @@ func NewConfigFromCliContext(c *cli.Context) (*Config, error) {
 			}
 			return nil
 		}(),
-		OpenDBFunc: func() (DB, error) {
+		OpenDBFunc: func() (db.DB, error) {
 			return db.OpenDBConnection(db.DBConnectionOpts{
 				Name:            c.String(flags.DatabaseUsername.Name),
 				Password:        c.String(flags.DatabasePassword.Name),
@@ -101,7 +105,7 @@ func NewConfigFromCliContext(c *cli.Context) (*Config, error) {
 				MaxIdleConns:    c.Uint64(flags.DatabaseMaxIdleConns.Name),
 				MaxOpenConns:    c.Uint64(flags.DatabaseMaxOpenConns.Name),
 				MaxConnLifetime: c.Uint64(flags.DatabaseConnMaxLifetime.Name),
-				OpenFunc: func(dsn string) (*db.DB, error) {
+				OpenFunc: func(dsn string) (db.DB, error) {
 					gormDB, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
 						Logger: logger.Default.LogMode(logger.Silent),
 					})

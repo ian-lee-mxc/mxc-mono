@@ -24,6 +24,7 @@
 
   export let item: BridgeTransaction;
   export let loading = false;
+  export let handleTransactionRemoved: (event: CustomEvent) => void;
 
   let token: NFT;
   let insufficientModal = false;
@@ -31,7 +32,7 @@
   let isDesktopOrLarger = false;
   let detailsOpen = false;
 
-  let bridgeTxStatus: Maybe<MessageStatus>;
+  export let bridgeTxStatus: Maybe<MessageStatus>;
 
   let attrs = isDesktopOrLarger ? {} : { role: 'button' };
 
@@ -89,6 +90,10 @@
     });
     bridgeTxStatus = item.msgStatus;
   }
+
+  const handleStatusChange = (event: CustomEvent<MessageStatus>) => {
+    bridgeTxStatus = event.detail;
+  };
 
   $: {
     if (item.tokenType === TokenType.ERC721 || item.tokenType === TokenType.ERC1155) {
@@ -188,6 +193,7 @@
       <Status
         bridgeTx={item}
         bind:bridgeTxStatus
+        on:transactionRemoved={handleTransactionRemoved}
         on:openModal={handleOpenModal}
         on:insufficientFunds={handleInsufficientFunds} />
     </div>
@@ -247,9 +253,11 @@
     <div class="md:w-1/5 py-2 flex flex-col justify-center">
       <Status
         bridgeTx={item}
+        on:transactionRemoved={handleTransactionRemoved}
         bind:bridgeTxStatus
         on:openModal={handleOpenModal}
-        on:insufficientFunds={handleInsufficientFunds} />
+        on:insufficientFunds={handleInsufficientFunds}
+        on:statusChange={handleStatusChange} />
     </div>
     <div class="hidden md:flex w-1/5 py-2 flex flex-col justify-center">
       <a

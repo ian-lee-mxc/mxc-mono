@@ -17,6 +17,7 @@ import (
 
 	"github.com/taikoxyz/taiko-mono/packages/taiko-client/bindings"
 	"github.com/taikoxyz/taiko-mono/packages/taiko-client/bindings/encoding"
+	"github.com/taikoxyz/taiko-mono/packages/taiko-client/bindings/metadata"
 	"github.com/taikoxyz/taiko-mono/packages/taiko-client/driver/chain_syncer/beaconsync"
 	"github.com/taikoxyz/taiko-mono/packages/taiko-client/driver/chain_syncer/blob"
 	"github.com/taikoxyz/taiko-mono/packages/taiko-client/driver/state"
@@ -44,7 +45,7 @@ func (s *ProofSubmitterTestSuite) SetupTest() {
 	builder := transaction.NewProveBlockTxBuilder(
 		s.RPCClient,
 		common.HexToAddress(os.Getenv("TAIKO_L1_ADDRESS")),
-		common.HexToAddress(os.Getenv("PROVER_SET_ADDRESS")),
+		common.Address{},
 		common.HexToAddress(os.Getenv("GUARDIAN_PROVER_CONTRACT_ADDRESS")),
 		common.HexToAddress(os.Getenv("GUARDIAN_PROVER_MINORITY_ADDRESS")),
 	)
@@ -131,34 +132,12 @@ func (s *ProofSubmitterTestSuite) SetupTest() {
 			TaikoL1Address:    common.HexToAddress(os.Getenv("TAIKO_L1_ADDRESS")),
 			TaikoL2Address:    common.HexToAddress(os.Getenv("TAIKO_L2_ADDRESS")),
 			TaikoTokenAddress: common.HexToAddress(os.Getenv("TAIKO_TOKEN_ADDRESS")),
-			ProverSetAddress:  common.HexToAddress(os.Getenv("PROVER_SET_ADDRESS")),
 		},
 		L1ProposerPrivKey:          l1ProposerPrivKey,
 		L2SuggestedFeeRecipient:    common.HexToAddress(os.Getenv("L2_SUGGESTED_FEE_RECIPIENT")),
 		ProposeInterval:            1024 * time.Hour,
 		MaxProposedTxListsPerEpoch: 1,
-		ProverEndpoints:            s.ProverEndpoints,
-		OptimisticTierFee:          common.Big256,
-		SgxTierFee:                 common.Big256,
-		MaxTierFeePriceBumps:       3,
-		TierFeePriceBump:           common.Big2,
-		L1BlockBuilderTip:          common.Big0,
-		TxmgrConfigs: &txmgr.CLIConfig{
-			L1RPCURL:                  os.Getenv("L1_NODE_WS_ENDPOINT"),
-			NumConfirmations:          0,
-			SafeAbortNonceTooLowCount: txmgr.DefaultBatcherFlagValues.SafeAbortNonceTooLowCount,
-			PrivateKey:                common.Bytes2Hex(crypto.FromECDSA(l1ProposerPrivKey)),
-			FeeLimitMultiplier:        txmgr.DefaultBatcherFlagValues.FeeLimitMultiplier,
-			FeeLimitThresholdGwei:     txmgr.DefaultBatcherFlagValues.FeeLimitThresholdGwei,
-			MinBaseFeeGwei:            txmgr.DefaultBatcherFlagValues.MinBaseFeeGwei,
-			MinTipCapGwei:             txmgr.DefaultBatcherFlagValues.MinTipCapGwei,
-			ResubmissionTimeout:       txmgr.DefaultBatcherFlagValues.ResubmissionTimeout,
-			ReceiptQueryInterval:      1 * time.Second,
-			NetworkTimeout:            txmgr.DefaultBatcherFlagValues.NetworkTimeout,
-			TxSendTimeout:             txmgr.DefaultBatcherFlagValues.TxSendTimeout,
-			TxNotInMempoolTimeout:     txmgr.DefaultBatcherFlagValues.TxNotInMempoolTimeout,
-		},
-	}))
+	}, txMgr))
 
 	s.proposer = prop
 }
@@ -192,7 +171,7 @@ func (s *ProofSubmitterTestSuite) TestGetRandomBumpedSubmissionDelay() {
 		s.RPCClient,
 		&producer.OptimisticProofProducer{},
 		s.proofCh,
-		common.HexToAddress(os.Getenv("PROVER_SET_ADDRESS")),
+		common.Address{},
 		common.HexToAddress(os.Getenv("TAIKO_L2_ADDRESS")),
 		"test",
 		0,
@@ -212,7 +191,7 @@ func (s *ProofSubmitterTestSuite) TestGetRandomBumpedSubmissionDelay() {
 		s.RPCClient,
 		&producer.OptimisticProofProducer{},
 		s.proofCh,
-		common.HexToAddress(os.Getenv("PROVER_SET_ADDRESS")),
+		common.Address{},
 		common.HexToAddress(os.Getenv("TAIKO_L2_ADDRESS")),
 		"test",
 		0,
@@ -239,7 +218,10 @@ func (s *ProofSubmitterTestSuite) TestProofSubmitterRequestProofDeadlineExceeded
 
 	s.ErrorContains(
 		s.submitter.RequestProof(
-			ctx, &bindings.TaikoL1ClientBlockProposed{BlockId: common.Big256}), "context deadline exceeded",
+			ctx,
+			&metadata.TaikoDataBlockMetadataLegacy{TaikoDataBlockMetadata: bindings.TaikoDataBlockMetadata{Id: 256}},
+		),
+		"context deadline exceeded",
 	)
 }
 
@@ -248,7 +230,7 @@ func (s *ProofSubmitterTestSuite) TestProofSubmitterSubmitProofMetadataNotFound(
 		s.submitter.SubmitProof(
 			context.Background(), &producer.ProofWithHeader{
 				BlockID: common.Big256,
-				Meta:    &bindings.TaikoDataBlockMetadata{},
+				Meta:    &metadata.TaikoDataBlockMetadataLegacy{},
 				Header:  &types.Header{},
 				Opts:    &producer.ProofRequestOptions{},
 				Proof:   bytes.Repeat([]byte{0xff}, 100),
@@ -258,20 +240,16 @@ func (s *ProofSubmitterTestSuite) TestProofSubmitterSubmitProofMetadataNotFound(
 }
 
 func (s *ProofSubmitterTestSuite) TestSubmitProofs() {
-	events := s.ProposeAndInsertEmptyBlocks(s.proposer, s.blobSyncer)
-
-	for _, e := range events {
-		s.Nil(s.submitter.RequestProof(context.Background(), e))
+	for _, m := range s.ProposeAndInsertEmptyBlocks(s.proposer, s.blobSyncer) {
+		s.Nil(s.submitter.RequestProof(context.Background(), m))
 		proofWithHeader := <-s.proofCh
 		s.Nil(s.submitter.SubmitProof(context.Background(), proofWithHeader))
 	}
 }
 
 func (s *ProofSubmitterTestSuite) TestGuardianSubmitProofs() {
-	events := s.ProposeAndInsertEmptyBlocks(s.proposer, s.blobSyncer)
-
-	for _, e := range events {
-		s.Nil(s.submitter.RequestProof(context.Background(), e))
+	for _, m := range s.ProposeAndInsertEmptyBlocks(s.proposer, s.blobSyncer) {
+		s.Nil(s.submitter.RequestProof(context.Background(), m))
 		proofWithHeader := <-s.proofCh
 		proofWithHeader.Tier = encoding.TierGuardianMajorityID
 		s.Nil(s.submitter.SubmitProof(context.Background(), proofWithHeader))
@@ -284,7 +262,10 @@ func (s *ProofSubmitterTestSuite) TestProofSubmitterRequestProofCancelled() {
 
 	s.ErrorContains(
 		s.submitter.RequestProof(
-			ctx, &bindings.TaikoL1ClientBlockProposed{BlockId: common.Big256}), "context canceled",
+			ctx,
+			&metadata.TaikoDataBlockMetadataLegacy{TaikoDataBlockMetadata: bindings.TaikoDataBlockMetadata{Id: 256}},
+		),
+		"context canceled",
 	)
 }
 
