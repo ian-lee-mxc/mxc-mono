@@ -289,37 +289,25 @@ contract TaikoL1LibProvingWithTiers is TaikoL1TestBase {
         giveEthAndTko(Carol, 1e8 ether, 100 ether);
 
         bytes32 parentHash = GENESIS_BLOCK_HASH;
+        (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1_000_000, 1024);
 
         for (uint256 blockId = 1; blockId < 10; blockId++) {
             //printVariables("before propose");
-            (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1_000_000, 1024);
+            (meta,) = proposeBlock(Alice, 1_000_000, 1024);
             //printVariables("after propose");
             mine(1);
 
             bytes32 blockHash = bytes32(1e10 + blockId);
             bytes32 stateRoot = bytes32(1e9 + blockId);
-            if(blockId == 1) {
-                proveBlock(
-                Bob,
+            proveBlock(
+                Carol,
                 meta,
                 parentHash,
                 blockHash,
                 stateRoot,
                 meta.minTier,
-                ""
+                TaikoErrors.L1_NOT_ASSIGNED_PROVER.selector
             );
-            }else {
-                proveBlock(
-                    Carol,
-                    meta,
-                    parentHash,
-                    blockHash,
-                    stateRoot,
-                    meta.minTier,
-                    TaikoErrors.L1_NOT_ASSIGNED_PROVER.selector
-                );
-            }
-            
             vm.roll(block.number + 15 * 12);
 
             uint16 minTier = meta.minTier;
@@ -436,12 +424,13 @@ contract TaikoL1LibProvingWithTiers is TaikoL1TestBase {
 
         bytes32 parentHash = GENESIS_BLOCK_HASH;
         for (uint256 blockId = 1; blockId < conf.blockMaxProposals * 3; blockId++) {
-            bool storeStateRoot = LibUtils.shouldSyncStateRoot(syncInternal, blockId);
-            console2.log("blockId:", blockId);
-            console2.log("storeStateRoot:", storeStateRoot);
+
 
             printVariables("before propose");
             (TaikoData.BlockMetadata memory meta,) = proposeBlock(Alice, 1_000_000, 1024);
+            bool storeStateRoot = LibUtils.shouldSyncStateRoot(syncInternal, meta.id);
+            console2.log("blockId:", blockId);
+            console2.log("storeStateRoot:", storeStateRoot);
             mine(1);
 
             bytes32 blockHash = bytes32(1_000_000 + blockId);

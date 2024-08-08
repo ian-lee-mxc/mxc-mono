@@ -13,7 +13,7 @@ library LibNetwork {
     uint256 internal constant ARBITRUM_SEPOLIA = 421614;
     uint256 internal constant ARBITRUM = 42161;
 
-    uint64 internal constant GENEVA = 5167003;
+    uint64 internal constant GENEVA = 5_167_003;
     uint64 internal constant TAIKO = 167_000;
     uint64 internal constant MOONCHAIN = 18686;
 

@@ -89,17 +89,21 @@ library LibVerifying {
                 // When `tid` is 0, it indicates that there is no proven
                 // transition with its parentHash equal to the blockHash of the
                 // most recently verified block.
-                if (local.tid == 0) break;
                 // CHANGE(MOONCHAIN): do migrate blockHash
-               if(local.tid == 0 && _state.blocks[local.slot - 1].metaHash == bytes32(uint256(1))) {
-                   blk.verifiedTransitionId = 1;
+                console2.log("testing local.tid",local.tid);
+               if(_state.blocks[local.slot - 1].metaHash == bytes32(uint256(1))) {
+                   // not allow contest
+                   if(blk.nextTransitionId > 0) local.tid = blk.nextTransitionId-1;
+                   if(local.tid == 0) {
+                       local.tid = 1;
+                   }
+                   blk.verifiedTransitionId = local.tid;
+                   local.lastVerifiedTransitionId = local.tid;
+                   provers[local.numBlocksVerified] = _state.transitions[local.slot][local.tid].prover;
+                   bonds[local.numBlocksVerified] = _state.transitions[local.slot][local.tid].validityBond;
                    ++local.blockId;
                    ++local.numBlocksVerified;
                    continue;
-                //    ISignalService(_resolver.resolve(LibStrings.B_SIGNAL_SERVICE, false))
-                //         .syncChainData(
-                //         _config.chainId, LibStrings.H_STATE_ROOT, b.lastVerifiedBlockId, bytes32(uint256(1))
-                //     );
                }
 
                 if (local.tid == 0) break;

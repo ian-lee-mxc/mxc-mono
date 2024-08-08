@@ -26,7 +26,7 @@ abstract contract EssentialContract is UUPSUpgradeable, Ownable2StepUpgradeable,
     uint8 private __paused;
     uint64 public lastUnpausedAt;
 
-    uint256[49] private __gap;
+    uint256[23] private __gap;
 
     /// @notice Emitted when the contract is paused.
     /// @param account The account that paused the contract.

@@ -11,7 +11,7 @@ import "./IAddressResolver.sol";
 abstract contract AddressResolver is IAddressResolver, Initializable {
     /// @notice Address of the AddressManager.
     address public addressManager;
-    uint256[49] private __gap;
+    uint256[25] private __gap;
 
     error RESOLVER_DENIED();
     error RESOLVER_INVALID_MANAGER();

@@ -117,12 +117,14 @@ library LibProving {
         local.tko = _tko;
         local.b = _state.slotB;
 
+        local.slot = _meta.id % _config.blockRingBufferSize;
         // Check that the block has been proposed but has not yet been verified.
         if (_meta.id <= local.b.lastVerifiedBlockId || _meta.id >= local.b.numBlocks) {
-            revert L1_INVALID_BLOCK_ID();
+            if(_state.blocks[local.slot - 1].metaHash != bytes32(uint(1))) {
+                revert L1_INVALID_BLOCK_ID();
+            }
         }
 
-        local.slot = _meta.id % _config.blockRingBufferSize;
         TaikoData.Block storage blk = _state.blocks[local.slot];
 
         local.blockId = blk.blockId;

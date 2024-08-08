@@ -179,7 +179,7 @@ library LibProposing {
             ++_state.slotB.numBlocks;
         }
         // TODO: Moonchain reward
-//        _tko.transferFrom(msg.sender, address(this), _config.livenessBond);
+        _tko.transferFrom(msg.sender, address(this), _config.livenessBond);
 
         // Bribe the block builder. Unlock 1559-tips, this tip is only made
         // if this transaction succeeds.

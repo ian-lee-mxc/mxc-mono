@@ -11,7 +11,7 @@ import "../../libs/LibNetwork.sol";
 import "../tiers/ITierProvider.sol";
 import "../tiers/ITierRouter.sol";
 import "../TaikoData.sol";
-
+import "forge-std/src/console2.sol";
 
 interface IArbSys {
     /**
@@ -191,15 +191,10 @@ library LibUtils {
     {
         if (_state.transitions[_slot][1].key == _parentHash) {
             tid_ = 1;
-            if (tid_ >= _blk.nextTransitionId) revert L1_UNEXPECTED_TRANSITION_ID();
+            if(_parentHash == bytes32(uint(0)) || _parentHash == bytes32(uint(1))) return 0;
+            if (tid_ >= _blk.nextTransitionId && _parentHash != bytes32(uint(1))) revert L1_UNEXPECTED_TRANSITION_ID();
         } else {
             tid_ = _state.transitionIds[_blk.blockId][_parentHash];
-            if(tid_ == 0) {
-                // 已经create过了
-                if(_parentHash == bytes32(uint(1))) {
-                    return 1;
-                }
-            }
             if (tid_ != 0 && tid_ >= _blk.nextTransitionId) revert L1_UNEXPECTED_TRANSITION_ID();
         }
     }

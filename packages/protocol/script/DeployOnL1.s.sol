@@ -40,8 +40,6 @@ contract DeployOnL1 is DeployCapability {
     uint256 public NUM_MIN_MAJORITY_GUARDIANS = vm.envUint("NUM_MIN_MAJORITY_GUARDIANS");
     uint256 public NUM_MIN_MINORITY_GUARDIANS = vm.envUint("NUM_MIN_MINORITY_GUARDIANS");
 
-    address public constant MAINNET_CONTRACT_OWNER = 0x9CBeE534B5D8a6280e01a14844Ee8aF350399C7F; // admin.taiko.eth
-
     modifier broadcast() {
         uint256 privateKey = vm.envUint("PRIVATE_KEY");
         require(privateKey != 0, "invalid priv key");
@@ -113,9 +111,9 @@ contract DeployOnL1 is DeployCapability {
 
         // ---------------------------------------------------------------
         // Deploy other contracts
-        if (block.chainid != 1) {
-            deployAuxContracts();
-        }
+//        if (block.chainid != 1) {
+//            deployAuxContracts();
+//        }
 
         if (AddressManager(sharedAddressManager).owner() == msg.sender) {
             AddressManager(sharedAddressManager).transferOwnership(contractOwner);
@@ -131,6 +129,7 @@ contract DeployOnL1 is DeployCapability {
 
         sharedAddressManager = vm.envAddress("SHARED_ADDRESS_MANAGER");
         if (sharedAddressManager == address(0)) {
+
             sharedAddressManager = deployProxy({
                 name: "shared_address_manager",
                 impl: address(new AddressManager()),
@@ -245,6 +244,7 @@ contract DeployOnL1 is DeployCapability {
         copyRegister(rollupAddressManager, _sharedAddressManager, "signal_service");
         copyRegister(rollupAddressManager, _sharedAddressManager, "bridge");
 
+        // TODO: do not init directly, use doMigrate()
         deployProxy({
             name: "taiko",
             impl: address(new TaikoL1()),

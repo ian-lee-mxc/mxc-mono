@@ -16,6 +16,7 @@ contract TaikoL10TestGroup1 is TaikoL1TestGroupBase {
 
         console2.log("====== Alice propose 5 block");
         bytes32 parentHash = GENESIS_BLOCK_HASH;
+        (, TaikoData.SlotB memory prevSlotB) = L1.getStateVariables();
 
         for (uint256 i = 1; i <= 5; ++i) {
             TaikoData.BlockMetadata memory meta = proposeBlock(Alice, "");
@@ -30,6 +31,9 @@ contract TaikoL10TestGroup1 is TaikoL1TestGroupBase {
             printBlockAndTrans(meta.id);
 
             parentHash = blockHash;
+            if(i == 1) {
+                verifyBlock(1);
+            }
         }
 
         console2.log("====== Verify up to 10 block");
@@ -37,7 +41,8 @@ contract TaikoL10TestGroup1 is TaikoL1TestGroupBase {
         verifyBlock(10);
         {
             (, TaikoData.SlotB memory b) = L1.getStateVariables();
-            assertEq(b.lastVerifiedBlockId, 5);
+            console2.log(b.lastVerifiedBlockId,prevSlotB.lastVerifiedBlockId, prevSlotB.lastVerifiedBlockId+5);
+            assertEq(b.lastVerifiedBlockId, prevSlotB.lastVerifiedBlockId+5);
 
             assertEq(tko.balanceOf(Alice), 10_000 ether);
         }

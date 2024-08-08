@@ -29,6 +29,7 @@ contract TaikoL2 is EssentialContract {
     /// be saved in this mapping.
     mapping(uint256 blockId => bytes32 blockHash) public l2Hashes;
 
+    uint256 private __deprecated;
     /// @notice A hash to check the integrity of public inputs.
     /// @dev Slot 2.
     bytes32 public publicInputHash;
@@ -97,6 +98,17 @@ contract TaikoL2 is EssentialContract {
         l1ChainId = _l1ChainId;
         gasExcess = _gasExcess;
         (publicInputHash,) = _calcPublicInputHash(block.number);
+    }
+
+    function doMigrate(
+        address _owner,
+        address _addressManager,
+        uint64 _l1ChainId,
+        uint64 _gasExcess
+    ) external initializer {
+        __Essential_init(_owner, _addressManager);
+        l1ChainId = _l1ChainId;
+        gasExcess = _gasExcess;
     }
 
     /// @notice Anchors the latest L1 block details to L2 for cross-layer

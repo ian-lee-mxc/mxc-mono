@@ -57,7 +57,7 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents, TaikoErrors {
         LibUtils.init(state, _genesisBlockHash);
         // CHANGE(Moonchain): No need to init
 //        LibVerifying.init(state, getConfig(), _genesisBlockHash);
-        doMigrate(_genesisBlockHash, 5);
+//        doMigrate(_genesisBlockHash, 6); // next proposer id 6
         if (_toPause) _pause();
     }
 
@@ -80,8 +80,9 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents, TaikoErrors {
         blk.blockId = l2MigrateHeight;
         blk.verifiedTransitionId = 1;
         blk.nextTransitionId = 2;
-
-        state.transitions[(b.numBlocks - 1) % _config.blockRingBufferSize][1].blockHash = bytes32(uint256(1));
+        TaikoData.TransitionState storage ts = state.transitions[(b.numBlocks - 1) % _config.blockRingBufferSize][1];
+        ts.blockHash = bytes32(uint256(1));
+        ts.stateRoot = bytes32(uint256(1));
     }
 
     function init2() external onlyOwner reinitializer(2) {
@@ -254,7 +255,7 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents, TaikoErrors {
         // - anchorGasLimit: 250_000 (based on internal devnet, its ~220_000
         // after 256 L2 blocks)
         return TaikoData.Config({
-            chainId: LibNetwork.MOONCHAIN, // CHANGE(Moonchain): geneva testnet chainID
+            chainId: LibNetwork.GENEVA, // CHANGE(Moonchain): geneva testnet chainID
             // Assume the block time is 3s, the protocol will allow ~90 days of
             // new blocks without any verification.
             blockMaxProposals: 3_240_000,
@@ -267,7 +268,7 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents, TaikoErrors {
             // There is 250_000 additional gas for the anchor tx. Therefore, on explorers, you'll
             // read Taiko's gas limit to be 240_250_000.
             blockMaxGasLimit: 240_000_000,
-            livenessBond: 125e18, // 125 Taiko token
+            livenessBond: 0, // 125 Taiko token
             stateRootSyncInternal: 16,
             checkEOAForCalldataDA: true
         });
