@@ -5,10 +5,11 @@ import "forge-std/src/Script.sol";
 import "forge-std/src/console2.sol";
 import "../../contracts/L1/TaikoL1.sol";
 import "./UpgradeScript.s.sol";
-import {TaikoL2} from "../../contracts/L2/TaikoL2.sol";
+import { TaikoL2 } from "../../contracts/L2/TaikoL2.sol";
 import "../../test/DeployCapability.sol";
-import {SignalService} from "../../contracts/signal/SignalService.sol";
-import {TransparentUpgradeableProxy} from "../../lib/openzeppelin-contracts/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import { SignalService } from "../../contracts/signal/SignalService.sol";
+import { TransparentUpgradeableProxy } from
+    "../../lib/openzeppelin-contracts/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "../../contracts/bridge/Bridge.sol";
 import "../../contracts/tokenvault/ERC20Vault.sol";
 import "../../contracts/tokenvault/ERC721Vault.sol";
@@ -18,45 +19,71 @@ import "../../contracts/tokenvault/BridgedERC721.sol";
 import "../../contracts/tokenvault/BridgedERC1155.sol";
 
 contract UpgradeTaikoL2 is DeployCapability {
-
     address payable mxcL2 = payable(0x1000777700000000000000000000000000000001);
-    address payable rollupAddressManagerProxyAddr = payable(0x1000777700000000000000000000000000000002);
-    address payable sharedAddressManagerProxyAddr = payable(0x2000777700000000000000000000000000000003);
-    address payable signalSericeProxyAddr = payable(0x2000777700000000000000000000000000000004);
-    address payable bridgeProxyAddr = payable(0x2000777700000000000000000000000000000005);
+    address payable sharedAddressManagerProxyAddr =
+        payable(0x2000777700000000000000000000000000000002);
+    address payable bridgeProxyAddr = payable(0x2000777700000000000000000000000000000003);
+    address payable rollupAddressManagerProxyAddr =
+        payable(0x1000777700000000000000000000000000000006);
+    address payable signalSericeProxyAddr = payable(0x1000777700000000000000000000000000000007);
     uint256 ownerPrivateKey = vm.envUint("L2_OWNER_PRIVATE_KEY");
+    uint256 adminPrivateKey = vm.envUint("PRIVATE_KEY");
     uint256 L1_CHAIN_ID = vm.envUint("L1_CHAIN_ID");
     uint256 gasExcess = vm.envUint("GAS_EXCESS");
     address owner = vm.addr(ownerPrivateKey);
-    function run() external {
 
-        TaikoL2 taikoL2 = new TaikoL2();
+    address public constant GOLDEN_TOUCH_ADDRESS = 0x0000777735367b36bC9B61C50022d9D0700dB4Ec;
 
-        deployAddressManagerContracts();
-        TransparentUpgradeableProxy(mxcL2).upgradeTo(address(taikoL2));
-        TaikoL2(mxcL2).doMigrate(owner, rollupAddressManagerProxyAddr,  uint64(L1_CHAIN_ID), uint64(gasExcess));
-
+    modifier broadcast() {
+        uint256 privateKey = vm.envUint("PRIVATE_KEY");
+        require(privateKey != 0, "invalid priv key");
+        vm.startBroadcast();
+        _;
+        vm.stopBroadcast();
     }
 
-    function deployAddressManagerContracts() internal  {
+    function run() external broadcast {
+        deployAddressManagerContracts();
+        TaikoL2 taikoL2 = new TaikoL2();
+        upgradeProxy(mxcL2, address(taikoL2));
+
+        console2.log("blockNumber", block.number);
+        TaikoL2(mxcL2).initMoonchain(
+            owner, rollupAddressManagerProxyAddr, uint64(L1_CHAIN_ID), uint64(gasExcess)
+        );
+
+        console2.logBytes32(TaikoL2(mxcL2).publicInputHash());
+        vm.stopBroadcast();
+        vm.roll(block.number + 1);
+        console2.log("blockNumber", block.number + 1);
+        vm.startPrank(GOLDEN_TOUCH_ADDRESS);
+        TaikoL2(mxcL2).anchorV2(
+            uint64(block.number + 1),
+            bytes32(uint256(1)),
+            uint32(TaikoL2(mxcL2).parentGasTarget() - 1),
+            uint32(5_000_000),
+            uint8(8)
+        );
+        vm.stopPrank();
+    }
+
+    function deployAddressManagerContracts() internal {
         addressNotNull(owner, "owner");
 
         AddressManager rollupAddressManager = new AddressManager();
-        TransparentUpgradeableProxy(rollupAddressManagerProxyAddr).upgradeTo(address(rollupAddressManager));
-        AddressManager(rollupAddressManagerProxyAddr).init(owner);
+        upgradeProxy(rollupAddressManagerProxyAddr, address(rollupAddressManager));
+        AddressManager(rollupAddressManagerProxyAddr).init2(owner);
 
         AddressManager sharedAddressManager = new AddressManager();
-        TransparentUpgradeableProxy(sharedAddressManagerProxyAddr).upgradeTo(address(sharedAddressManager));
+        upgradeProxy(sharedAddressManagerProxyAddr, address(sharedAddressManager));
         AddressManager(sharedAddressManagerProxyAddr).init(owner);
 
-
-        TransparentUpgradeableProxy(signalSericeProxyAddr).upgradeTo(address(new SignalService()));
-        SignalService(signalSericeProxyAddr).init(owner, sharedAddressManagerProxyAddr);
-        register(sharedAddressManagerProxyAddr, "signal_service",  signalSericeProxyAddr);
+        upgradeProxy(signalSericeProxyAddr, address(new SignalService()));
+        SignalService(signalSericeProxyAddr).init2(owner, sharedAddressManagerProxyAddr);
+        register(sharedAddressManagerProxyAddr, "signal_service", signalSericeProxyAddr);
 
         // Deploy Bridging contracts
-
-        TransparentUpgradeableProxy(bridgeProxyAddr).upgradeTo(address(new Bridge()));
+        upgradeProxy(bridgeProxyAddr, address(new Bridge()));
         Bridge(payable(bridgeProxyAddr)).init(owner, sharedAddressManagerProxyAddr);
         register(sharedAddressManagerProxyAddr, "bridge", bridgeProxyAddr);
 
@@ -126,20 +153,26 @@ contract UpgradeTaikoL2 is DeployCapability {
         require(addr != address(0), err);
     }
 
+    function upgradeProxy(address payable proxy, address newImpl) public {
+        vm.stopBroadcast();
+        vm.startBroadcast(adminPrivateKey);
+        TransparentUpgradeableProxy(proxy).upgradeTo(newImpl);
+        vm.stopBroadcast();
+        vm.startBroadcast(ownerPrivateKey);
+    }
 
-//    function verifyMXCL2Slot() public {
-////        bytes32 slot1 = readSlot(deployedMXCL2, 0);
-////        uint8 _initialized = uint8(uint256(slot1));
-////        assert(_initialized == uint8(1));
-//
-////        bytes32 slot3 = readSlot(mxcL2, 0);
-////        address _owner = address(uint160(uint256(slot3)));
-////        assert(_initialized == uint8(1));
-//    }
-//
-//    function readSlot(address _contract, uint256 _slot) internal view returns (bytes32 data) {
-//        data = vm.load(_contract, bytes32(uint256(_slot)));
-//        console2.log("----MXCL2 slot:", _slot, uint256(data));
-//        return data;
-//    }
+    //    function verifyMXCL2Slot() public {
+    ////        bytes32 slot1 = readSlot(deployedMXCL2, 0);
+    ////        uint8 _initialized = uint8(uint256(slot1));
+    ////        assert(_initialized == uint8(1));
+    //
+    ////        bytes32 slot3 = readSlot(mxcL2, 0);
+    ////        assert(_initialized == uint8(1));
+    //    }
+    //
+    function readSlot(address _contract, uint256 _slot) internal view returns (bytes32 data) {
+        data = vm.load(_contract, bytes32(uint256(_slot)));
+        console2.log("----MXCL2 slot:", _slot, uint256(data));
+        return data;
+    }
 }

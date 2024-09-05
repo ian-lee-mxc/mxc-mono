@@ -87,21 +87,19 @@ library LibVerifying {
                 // transition with its parentHash equal to the blockHash of the
                 // most recently verified block.
                 // CHANGE(MOONCHAIN): do migrate blockHash
-                console2.log("testing local.tid",local.tid);
-               if(_state.blocks[local.slot - 1].metaHash == bytes32(uint256(1))) {
-                   // not allow contest
-                   if(blk.nextTransitionId > 0) local.tid = blk.nextTransitionId-1;
-                   if(local.tid == 0) {
-                       local.tid = 1;
-                   }
-                   blk.verifiedTransitionId = local.tid;
-                   local.lastVerifiedTransitionId = local.tid;
-                   provers[local.numBlocksVerified] = _state.transitions[local.slot][local.tid].prover;
-                   bonds[local.numBlocksVerified] = _state.transitions[local.slot][local.tid].validityBond;
-                   ++local.blockId;
-                   ++local.numBlocksVerified;
-                   continue;
-               }
+                if (_state.blocks[local.slot - 1].metaHash == bytes32(uint256(1))) {
+                    // not allow contest
+                    if (blk.nextTransitionId > 0) local.tid = blk.nextTransitionId - 1;
+                    if (local.tid == 0) {
+                        local.tid = 1;
+                    }
+                    blk.verifiedTransitionId = local.tid;
+                    local.lastVerifiedTransitionId = local.tid;
+                    local.prover = _state.transitions[local.slot][local.tid].prover;
+                    ++local.blockId;
+                    ++local.numBlocksVerified;
+                    continue;
+                }
 
                 if (local.tid == 0) break;
 

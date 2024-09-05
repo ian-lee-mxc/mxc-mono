@@ -35,6 +35,8 @@ import "../test/common/erc20/MayFailFreeMintERC20.sol";
 import "../test/L1/TestTierProvider.sol";
 import "../test/DeployCapability.sol";
 import "../contracts/verifiers/RiscZeroVerifier.sol";
+import "p256-verifier/src/P256Verifier.sol";
+import "risc0-ethereum/contracts/src/groth16/RiscZeroGroth16Verifier.sol";
 
 /// @title DeployOnL1
 /// @notice This script deploys the core Taiko protocol smart contract on L1,
@@ -114,9 +116,9 @@ contract DeployOnL1 is DeployCapability {
 
         // ---------------------------------------------------------------
         // Deploy other contracts
-//        if (block.chainid != 1) {
-//            deployAuxContracts();
-//        }
+        //        if (block.chainid != 1) {
+        //            deployAuxContracts();
+        //        }
 
         if (AddressManager(sharedAddressManager).owner() == msg.sender) {
             AddressManager(sharedAddressManager).transferOwnership(contractOwner);
@@ -132,7 +134,6 @@ contract DeployOnL1 is DeployCapability {
 
         sharedAddressManager = vm.envAddress("SHARED_ADDRESS_MANAGER");
         if (sharedAddressManager == address(0)) {
-
             sharedAddressManager = deployProxy({
                 name: "shared_address_manager",
                 impl: address(new AddressManager()),
@@ -272,7 +273,6 @@ contract DeployOnL1 is DeployCapability {
         copyRegister(rollupAddressManager, _sharedAddressManager, "signal_service");
         copyRegister(rollupAddressManager, _sharedAddressManager, "bridge");
 
-        // TODO: do not init directly, use doMigrate()
         deployProxy({
             name: "mainnet_taiko",
             impl: address(new MainnetTaikoL1()),

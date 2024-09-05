@@ -46,6 +46,13 @@ contract SignalService is EssentialContract, ISignalService {
         __Essential_init(_owner, _sharedAddressManager);
     }
 
+    /// @notice Initializes the contract.
+    /// @param _owner The owner of this contract. msg.sender will be used if this value is zero.
+    /// @param _sharedAddressManager The address of the {AddressManager} contract.
+    function init2(address _owner, address _sharedAddressManager) external reinitializer(2) {
+        __Essential_init(_owner, _sharedAddressManager);
+    }
+
     /// @dev Authorize or deauthorize an address for calling syncChainData.
     /// @dev Note that addr is supposed to be TaikoL1 and TaikoL1 contracts deployed locally.
     /// @param _addr The address to be authorized or deauthorized.

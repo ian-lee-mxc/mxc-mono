@@ -171,7 +171,7 @@ library LibProving {
 
         // Check that the block has been proposed but has not yet been verified.
         if (meta.id <= local.b.lastVerifiedBlockId || meta.id >= local.b.numBlocks) {
-            if(_state.blocks[local.slot - 1].metaHash != bytes32(uint(1))) {
+            if (_state.blocks[local.slot - 1].metaHash != bytes32(uint256(1))) {
                 revert LibUtils.L1_INVALID_BLOCK_ID();
             }
         }

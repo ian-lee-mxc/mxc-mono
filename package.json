@@ -3,6 +3,7 @@
   "version": "0.23.0",
   "private": true,
   "devDependencies": {
+    "eslint-plugin-n": "^17.10.2",
     "lefthook": "^1.6.10",
     "prettier": "^3.2.5"
   }

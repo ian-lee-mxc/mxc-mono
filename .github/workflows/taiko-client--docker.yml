@@ -2,7 +2,7 @@ name: "Push docker image to GAR"
 
 on:
   push:
-    branches: [main]
+    branches: [moonchain-dev]
     tags:
       - "taiko-client-v*"
     paths:
@@ -22,7 +22,7 @@ jobs:
         with:
           registry: us-docker.pkg.dev
           username: _json_key
-          password: ${{ secrets.GAR_JSON_KEY }}
+          password: ${{ secrets.GCR_JSON_KEY }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -35,7 +35,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            us-docker.pkg.dev/evmchain/images/taiko-client
+            us-docker.pkg.dev/mxczkevm/images/moonchain-client
           tags: |
             type=ref,event=branch
             type=ref,event=pr

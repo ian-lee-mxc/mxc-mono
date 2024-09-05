@@ -41,7 +41,7 @@ contract TaikoL2 is EssentialContract {
     /// @notice The last synced L1 block height.
     uint64 public lastSyncedBlock;
     uint64 private parentTimestamp;
-    uint64 private parentGasTarget;
+    uint64 public parentGasTarget;
 
     /// @notice The L1's chain ID.
     uint64 public l1ChainId;
@@ -100,17 +100,6 @@ contract TaikoL2 is EssentialContract {
         (publicInputHash,) = _calcPublicInputHash(block.number);
     }
 
-    function doMigrate(
-        address _owner,
-        address _addressManager,
-        uint64 _l1ChainId,
-        uint64 _gasExcess
-    ) external initializer {
-        __Essential_init(_owner, _addressManager);
-        l1ChainId = _l1ChainId;
-        gasExcess = _gasExcess;
-    }
-
     /// @dev Reinitialize some state variables.
     /// We may want to init the basefee to a default value using one of the following values.
     /// - _initialGasExcess = 274*5_000_000 => basefee =0.01 gwei
@@ -122,17 +111,33 @@ contract TaikoL2 is EssentialContract {
         parentGasTarget = 0;
     }
 
+    function initMoonchain(
+        address _owner,
+        address _addressManager,
+        uint64 _l1ChainId,
+        uint64 _gasExcess
+    )
+        external
+        reinitializer(3)
+    {
+        __Essential_init(_owner, _addressManager);
+        l1ChainId = _l1ChainId;
+        parentTimestamp = uint64(block.timestamp);
+        parentGasExcess = _gasExcess;
+        parentGasTarget = uint64(block.gaslimit);
+        (publicInputHash,) = _calcPublicInputHash(block.number);
+    }
+
     /// @notice Anchors the latest L1 block details to L2 for cross-layer
     /// message verification.
     /// @dev This function can be called freely as the golden touch private key is publicly known,
     /// but the Taiko node guarantees the first transaction of each block is always this anchor
     /// transaction, and any subsequent calls will revert with L2_PUBLIC_INPUT_HASH_MISMATCH.
-    /// @param _l1BlockHash The `anchorBlockHash` value in this block's metadata.
     /// @param _l1StateRoot The state root for the L1 block with id equals `_anchorBlockId`
     /// @param _l1BlockId The `anchorBlockId` value in this block's metadata.
     /// @param _parentGasUsed The gas used in the parent block.
     function anchor(
-        bytes32 _l1BlockHash,
+        bytes32, /*_l1BlockHash*/
         bytes32 _l1StateRoot,
         uint64 _l1BlockId,
         uint32 _parentGasUsed
@@ -288,10 +293,11 @@ contract TaikoL2 is EssentialContract {
             revert L2_INVALID_PARAM();
         }
 
-        if (msg.sender != GOLDEN_TOUCH_ADDRESS) revert L2_INVALID_SENDER();
+        //        if (msg.sender != GOLDEN_TOUCH_ADDRESS) revert L2_INVALID_SENDER();
 
         // Verify ancestor hashes
         uint256 parentId = block.number - 1;
+
         (bytes32 currentPublicInputHash, bytes32 newPublicInputHash) =
             _calcPublicInputHash(parentId);
         if (publicInputHash != currentPublicInputHash) revert L2_PUBLIC_INPUT_HASH_MISMATCH();

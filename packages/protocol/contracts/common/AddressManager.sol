@@ -30,7 +30,8 @@ contract AddressManager is EssentialContract, IAddressManager {
         addressManager = address(this);
     }
 
-    function init2() external onlyOwner reinitializer(2) {
+    function init2(address _owner) external onlyOwner reinitializer(2) {
+        __Essential_init(_owner);
         addressManager = address(this);
     }
 

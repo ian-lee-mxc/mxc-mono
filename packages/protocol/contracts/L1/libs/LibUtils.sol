@@ -14,7 +14,8 @@ import "forge-std/src/console2.sol";
 
 interface IArbSys {
     /**
-     * @notice Get Arbitrum block number (distinct from L1 block number; Arbitrum genesis block has block number 0)
+     * @notice Get Arbitrum block number (distinct from L1 block number; Arbitrum genesis block has
+     * block number 0)
      * @return block number as int
      */
     function arbBlockNumber() external view returns (uint256);
@@ -215,8 +216,10 @@ library LibUtils {
     {
         if (_state.transitions[_slot][1].key == _parentHash) {
             tid_ = 1;
-            if(_parentHash == bytes32(uint(0)) || _parentHash == bytes32(uint(1))) return 0;
-            if (tid_ >= _blk.nextTransitionId && _parentHash != bytes32(uint(1))) revert L1_UNEXPECTED_TRANSITION_ID();
+            if (_parentHash == bytes32(uint256(0)) || _parentHash == bytes32(uint256(1))) return 0;
+            if (tid_ >= _blk.nextTransitionId && _parentHash != bytes32(uint256(1))) {
+                revert L1_UNEXPECTED_TRANSITION_ID();
+            }
         } else {
             tid_ = _state.transitionIds[_blk.blockId][_parentHash];
             if (tid_ != 0 && tid_ >= _blk.nextTransitionId) revert L1_UNEXPECTED_TRANSITION_ID();
@@ -239,23 +242,22 @@ library LibUtils {
     }
 
     function getBlockNumber() internal view returns (uint256 blockNumber) {
-        if(LibNetwork.isArbitrum(block.chainid)) {
+        if (LibNetwork.isArbitrum(block.chainid)) {
             blockNumber = IArbSys(address(100)).arbBlockNumber();
-        }else {
+        } else {
             blockNumber = block.number;
         }
         // eth l1 block number
     }
 
-    function getBlockHash(uint256 blockNumber) internal view returns (bytes32 L1BlockHash) {
+    function getBlockHash(uint256 blockNumber) internal view returns (bytes32 l1BlockHash) {
         // eth l1 block number
-        if(LibNetwork.isArbitrum(block.chainid)) {
-            L1BlockHash = IArbSys(address(100)).arbBlockHash(blockNumber);
-        }else {
-            L1BlockHash = blockhash(blockNumber);
+        if (LibNetwork.isArbitrum(block.chainid)) {
+            l1BlockHash = IArbSys(address(100)).arbBlockHash(blockNumber);
+        } else {
+            l1BlockHash = blockhash(blockNumber);
         }
     }
-
 
     function shouldVerifyBlocks(
         TaikoData.Config memory _config,

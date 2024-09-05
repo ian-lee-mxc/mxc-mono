@@ -31,7 +31,7 @@ contract TaikoL10TestGroup1 is TaikoL1TestGroupBase {
             printBlockAndTrans(meta.id);
 
             parentHash = blockHash;
-            if(i == 1) {
+            if (i == 1) {
                 verifyBlock(1);
             }
         }
@@ -41,8 +41,12 @@ contract TaikoL10TestGroup1 is TaikoL1TestGroupBase {
         verifyBlock(10);
         {
             (, TaikoData.SlotB memory b) = L1.getStateVariables();
-            console2.log(b.lastVerifiedBlockId,prevSlotB.lastVerifiedBlockId, prevSlotB.lastVerifiedBlockId+5);
-            assertEq(b.lastVerifiedBlockId, prevSlotB.lastVerifiedBlockId+5);
+            console2.log(
+                b.lastVerifiedBlockId,
+                prevSlotB.lastVerifiedBlockId,
+                prevSlotB.lastVerifiedBlockId + 5
+            );
+            assertEq(b.lastVerifiedBlockId, prevSlotB.lastVerifiedBlockId + 5);
 
             assertEq(totalTkoBalance(tko, L1, Alice), 10_000 ether);
         }

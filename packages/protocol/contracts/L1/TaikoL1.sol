@@ -19,6 +19,8 @@ import "./ITaikoL1.sol";
 /// @dev Labeled in AddressResolver as "taiko"
 /// @custom:security-contact security@taiko.xyz
 contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents {
+    /// @notice The old TaikoL1 state.
+    uint256[50] private _prevState;
     /// @notice The TaikoL1 state.
     TaikoData.State public state;
 
@@ -58,19 +60,59 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents {
     {
         __Essential_init(_owner, _rollupAddressManager);
         LibUtils.init(state, getConfig(), _genesisBlockHash);
-        // CHANGE(Moonchain): No need to init
-//        LibVerifying.init(state, getConfig(), _genesisBlockHash);
-//        doMigrate(_genesisBlockHash, 6); // next proposer id 6
         if (_toPause) _pause();
     }
 
-    function doMigrate(bytes32 _genesisBlockHash,uint64 l2MigrateHeight) public onlyOwner {
+    function init2() external onlyOwner reinitializer(2) {
+        // reset some previously used slots for future reuse
+        state.slotB.__reservedB1 = 0;
+        state.slotB.__reservedB2 = 0;
+        state.slotB.__reservedB3 = 0;
+        state.__reserve1 = 0;
+    }
+
+    /// @notice CHANGE(MOONCHAIN): Reinitialize the contract.
+    /// @param _owner The owner of this contract. msg.sender will be used if this value is zero.
+    /// @param _rollupAddressManager The address of the {AddressManager} contract.
+    /// @param _genesisBlockHash The block hash of the genesis block.
+    /// @param _toPause true to pause the contract by default.
+    function initMigrate(
+        address _owner,
+        address _rollupAddressManager,
+        bytes32 _genesisBlockHash,
+        uint64 _l2LatestHeight,
+        bool _toPause
+    )
+        external
+        reinitializer(2)
+    {
+        __Essential_init(_owner, _rollupAddressManager);
+        doMigrate(_genesisBlockHash, _l2LatestHeight);
+        if (_toPause) _pause();
+
+        TaikoData.BlockParamsV2 memory params = TaikoData.BlockParamsV2(
+            address(0),
+            bytes32(0),
+            bytes32(uint256(1)),
+            0,
+            uint64(block.timestamp),
+            uint32(0),
+            uint32(0),
+            uint8(0)
+        );
+        bytes memory _params = abi.encode(params);
+
+        bytes memory _txList = "0x";
+        LibProposing.proposeBlock(state, getConfig(), this, _params, _txList);
+    }
+
+    function doMigrate(bytes32 _genesisBlockHash, uint64 _l2LatestHeight) private {
         TaikoData.Config memory _config = getConfig();
         // Init state
         state.slotA.genesisHeight = uint64(LibUtils.getBlockNumber());
         state.slotA.genesisTimestamp = uint64(block.timestamp);
-        state.slotB.numBlocks = l2MigrateHeight + 1;
-        state.slotB.lastVerifiedBlockId = l2MigrateHeight;
+        state.slotB.numBlocks = _l2LatestHeight + 1;
+        state.slotB.lastVerifiedBlockId = _l2LatestHeight;
         TaikoData.SlotB memory b = state.slotB;
 
         state.blocks[0].nextTransitionId = 1;
@@ -80,20 +122,14 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents {
 
         TaikoData.Block storage blk = state.blocks[(b.numBlocks - 1) % _config.blockRingBufferSize];
         blk.metaHash = bytes32(uint256(1));
-        blk.blockId = l2MigrateHeight;
+        blk.blockId = _l2LatestHeight;
+        blk.proposedIn = _l2LatestHeight;
         blk.verifiedTransitionId = 1;
         blk.nextTransitionId = 2;
-        TaikoData.TransitionState storage ts = state.transitions[(b.numBlocks - 1) % _config.blockRingBufferSize][1];
+        TaikoData.TransitionState storage ts =
+            state.transitions[(b.numBlocks - 1) % _config.blockRingBufferSize][1];
         ts.blockHash = bytes32(uint256(1));
         ts.stateRoot = bytes32(uint256(1));
-    }
-
-    function init2() external onlyOwner reinitializer(2) {
-        // reset some previously used slots for future reuse
-        state.slotB.__reservedB1 = 0;
-        state.slotB.__reservedB2 = 0;
-        state.slotB.__reservedB3 = 0;
-        state.__reserve1 = 0;
     }
 
     /// @inheritdoc ITaikoL1
@@ -318,7 +354,7 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents {
     /// @inheritdoc ITaikoL1
     function getConfig() public pure virtual override returns (TaikoData.Config memory) {
         return TaikoData.Config({
-            chainId: LibNetwork.Geneva,
+            chainId: LibNetwork.GENEVA,
             blockMaxProposals: 3_240_000, // = 7200 * 45
             blockRingBufferSize: 3_600_000, // = 7200 * 50
             maxBlocksToVerify: 16,
@@ -329,7 +365,7 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents {
             basefeeAdjustmentQuotient: 8,
             basefeeSharingPctg: 75,
             gasIssuancePerSecond: 5_000_000,
-            ontakeForkHeight: 3_744_000 // = 7200 * 52
+            ontakeForkHeight: 0 // = 7200 * 52
          });
     }
 

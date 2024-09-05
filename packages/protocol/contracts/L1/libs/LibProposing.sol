@@ -104,7 +104,7 @@ library LibProposing {
         }
 
         if (!local.postFork || local.params.anchorBlockId == 0) {
-            local.params.anchorBlockId = LibUtils.getBlockHash(LibUtils.getBlockNumber() - 1);
+            local.params.anchorBlockId = uint64(LibUtils.getBlockNumber() - 1);
         }
 
         if (!local.postFork || local.params.timestamp == 0) {
@@ -121,8 +121,9 @@ library LibProposing {
             // The other constraint is that the L1 block number needs to be larger than or equal
             // the one in the previous L2 block.
             if (
-                local.params.anchorBlockId + _config.maxAnchorHeightOffset < block.number //
-                    || local.params.anchorBlockId >= block.number
+                local.params.anchorBlockId + _config.maxAnchorHeightOffset
+                    < LibUtils.getBlockNumber()
+                    || local.params.anchorBlockId >= LibUtils.getBlockNumber()
                     || local.params.anchorBlockId < parentBlk.proposedIn
             ) {
                 revert L1_INVALID_ANCHOR_BLOCK();
@@ -155,7 +156,7 @@ library LibProposing {
         // require additional storage slots.
         unchecked {
             meta_ = TaikoData.BlockMetadataV2({
-                anchorBlockHash: LibUtils.getBlockHash((local.params.anchorBlockId),
+                anchorBlockHash: LibUtils.getBlockHash(local.params.anchorBlockId),
                 difficulty: keccak256(abi.encode("TAIKO_DIFFICULTY", local.b.numBlocks)),
                 blobHash: 0, // to be initialized below
                 extraData: local.params.extraData,
@@ -170,7 +171,7 @@ library LibProposing {
                 proposer: msg.sender,
                 livenessBond: _config.livenessBond,
                 proposedAt: uint64(block.timestamp),
-                proposedIn: uint64(block.number),
+                proposedIn: uint64(LibUtils.getBlockNumber()),
                 blobTxListOffset: local.params.blobTxListOffset,
                 blobTxListLength: local.params.blobTxListLength,
                 blobIndex: local.params.blobIndex,
@@ -188,7 +189,7 @@ library LibProposing {
             // proposeBlock functions are called more than once in the same
             // L1 transaction, these multiple L2 blocks will share the same
             // blob.
-            meta_.blobHash = blobhash(local.params.blobIndex);
+            meta_.blobHash = LibUtils.getBlockHash(local.params.blobIndex);
             if (meta_.blobHash == 0) revert L1_BLOB_NOT_FOUND();
         } else {
             meta_.blobHash = keccak256(_txList);
