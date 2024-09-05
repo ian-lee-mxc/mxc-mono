@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.24;
+pragma solidity ^0.8.27;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -236,6 +236,19 @@ contract GuardianProver is IVerifier, EssentialContract {
         view
     {
         if (_ctx.msgSender != address(this)) revert GV_PERMISSION_DENIED();
+    }
+
+    /// @inheritdoc IVerifier
+    function verifyBatchProof(
+        ContextV2[] calldata _ctxs,
+        TaikoData.TierProof calldata /*_proof*/
+    )
+        external
+        view
+    {
+        for (uint256 i; i < _ctxs.length; ++i) {
+            if (_ctxs[i].msgSender != address(this)) revert GV_PERMISSION_DENIED();
+        }
     }
 
     /// @notice Returns the number of guardians

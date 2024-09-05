@@ -8,6 +8,8 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/taikoxyz/taiko-mono/packages/taiko-client/bindings"
+
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/beacon/engine"
@@ -209,6 +211,7 @@ func (s *Syncer) onBlockProposed(
 	// only happen when testing.
 	if meta.GetTimestamp() > uint64(time.Now().Unix()) {
 		log.Warn("Future L2 block, waiting", "L2BlockTimestamp", meta.GetTimestamp(), "now", time.Now().Unix())
+		// #nosec G115
 		time.Sleep(time.Until(time.Unix(int64(meta.GetTimestamp()), 0)))
 	}
 
@@ -324,13 +327,10 @@ func (s *Syncer) insertNewHead(
 
 	// Insert a TaikoL2.anchor / TaikoL2.anchorV2 transaction at transactions list head
 	var (
-		txList      []*types.Transaction
-		anchorTx    *types.Transaction
-		baseFeeInfo struct {
-			Basefee         *big.Int
-			ParentGasExcess uint64
-		}
-		err error
+		txList   []*types.Transaction
+		anchorTx *types.Transaction
+		baseFee  *big.Int
+		err      error
 	)
 	if len(txListBytes) != 0 {
 		if err := rlp.DecodeBytes(txListBytes, &txList); err != nil {
@@ -339,49 +339,30 @@ func (s *Syncer) insertNewHead(
 		}
 	}
 
-	if !meta.IsOntakeBlock() {
-		// Get L2 baseFee
-		baseFeeInfo, err = s.rpc.TaikoL2.GetBasefee(
-			&bind.CallOpts{BlockNumber: parent.Number, Context: ctx},
-			meta.GetRawBlockHeight().Uint64()-1,
-			uint32(parent.GasUsed),
-		)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get L2 baseFee: %w", encoding.TryParsingCustomError(err))
-		}
+	if baseFee, err = s.rpc.CalculateBaseFee(
+		ctx,
+		parent,
+		new(big.Int).SetUint64(meta.GetAnchorBlockID()),
+		meta.IsOntakeBlock(),
+		meta.GetBaseFeeConfig(),
+	); err != nil {
+		return nil, err
+	}
 
+	if !meta.IsOntakeBlock() {
 		// Assemble a TaikoL2.anchor transaction
 		anchorTx, err = s.anchorConstructor.AssembleAnchorTx(
 			ctx,
 			new(big.Int).SetUint64(meta.GetAnchorBlockID()),
 			meta.GetAnchorBlockHash(),
 			new(big.Int).Add(parent.Number, common.Big1),
-			baseFeeInfo.Basefee,
+			baseFee,
 			parent.GasUsed,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create TaikoL2.anchor transaction: %w", err)
 		}
 	} else {
-		parentGasExcess, err := s.rpc.TaikoL2.ParentGasExcess(&bind.CallOpts{
-			BlockNumber: parent.Number, Context: ctx,
-		})
-		if err != nil {
-			return nil, fmt.Errorf("failed to fetch parent gas excess: %w", err)
-		}
-		// Get L2 baseFee
-		baseFeeInfo, err = s.rpc.TaikoL2.CalculateBaseFee(
-			&bind.CallOpts{BlockNumber: parent.Number, Context: ctx},
-			meta.GetGasIssuancePerSecond(),
-			meta.GetTimestamp()-parent.Time,
-			meta.GetBasefeeAdjustmentQuotient(),
-			parentGasExcess,
-			uint32(parent.GasUsed),
-		)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get L2 baseFee: %w", encoding.TryParsingCustomError(err))
-		}
-
 		// Assemble a TaikoL2.anchorV2 transaction
 		anchorBlockHeader, err := s.rpc.L1.HeaderByHash(ctx, meta.GetAnchorBlockHash())
 		if err != nil {
@@ -392,10 +373,9 @@ func (s *Syncer) insertNewHead(
 			new(big.Int).SetUint64(meta.GetAnchorBlockID()),
 			anchorBlockHeader.Root,
 			parent.GasUsed,
-			meta.GetGasIssuancePerSecond(),
-			meta.GetBasefeeAdjustmentQuotient(),
+			meta.GetBaseFeeConfig(),
 			new(big.Int).Add(parent.Number, common.Big1),
-			baseFeeInfo.Basefee,
+			baseFee,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create TaikoL2.anchorV2 transaction: %w", err)
@@ -405,7 +385,7 @@ func (s *Syncer) insertNewHead(
 	log.Info(
 		"L2 baseFee",
 		"blockID", meta.GetBlockID(),
-		"baseFee", utils.WeiToGWei(baseFeeInfo.Basefee),
+		"baseFee", utils.WeiToGWei(baseFee),
 		"syncedL1Height", meta.GetRawBlockHeight(),
 		"parentGasUsed", parent.GasUsed,
 	)
@@ -423,7 +403,7 @@ func (s *Syncer) insertNewHead(
 		parent.Hash(),
 		l1Origin,
 		txListBytes,
-		baseFeeInfo.Basefee,
+		baseFee,
 		make(types.Withdrawals, 0),
 	)
 	if err != nil {
@@ -591,13 +571,21 @@ func (s *Syncer) retrievePastBlock(
 		currentBlockID = 0
 	}
 
-	blockInfo, err := s.rpc.GetL2BlockInfo(ctx, new(big.Int).SetUint64(currentBlockID))
+	blockNum := new(big.Int).SetUint64(currentBlockID)
+	var blockInfo bindings.TaikoDataBlockV2
+	if s.state.IsOnTake(blockNum) {
+		blockInfo, err = s.rpc.GetL2BlockInfoV2(ctx, blockNum)
+	} else {
+		blockInfo, err = s.rpc.GetL2BlockInfo(ctx, blockNum)
+	}
+
 	if err != nil {
 		return nil, err
 	}
 	ts, err := s.rpc.GetTransition(
 		ctx,
 		new(big.Int).SetUint64(blockInfo.BlockId),
+		// #nosec G115
 		uint32(blockInfo.VerifiedTransitionId.Uint64()),
 	)
 	if err != nil {

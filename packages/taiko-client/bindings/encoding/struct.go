@@ -14,17 +14,12 @@ import (
 var (
 	TierOptimisticID       uint16 = 100
 	TierSgxID              uint16 = 200
+	TierZkVMRisc0ID        uint16 = 250
+	TierZkVMSp1ID          uint16 = 251
 	TierSgxAndZkVMID       uint16 = 300
 	TierGuardianMinorityID uint16 = 900
 	TierGuardianMajorityID uint16 = 1000
-	ProtocolTiers                 = []uint16{
-		TierOptimisticID,
-		TierSgxID,
-		TierSgxAndZkVMID,
-		TierGuardianMinorityID,
-		TierGuardianMajorityID,
-	}
-	GoldenTouchPrivKey = "92954368afd3caa1f3ce3ead0069c1af414054aefe1ef9aeacc1bf426222ce38"
+	GoldenTouchPrivKey            = "92954368afd3caa1f3ce3ead0069c1af414054aefe1ef9aeacc1bf426222ce38"
 )
 
 // HookCall should be same with TaikoData.HookCall
@@ -46,7 +41,6 @@ type BlockParams struct {
 // BlockParamsV2 should be same with TaikoData.BlockParamsV2.
 type BlockParamsV2 struct {
 	Coinbase         common.Address
-	ExtraData        [32]byte
 	ParentMetaHash   [32]byte
 	AnchorBlockId    uint64
 	Timestamp        uint64
@@ -129,6 +123,21 @@ func BlockVerifiedEventToV2(e *bindings.TaikoL1ClientBlockVerified) *bindings.Ta
 		BlockHash: e.BlockHash,
 		Tier:      e.Tier,
 		Raw:       e.Raw,
+	}
+}
+
+// BlockVerifiedEventToV2 converts a *bindings.TaikoDataBlock to *bindings.TaikoDataBlockV2.
+func TaikoDataBlockToV2(b *bindings.TaikoDataBlock) *bindings.TaikoDataBlockV2 {
+	return &bindings.TaikoDataBlockV2{
+		MetaHash:             b.MetaHash,
+		AssignedProver:       b.AssignedProver,
+		LivenessBond:         b.LivenessBond,
+		BlockId:              b.BlockId,
+		ProposedAt:           b.ProposedAt,
+		ProposedIn:           b.ProposedIn,
+		NextTransitionId:     big.NewInt(int64(b.NextTransitionId)),
+		LivenessBondReturned: false,
+		VerifiedTransitionId: big.NewInt(int64(b.VerifiedTransitionId)),
 	}
 }
 

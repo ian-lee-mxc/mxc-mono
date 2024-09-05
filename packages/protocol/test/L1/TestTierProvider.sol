@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.24;
+pragma solidity ^0.8.27;
 
 import "../../contracts/common/LibStrings.sol";
 import "../../contracts/L1/tiers/ITierProvider.sol";
+import "../../contracts/L1/tiers/LibTiers.sol";
 import "../../contracts/L1/tiers/ITierRouter.sol";
 
 /// @title TestTierProvider
@@ -63,7 +64,7 @@ contract TestTierProvider is ITierProvider, ITierRouter {
     }
 
     /// @inheritdoc ITierProvider
-    function getMinTier(uint256 _rand) public pure override returns (uint16) {
+    function getMinTier(address, uint256 _rand) public pure override returns (uint16) {
         // 10% will be selected to require SGX proofs.
         if (_rand % 10 == 0) return LibTiers.TIER_SGX;
         // Other blocks are optimistic, without validity proofs.

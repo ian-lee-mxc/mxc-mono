@@ -44,6 +44,7 @@ type RaikoRequestProofBody struct {
 	Type     string                      `json:"proof_type"`
 	SGX      *SGXRequestProofBodyParam   `json:"sgx"`
 	RISC0    *RISC0RequestProofBodyParam `json:"risc0"`
+	SP1      *SP1RequestProofBodyParam   `json:"sp1"`
 }
 
 // SGXRequestProofBodyParam represents the JSON body of RaikoRequestProofBody's `sgx` field.
@@ -59,6 +60,12 @@ type RISC0RequestProofBodyParam struct {
 	Snark        bool     `json:"snark"`
 	Profile      bool     `json:"profile"`
 	ExecutionPo2 *big.Int `json:"execution_po2"`
+}
+
+// SP1RequestProofBodyParam represents the JSON body of RaikoRequestProofBody's `sp1` field.
+type SP1RequestProofBodyParam struct {
+	Recursion string `json:"recursion"`
+	Prover    string `json:"prover"`
 }
 
 // RaikoRequestProofBodyResponse represents the JSON body of the response of the proof requests.
@@ -79,6 +86,7 @@ func (s *SGXProofProducer) RequestProof(
 	blockID *big.Int,
 	meta metadata.TaikoBlockMetaData,
 	header *types.Header,
+	requestAt time.Time,
 ) (*ProofWithHeader, error) {
 	log.Info(
 		"Request sgx proof from raiko-host service",
@@ -89,10 +97,10 @@ func (s *SGXProofProducer) RequestProof(
 	)
 
 	if s.Dummy {
-		return s.DummyProofProducer.RequestProof(opts, blockID, meta, header, s.Tier())
+		return s.DummyProofProducer.RequestProof(opts, blockID, meta, header, s.Tier(), requestAt)
 	}
 
-	proof, err := s.callProverDaemon(ctx, opts)
+	proof, err := s.callProverDaemon(ctx, opts, requestAt)
 	if err != nil {
 		return nil, err
 	}
@@ -117,10 +125,13 @@ func (s *SGXProofProducer) RequestCancel(
 }
 
 // callProverDaemon keeps polling the proverd service to get the requested proof.
-func (s *SGXProofProducer) callProverDaemon(ctx context.Context, opts *ProofRequestOptions) ([]byte, error) {
+func (s *SGXProofProducer) callProverDaemon(
+	ctx context.Context,
+	opts *ProofRequestOptions,
+	requestAt time.Time,
+) ([]byte, error) {
 	var (
 		proof []byte
-		start = time.Now()
 	)
 
 	ctx, cancel := rpc.CtxWithTimeoutOrDefault(ctx, s.RaikoRequestTimeout)
@@ -136,13 +147,11 @@ func (s *SGXProofProducer) callProverDaemon(ctx context.Context, opts *ProofRequ
 		log.Info(
 			"Proof generating",
 			"height", opts.BlockID,
-			"time", time.Since(start),
+			"time", time.Since(requestAt),
 			"producer", "SGXProofProducer",
 		)
 		return nil, errProofGenerating
 	}
-
-	log.Debug("Proof generation output", "output", output)
 
 	// Raiko returns "" as proof when proof type is native,
 	// so we just convert "" to bytes
@@ -155,7 +164,7 @@ func (s *SGXProofProducer) callProverDaemon(ctx context.Context, opts *ProofRequ
 	log.Info(
 		"Proof generated",
 		"height", opts.BlockID,
-		"time", time.Since(start),
+		"time", time.Since(requestAt),
 		"producer", "SGXProofProducer",
 	)
 
@@ -209,6 +218,8 @@ func (s *SGXProofProducer) requestProof(
 	if err != nil {
 		return nil, err
 	}
+
+	log.Debug("Proof generation output", "output", string(resBytes))
 
 	var output RaikoRequestProofBodyResponse
 	if err := json.Unmarshal(resBytes, &output); err != nil {

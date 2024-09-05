@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math/big"
 	"math/rand"
 	"sync"
 	"time"
@@ -40,35 +39,39 @@ type Proposer struct {
 
 	proposingTimer *time.Timer
 
-	tiers []*rpc.TierProviderTierWithID
-
 	// Transaction builder
 	txBuilder builder.ProposeBlockTransactionBuilder
 
 	// Protocol configurations
 	protocolConfigs *bindings.TaikoDataConfig
 
+	chainConfig *config.ChainConfig
+
 	lastProposedAt time.Time
 	totalEpochs    uint64
 
-	txmgr *txmgr.SimpleTxManager
+	txmgrSelector *utils.TxMgrSelector
 
 	ctx context.Context
 	wg  sync.WaitGroup
 }
 
-// InitFromCli New initializes the given proposer instance based on the command line flags.
+// InitFromCli initializes the given proposer instance based on the command line flags.
 func (p *Proposer) InitFromCli(ctx context.Context, c *cli.Context) error {
 	cfg, err := NewConfigFromCliContext(c)
 	if err != nil {
 		return err
 	}
 
-	return p.InitFromConfig(ctx, cfg, nil)
+	return p.InitFromConfig(ctx, cfg, nil, nil)
 }
 
 // InitFromConfig initializes the proposer instance based on the given configurations.
-func (p *Proposer) InitFromConfig(ctx context.Context, cfg *Config, txMgr *txmgr.SimpleTxManager) (err error) {
+func (p *Proposer) InitFromConfig(
+	ctx context.Context, cfg *Config,
+	txMgr *txmgr.SimpleTxManager,
+	privateTxMgr *txmgr.SimpleTxManager,
+) (err error) {
 	p.proposerAddress = crypto.PubkeyToAddress(cfg.L1ProposerPrivKey.PublicKey)
 	p.ctx = ctx
 	p.Config = cfg
@@ -84,14 +87,8 @@ func (p *Proposer) InitFromConfig(ctx context.Context, cfg *Config, txMgr *txmgr
 
 	log.Info("Protocol configs", "configs", p.protocolConfigs)
 
-	if p.tiers, err = p.rpc.GetTiers(ctx); err != nil {
-		return err
-	}
-
-	if txMgr != nil {
-		p.txmgr = txMgr
-	} else {
-		if p.txmgr, err = txmgr.NewSimpleTxManager(
+	if txMgr == nil {
+		if txMgr, err = txmgr.NewSimpleTxManager(
 			"proposer",
 			log.Root(),
 			&metrics.TxMgrMetrics,
@@ -101,7 +98,21 @@ func (p *Proposer) InitFromConfig(ctx context.Context, cfg *Config, txMgr *txmgr
 		}
 	}
 
-	chainConfig := config.NewChainConfig(p.rpc.L2.ChainID, new(big.Int).SetUint64(p.protocolConfigs.OntakeForkHeight))
+	if privateTxMgr == nil && cfg.PrivateTxmgrConfigs != nil && len(cfg.PrivateTxmgrConfigs.L1RPCURL) > 0 {
+		if privateTxMgr, err = txmgr.NewSimpleTxManager(
+			"privateMempoolProposer",
+			log.Root(),
+			&metrics.TxMgrMetrics,
+			*cfg.PrivateTxmgrConfigs,
+		); err != nil {
+			return err
+		}
+	}
+
+	p.txmgrSelector = utils.NewTxMgrSelector(txMgr, privateTxMgr, nil)
+
+	chainConfig := config.NewChainConfig(p.protocolConfigs)
+	p.chainConfig = chainConfig
 
 	if cfg.BlobAllowed {
 		p.txBuilder = builder.NewBlobTransactionBuilder(
@@ -187,6 +198,7 @@ func (p *Proposer) fetchPoolContent(filterPoolContent bool) ([]types.Transaction
 		p.LocalAddresses,
 		p.MaxProposedTxListsPerEpoch,
 		minTip,
+		p.chainConfig,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch transaction pool content: %w", err)
@@ -356,14 +368,8 @@ func (p *Proposer) ProposeTxList(
 		return err
 	}
 
-	receipt, err := p.txmgr.Send(ctx, *txCandidate)
-	if err != nil {
-		log.Warn("Failed to send TaikoL1.proposeBlock transaction", "error", encoding.TryParsingCustomError(err))
+	if err := p.sendTx(ctx, txCandidate); err != nil {
 		return err
-	}
-
-	if receipt.Status != types.ReceiptStatusSuccessful {
-		return fmt.Errorf("failed to propose block: %s", receipt.TxHash.Hex())
 	}
 
 	log.Info("📝 Propose transactions succeeded", "txs", txNum)
@@ -390,6 +396,28 @@ func (p *Proposer) updateProposingTicker() {
 	}
 
 	p.proposingTimer = time.NewTimer(duration)
+}
+
+// sendTx is the internal function to send a transaction with a selected tx manager.
+func (p *Proposer) sendTx(ctx context.Context, txCandidate *txmgr.TxCandidate) error {
+	txMgr, isPrivate := p.txmgrSelector.Select()
+	receipt, err := txMgr.Send(ctx, *txCandidate)
+	if err != nil {
+		log.Warn(
+			"Failed to send TaikoL1.proposeBlock / TaikoL1.proposeBlockV2 transaction by tx manager",
+			"isPrivateMempool", isPrivate,
+			"error", encoding.TryParsingCustomError(err),
+		)
+		if isPrivate {
+			p.txmgrSelector.RecordPrivateTxMgrFailed()
+		}
+		return err
+	}
+
+	if receipt.Status != types.ReceiptStatusSuccessful {
+		return fmt.Errorf("failed to propose block: %s", receipt.TxHash.Hex())
+	}
+	return nil
 }
 
 // Name returns the application name.

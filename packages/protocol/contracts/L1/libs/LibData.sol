@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.24;
+pragma solidity ^0.8.27;
 
 import "../TaikoData.sol";
+import "../../verifiers/IVerifier.sol";
 
 /// @title LibData
 /// @notice A library that offers helper functions.
@@ -18,7 +19,6 @@ library LibData {
     {
         return TaikoData.BlockParamsV2({
             coinbase: _v1.coinbase,
-            extraData: _v1.extraData,
             parentMetaHash: _v1.parentMetaHash,
             anchorBlockId: 0,
             timestamp: 0,
@@ -76,9 +76,40 @@ library LibData {
             blobTxListOffset: 0,
             blobTxListLength: 0,
             blobIndex: 0,
-            basefeeAdjustmentQuotient: 0,
-            basefeeSharingPctg: 0,
-            gasIssuancePerSecond: 0
+            baseFeeConfig: TaikoData.BaseFeeConfig(0, 0, 0, 0, 0)
+        });
+    }
+
+    function blockV2toV1(TaikoData.BlockV2 memory _v2)
+        internal
+        pure
+        returns (TaikoData.Block memory)
+    {
+        return TaikoData.Block({
+            metaHash: _v2.metaHash,
+            assignedProver: _v2.assignedProver,
+            livenessBond: _v2.livenessBond,
+            blockId: _v2.blockId,
+            proposedAt: _v2.proposedAt,
+            proposedIn: _v2.proposedIn,
+            nextTransitionId: _v2.nextTransitionId,
+            verifiedTransitionId: _v2.verifiedTransitionId
+        });
+    }
+
+    function verifierContextV2toV1(IVerifier.ContextV2 memory _v2)
+        internal
+        pure
+        returns (IVerifier.Context memory)
+    {
+        return IVerifier.Context({
+            metaHash: _v2.metaHash,
+            blobHash: _v2.blobHash,
+            prover: _v2.prover,
+            blockId: _v2.blockId,
+            isContesting: _v2.isContesting,
+            blobUsed: _v2.blobUsed,
+            msgSender: _v2.msgSender
         });
     }
 }

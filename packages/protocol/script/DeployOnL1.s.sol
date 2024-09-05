@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.24;
+pragma solidity ^0.8.27;
 
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@risc0/contracts/groth16/RiscZeroGroth16Verifier.sol";
+import { SP1Verifier as SP1Verifier120rc } from "@sp1-contracts/src/v1.2.0-rc/SP1VerifierPlonk.sol";
 
 // Actually this one is deployed already on mainnet, but we are now deploying our own (non via-ir)
 // version. For mainnet, it is easier to go with one of:
@@ -12,31 +13,31 @@ import "@p256-verifier/contracts/P256Verifier.sol";
 
 import "../contracts/common/LibStrings.sol";
 import "../contracts/tko/TaikoToken.sol";
-import "../contracts/mainnet/MainnetTaikoL1.sol";
+import "../contracts/mainnet/rollup/MainnetTaikoL1.sol";
+import "../contracts/devnet/DevnetTaikoL1.sol";
 import "../contracts/L1/provers/GuardianProver.sol";
 import "../contracts/L1/tiers/DevnetTierProvider.sol";
 import "../contracts/L1/tiers/TierProviderV2.sol";
-import "../contracts/mainnet/MainnetBridge.sol";
+import "../contracts/mainnet/shared/MainnetBridge.sol";
 import "../contracts/tokenvault/BridgedERC20.sol";
 import "../contracts/tokenvault/BridgedERC721.sol";
 import "../contracts/tokenvault/BridgedERC1155.sol";
-import "../contracts/mainnet/MainnetERC20Vault.sol";
-import "../contracts/mainnet/MainnetERC1155Vault.sol";
-import "../contracts/mainnet/MainnetERC721Vault.sol";
-import "../contracts/mainnet/MainnetSignalService.sol";
-import "../contracts/mainnet/MainnetGuardianProver.sol";
+import "../contracts/mainnet/shared/MainnetERC20Vault.sol";
+import "../contracts/mainnet/shared/MainnetERC1155Vault.sol";
+import "../contracts/mainnet/shared/MainnetERC721Vault.sol";
+import "../contracts/mainnet/shared/MainnetSignalService.sol";
+import "../contracts/mainnet/rollup/MainnetGuardianProver.sol";
 import "../contracts/automata-attestation/AutomataDcapV3Attestation.sol";
 import "../contracts/automata-attestation/utils/SigVerifyLib.sol";
 import "../contracts/automata-attestation/lib/PEMCertChainLib.sol";
-import "../contracts/mainnet/MainnetSgxVerifier.sol";
+import "../contracts/mainnet/rollup/verifiers/MainnetSgxVerifier.sol";
 import "../contracts/team/proving/ProverSet.sol";
 import "../test/common/erc20/FreeMintERC20.sol";
 import "../test/common/erc20/MayFailFreeMintERC20.sol";
 import "../test/L1/TestTierProvider.sol";
 import "../test/DeployCapability.sol";
-import "../contracts/verifiers/RiscZeroVerifier.sol";
-import "p256-verifier/src/P256Verifier.sol";
-import "risc0-ethereum/contracts/src/groth16/RiscZeroGroth16Verifier.sol";
+import "../contracts/verifiers/Risc0Verifier.sol";
+import "../contracts/verifiers/SP1Verifier.sol";
 
 /// @title DeployOnL1
 /// @notice This script deploys the core Taiko protocol smart contract on L1,
@@ -44,6 +45,8 @@ import "risc0-ethereum/contracts/src/groth16/RiscZeroGroth16Verifier.sol";
 contract DeployOnL1 is DeployCapability {
     uint256 public NUM_MIN_MAJORITY_GUARDIANS = vm.envUint("NUM_MIN_MAJORITY_GUARDIANS");
     uint256 public NUM_MIN_MINORITY_GUARDIANS = vm.envUint("NUM_MIN_MINORITY_GUARDIANS");
+
+    address public constant MAINNET_CONTRACT_OWNER = 0x9CBeE534B5D8a6280e01a14844Ee8aF350399C7F; // admin.taiko.eth
 
     modifier broadcast() {
         uint256 privateKey = vm.envUint("PRIVATE_KEY");
@@ -116,9 +119,9 @@ contract DeployOnL1 is DeployCapability {
 
         // ---------------------------------------------------------------
         // Deploy other contracts
-        //        if (block.chainid != 1) {
-        //            deployAuxContracts();
-        //        }
+        if (block.chainid != 1) {
+            deployAuxContracts();
+        }
 
         if (AddressManager(sharedAddressManager).owner() == msg.sender) {
             AddressManager(sharedAddressManager).transferOwnership(contractOwner);
@@ -287,9 +290,17 @@ contract DeployOnL1 is DeployCapability {
             )
         });
 
+        TaikoL1 taikoL1;
+        if (keccak256(abi.encode(vm.envString("TIER_PROVIDER"))) == keccak256(abi.encode("devnet")))
+        {
+            taikoL1 = TaikoL1(address(new DevnetTaikoL1()));
+        } else {
+            taikoL1 = TaikoL1(address(new TaikoL1()));
+        }
+
         deployProxy({
             name: "taiko",
-            impl: address(new TaikoL1()),
+            impl: address(taikoL1),
             data: abi.encodeCall(
                 TaikoL1.init,
                 (
@@ -386,15 +397,32 @@ contract DeployOnL1 is DeployCapability {
             )
         });
 
+        deployZKVerifiers(owner, rollupAddressManager);
+    }
+
+    // deploy both sp1 & risc0 verifiers.
+    // using function to avoid stack too deep error
+    function deployZKVerifiers(address owner, address rollupAddressManager) private {
         // Deploy r0 groth16 verifier
         RiscZeroGroth16Verifier verifier =
             new RiscZeroGroth16Verifier(ControlID.CONTROL_ROOT, ControlID.BN254_CONTROL_ID);
         register(rollupAddressManager, "risc0_groth16_verifier", address(verifier));
 
         deployProxy({
-            name: "risc0_verifier",
-            impl: address(new RiscZeroVerifier()),
-            data: abi.encodeCall(RiscZeroVerifier.init, (owner, rollupAddressManager)),
+            name: "tier_zkvm_risc0",
+            impl: address(new Risc0Verifier()),
+            data: abi.encodeCall(Risc0Verifier.init, (owner, rollupAddressManager)),
+            registerTo: rollupAddressManager
+        });
+
+        // Deploy sp1 plonk verifier
+        SP1Verifier120rc sp1Verifier120rc = new SP1Verifier120rc();
+        register(rollupAddressManager, "sp1_remote_verifier", address(sp1Verifier120rc));
+
+        deployProxy({
+            name: "tier_zkvm_sp1",
+            impl: address(new SP1Verifier()),
+            data: abi.encodeCall(SP1Verifier.init, (owner, rollupAddressManager)),
             registerTo: rollupAddressManager
         });
     }

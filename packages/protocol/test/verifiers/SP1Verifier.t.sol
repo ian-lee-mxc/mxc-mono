@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.24;
+pragma solidity ^0.8.27;
 
 import "../L1/TaikoL1TestBase.sol";
 
@@ -43,7 +43,7 @@ contract TestSP1Verifier is TaikoL1TestBase {
         // Deploy Taiko's SP1 proof verifier ('remitter')
         sp1 = SP1Verifier(
             deployProxy({
-                name: "tier_sp1",
+                name: "tier_zkvm_sp1",
                 impl: address(new SP1Verifier()),
                 data: abi.encodeCall(SP1Verifier.init, (address(0), address(addressManager)))
             })

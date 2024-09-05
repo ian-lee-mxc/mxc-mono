@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.24;
+pragma solidity ^0.8.27;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./IAddressManager.sol";
@@ -23,6 +23,15 @@ abstract contract AddressResolver is IAddressResolver, Initializable {
     /// @param _name The name to check against.
     modifier onlyFromNamed(bytes32 _name) {
         if (msg.sender != resolve(_name, true)) revert RESOLVER_DENIED();
+        _;
+    }
+
+    /// @dev Modifier that ensures the caller is the resolved address of a given
+    /// name, if the name is set.
+    /// @param _name The name to check against.
+    modifier onlyFromOptionalNamed(bytes32 _name) {
+        address addr = resolve(_name, true);
+        if (addr != address(0) && msg.sender != addr) revert RESOLVER_DENIED();
         _;
     }
 

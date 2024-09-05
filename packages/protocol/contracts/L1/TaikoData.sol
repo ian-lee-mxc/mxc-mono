@@ -1,11 +1,20 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.24;
+pragma solidity ^0.8.27;
 
 /// @title TaikoData
 /// @notice This library defines various data structures used in the Taiko
 /// protocol.
 /// @custom:security-contact security@taiko.xyz
 library TaikoData {
+    /// @dev Struct that represents L2 basefee configurations
+    struct BaseFeeConfig {
+        uint8 adjustmentQuotient;
+        uint8 sharingPctg;
+        uint32 gasIssuancePerSecond;
+        uint64 minGasExcess;
+        uint32 maxGasIssuancePerBlock;
+    }
+
     /// @dev Struct holding Taiko configuration parameters. See {TaikoConfig}.
     struct Config {
         // ---------------------------------------------------------------------
@@ -39,9 +48,7 @@ library TaikoData {
         // ---------------------------------------------------------------------
         // Group 5: Previous configs in TaikoL2
         // ---------------------------------------------------------------------
-        uint8 basefeeAdjustmentQuotient;
-        uint8 basefeeSharingPctg;
-        uint32 gasIssuancePerSecond;
+        BaseFeeConfig baseFeeConfig;
         // ---------------------------------------------------------------------
         // Group 6: Others
         // ---------------------------------------------------------------------
@@ -72,7 +79,6 @@ library TaikoData {
 
     struct BlockParamsV2 {
         address coinbase;
-        bytes32 extraData;
         bytes32 parentMetaHash;
         uint64 anchorBlockId; // NEW
         uint64 timestamp; // NEW
@@ -124,9 +130,7 @@ library TaikoData {
         uint32 blobTxListOffset;
         uint32 blobTxListLength;
         uint8 blobIndex;
-        uint8 basefeeAdjustmentQuotient;
-        uint8 basefeeSharingPctg;
-        uint32 gasIssuancePerSecond;
+        BaseFeeConfig baseFeeConfig;
     }
 
     /// @dev Struct representing transition to be proven.
@@ -155,6 +159,22 @@ library TaikoData {
     /// @dev Struct containing data required for verifying a block.
     /// 3 slots used.
     struct Block {
+        bytes32 metaHash; // slot 1
+        address assignedProver; // slot 2
+        uint96 livenessBond;
+        uint64 blockId; // slot 3
+        uint64 proposedAt; // timestamp
+        uint64 proposedIn; // L1 block number, required/used by node/client.
+        uint32 nextTransitionId;
+        // The ID of the transaction that is used to verify this block. However, if
+        // this block is not verified as the last block in a batch, verifiedTransitionId
+        // will remain zero.
+        uint32 verifiedTransitionId;
+    }
+
+    /// @dev Struct containing data required for verifying a block.
+    /// 3 slots used.
+    struct BlockV2 {
         bytes32 metaHash; // slot 1
         address assignedProver; // slot 2
         uint96 livenessBond;
@@ -209,7 +229,7 @@ library TaikoData {
     /// @dev Struct holding the state variables for the {TaikoL1} contract.
     struct State {
         // Ring buffer for proposed blocks and a some recent verified blocks.
-        mapping(uint64 blockId_mod_blockRingBufferSize => Block blk) blocks;
+        mapping(uint64 blockId_mod_blockRingBufferSize => BlockV2 blk) blocks;
         // Indexing to transition ids (ring buffer not possible)
         mapping(uint64 blockId => mapping(bytes32 parentHash => uint24 transitionId)) transitionIds;
         // Ring buffer for transitions
@@ -217,8 +237,7 @@ library TaikoData {
             uint64 blockId_mod_blockRingBufferSize
                 => mapping(uint32 transitionId => TransitionState ts)
         ) transitions;
-        // Ring buffer for Ether deposits
-        bytes32 __reserve1;
+        bytes32 __reserve1; // Used as a ring buffer for Ether deposits
         SlotA slotA; // slot 5
         SlotB slotB; // slot 6
         mapping(address account => uint256 bond) bondBalance;

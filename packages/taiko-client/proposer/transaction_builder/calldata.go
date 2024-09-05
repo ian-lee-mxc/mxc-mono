@@ -6,6 +6,7 @@ import (
 	"math/big"
 
 	"github.com/ethereum-optimism/optimism/op-service/txmgr"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 
@@ -25,7 +26,6 @@ type CalldataTransactionBuilder struct {
 	gasLimit                uint64
 	extraData               string
 	chainConfig             *config.ChainConfig
-	afterOntake             bool
 }
 
 // NewCalldataTransactionBuilder creates a new CalldataTransactionBuilder instance based on giving configurations.
@@ -48,7 +48,6 @@ func NewCalldataTransactionBuilder(
 		gasLimit,
 		extraData,
 		chainConfig,
-		false,
 	}
 }
 
@@ -64,7 +63,11 @@ func (b *CalldataTransactionBuilder) Build(
 		err            error
 	)
 	if includeParentMetaHash {
-		if parentMetaHash, err = getParentMetaHash(ctx, b.rpc); err != nil {
+		if parentMetaHash, err = getParentMetaHash(
+			ctx,
+			b.rpc,
+			new(big.Int).SetUint64(b.chainConfig.ProtocolConfigs.OntakeForkHeight),
+		); err != nil {
 			return nil, err
 		}
 	}
@@ -73,7 +76,7 @@ func (b *CalldataTransactionBuilder) Build(
 	if err != nil {
 		return nil, err
 	}
-	signature[64] = uint8(uint(signature[64])) + 27
+	signature[64] = signature[64] + 27
 
 	var (
 		to            = &b.taikoL1Address
@@ -86,16 +89,12 @@ func (b *CalldataTransactionBuilder) Build(
 	}
 
 	// Check if the current L2 chain is after ontake fork.
-	if !b.afterOntake {
-		blockNum, err := b.rpc.L2.BlockNumber(ctx)
-		if err != nil {
-			return nil, err
-		}
-
-		b.afterOntake = b.chainConfig.IsOntake(new(big.Int).SetUint64(blockNum + 1))
+	state, err := rpc.GetProtocolStateVariables(b.rpc.TaikoL1, &bind.CallOpts{Context: ctx})
+	if err != nil {
+		return nil, err
 	}
 
-	if !b.afterOntake {
+	if !b.chainConfig.IsOntake(new(big.Int).SetUint64(state.B.NumBlocks)) {
 		// ABI encode the TaikoL1.proposeBlock / ProverSet.proposeBlock parameters.
 		method = "proposeBlock"
 
@@ -113,7 +112,6 @@ func (b *CalldataTransactionBuilder) Build(
 
 		if encodedParams, err = encoding.EncodeBlockParamsOntake(&encoding.BlockParamsV2{
 			Coinbase:       b.l2SuggestedFeeRecipient,
-			ExtraData:      rpc.StringToBytes32(b.extraData),
 			ParentMetaHash: parentMetaHash,
 			AnchorBlockId:  0,
 			Timestamp:      0,

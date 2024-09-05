@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.24;
+pragma solidity ^0.8.27;
 
 /// @title ITierProvider
 /// @notice Defines interface to return tier configuration.
@@ -28,26 +28,8 @@ interface ITierProvider {
     function getTierIds() external view returns (uint16[] memory);
 
     /// @dev Determines the minimal tier for a block based on a random input.
+    /// @param proposer The address of the block proposer.
     /// @param rand A pseudo-random number.
     /// @return The tier id.
-    function getMinTier(uint256 rand) external view returns (uint16);
-}
-
-/// @dev Tier ID cannot be zero!
-library LibTiers {
-    /// @notice Optimistic tier ID.
-    uint16 public constant TIER_OPTIMISTIC = 100;
-
-    /// @notice SGX tier ID.
-    uint16 public constant TIER_SGX = 200;
-    uint16 public constant TIER_SGX2 = 200;
-
-    /// @notice SGX + ZKVM tier ID.
-    uint16 public constant TIER_SGX_ZKVM = 300;
-
-    /// @notice Guardian tier ID with minority approval.
-    uint16 public constant TIER_GUARDIAN_MINORITY = 900;
-
-    /// @notice Guardian tier ID with majority approval.
-    uint16 public constant TIER_GUARDIAN = 1000;
+    function getMinTier(address proposer, uint256 rand) external view returns (uint16);
 }

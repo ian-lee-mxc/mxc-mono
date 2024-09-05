@@ -149,16 +149,30 @@ var (
 			Type: "uint8",
 		},
 		{
-			Name: "basefeeAdjustmentQuotient",
-			Type: "uint8",
-		},
-		{
-			Name: "basefeeSharingPctg",
-			Type: "uint8",
-		},
-		{
-			Name: "gasIssuancePerSecond",
-			Type: "uint32",
+			Name: "baseFeeConfig",
+			Type: "tuple",
+			Components: []abi.ArgumentMarshaling{
+				{
+					Name: "adjustmentQuotient",
+					Type: "uint8",
+				},
+				{
+					Name: "sharingPctg",
+					Type: "uint8",
+				},
+				{
+					Name: "gasIssuancePerSecond",
+					Type: "uint32",
+				},
+				{
+					Name: "minGasExcess",
+					Type: "uint64",
+				},
+				{
+					Name: "maxGasIssuancePerBlock",
+					Type: "uint32",
+				},
+			},
 		},
 	}
 	transitionComponents = []abi.ArgumentMarshaling{
@@ -229,10 +243,6 @@ var (
 		{
 			Name: "coinbase",
 			Type: "address",
-		},
-		{
-			Name: "extraData",
-			Type: "bytes32",
 		},
 		{
 			Name: "parentMetaHash",

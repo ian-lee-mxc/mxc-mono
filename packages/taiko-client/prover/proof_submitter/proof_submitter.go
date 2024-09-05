@@ -28,7 +28,7 @@ var (
 	_                              Submitter = (*ProofSubmitter)(nil)
 	submissionDelayRandomBumpRange float64   = 20
 	proofPollingInterval                     = 10 * time.Second
-	ProofTimeout                             = 90 * time.Minute
+	ProofTimeout                             = 3 * time.Hour
 )
 
 // ProofSubmitter is responsible requesting proofs for the given L2
@@ -60,6 +60,7 @@ func NewProofSubmitter(
 	graffiti string,
 	gasLimit uint64,
 	txmgr *txmgr.SimpleTxManager,
+	privateTxmgr *txmgr.SimpleTxManager,
 	builder *transaction.ProveBlockTxBuilder,
 	tiers []*rpc.TierProviderTierWithID,
 	isGuardian bool,
@@ -76,7 +77,7 @@ func NewProofSubmitter(
 		resultCh:         resultCh,
 		anchorValidator:  anchorValidator,
 		txBuilder:        builder,
-		sender:           transaction.NewSender(rpcClient, txmgr, proverSetAddress, gasLimit),
+		sender:           transaction.NewSender(rpcClient, txmgr, privateTxmgr, proverSetAddress, gasLimit),
 		proverAddress:    txmgr.From(),
 		proverSetAddress: proverSetAddress,
 		taikoL2Address:   taikoL2Address,
@@ -89,6 +90,10 @@ func NewProofSubmitter(
 
 // RequestProof implements the Submitter interface.
 func (s *ProofSubmitter) RequestProof(ctx context.Context, meta metadata.TaikoBlockMetaData) error {
+	var (
+		blockInfo bindings.TaikoDataBlockV2
+	)
+
 	header, err := s.rpc.WaitL2Header(ctx, meta.GetBlockID())
 	if err != nil {
 		return fmt.Errorf("failed to fetch l2 Header, blockID: %d, error: %w", meta.GetBlockID(), err)
@@ -103,7 +108,11 @@ func (s *ProofSubmitter) RequestProof(ctx context.Context, meta metadata.TaikoBl
 		return fmt.Errorf("failed to get the L2 parent block by hash (%s): %w", header.ParentHash, err)
 	}
 
-	blockInfo, err := s.rpc.GetL2BlockInfo(ctx, meta.GetBlockID())
+	if meta.IsOntakeBlock() {
+		blockInfo, err = s.rpc.GetL2BlockInfoV2(ctx, meta.GetBlockID())
+	} else {
+		blockInfo, err = s.rpc.GetL2BlockInfo(ctx, meta.GetBlockID())
+	}
 	if err != nil {
 		return err
 	}
@@ -159,6 +168,7 @@ func (s *ProofSubmitter) RequestProof(ctx context.Context, meta metadata.TaikoBl
 				meta.GetBlockID(),
 				meta,
 				header,
+				startTime,
 			)
 			if err != nil {
 				// If request proof has timed out in retry, let's cancel the proof generating and skip

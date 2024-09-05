@@ -52,12 +52,14 @@ type Config struct {
 	Allowance                               *big.Int
 	GuardianProverHealthCheckServerEndpoint *url.URL
 	RaikoHostEndpoint                       string
+	RaikoZKVMHostEndpoint                   string
 	RaikoJWT                                string
 	RaikoRequestTimeout                     time.Duration
 	L1NodeVersion                           string
 	L2NodeVersion                           string
 	BlockConfirmations                      uint64
 	TxmgrConfigs                            *txmgr.CLIConfig
+	PrivateTxmgrConfigs                     *txmgr.CLIConfig
 }
 
 // NewConfigFromCliContext creates a new config instance from command line flags.
@@ -143,6 +145,7 @@ func NewConfigFromCliContext(c *cli.Context) (*Config, error) {
 		ProverSetAddress:                        common.HexToAddress(c.String(flags.ProverSetAddress.Name)),
 		L1ProverPrivKey:                         l1ProverPrivKey,
 		RaikoHostEndpoint:                       c.String(flags.RaikoHostEndpoint.Name),
+		RaikoZKVMHostEndpoint:                   c.String(flags.RaikoZKVMHostEndpoint.Name),
 		RaikoJWT:                                common.Bytes2Hex(jwtSecret),
 		RaikoRequestTimeout:                     c.Duration(flags.RaikoRequestTimeout.Name),
 		StartingBlockID:                         startingBlockID,
@@ -172,6 +175,11 @@ func NewConfigFromCliContext(c *cli.Context) (*Config, error) {
 		BlockConfirmations:                      c.Uint64(flags.BlockConfirmations.Name),
 		TxmgrConfigs: pkgFlags.InitTxmgrConfigsFromCli(
 			c.String(flags.L1WSEndpoint.Name),
+			l1ProverPrivKey,
+			c,
+		),
+		PrivateTxmgrConfigs: pkgFlags.InitTxmgrConfigsFromCli(
+			c.String(flags.L1PrivateEndpoint.Name),
 			l1ProverPrivKey,
 			c,
 		),

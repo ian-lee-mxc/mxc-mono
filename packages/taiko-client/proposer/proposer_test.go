@@ -2,7 +2,6 @@ package proposer
 
 import (
 	"context"
-	"math/big"
 	"os"
 	"testing"
 	"time"
@@ -68,13 +67,13 @@ func (s *ProposerTestSuite) SetupTest() {
 
 	s.Nil(p.InitFromConfig(ctx, &Config{
 		ClientConfig: &rpc.ClientConfig{
-			L1Endpoint:        os.Getenv("L1_NODE_WS_ENDPOINT"),
-			L2Endpoint:        os.Getenv("L2_EXECUTION_ENGINE_HTTP_ENDPOINT"),
-			L2EngineEndpoint:  os.Getenv("L2_EXECUTION_ENGINE_AUTH_ENDPOINT"),
+			L1Endpoint:        os.Getenv("L1_WS"),
+			L2Endpoint:        os.Getenv("L2_HTTP"),
+			L2EngineEndpoint:  os.Getenv("L2_AUTH"),
 			JwtSecret:         string(jwtSecret),
-			TaikoL1Address:    common.HexToAddress(os.Getenv("TAIKO_L1_ADDRESS")),
-			TaikoL2Address:    common.HexToAddress(os.Getenv("TAIKO_L2_ADDRESS")),
-			TaikoTokenAddress: common.HexToAddress(os.Getenv("TAIKO_TOKEN_ADDRESS")),
+			TaikoL1Address:    common.HexToAddress(os.Getenv("TAIKO_L1")),
+			TaikoL2Address:    common.HexToAddress(os.Getenv("TAIKO_L2")),
+			TaikoTokenAddress: common.HexToAddress(os.Getenv("TAIKO_TOKEN")),
 		},
 		L1ProposerPrivKey:          l1ProposerPrivKey,
 		L2SuggestedFeeRecipient:    common.HexToAddress(os.Getenv("L2_SUGGESTED_FEE_RECIPIENT")),
@@ -84,7 +83,7 @@ func (s *ProposerTestSuite) SetupTest() {
 		ExtraData:                  "test",
 		ProposeBlockTxGasLimit:     10_000_000,
 		TxmgrConfigs: &txmgr.CLIConfig{
-			L1RPCURL:                  os.Getenv("L1_NODE_WS_ENDPOINT"),
+			L1RPCURL:                  os.Getenv("L1_WS"),
 			NumConfirmations:          0,
 			SafeAbortNonceTooLowCount: txmgr.DefaultBatcherFlagValues.SafeAbortNonceTooLowCount,
 			PrivateKey:                common.Bytes2Hex(crypto.FromECDSA(l1ProposerPrivKey)),
@@ -98,7 +97,22 @@ func (s *ProposerTestSuite) SetupTest() {
 			TxSendTimeout:             txmgr.DefaultBatcherFlagValues.TxSendTimeout,
 			TxNotInMempoolTimeout:     txmgr.DefaultBatcherFlagValues.TxNotInMempoolTimeout,
 		},
-	}, nil))
+		PrivateTxmgrConfigs: &txmgr.CLIConfig{
+			L1RPCURL:                  os.Getenv("L1_WS"),
+			NumConfirmations:          0,
+			SafeAbortNonceTooLowCount: txmgr.DefaultBatcherFlagValues.SafeAbortNonceTooLowCount,
+			PrivateKey:                common.Bytes2Hex(crypto.FromECDSA(l1ProposerPrivKey)),
+			FeeLimitMultiplier:        txmgr.DefaultBatcherFlagValues.FeeLimitMultiplier,
+			FeeLimitThresholdGwei:     txmgr.DefaultBatcherFlagValues.FeeLimitThresholdGwei,
+			MinBaseFeeGwei:            txmgr.DefaultBatcherFlagValues.MinBaseFeeGwei,
+			MinTipCapGwei:             txmgr.DefaultBatcherFlagValues.MinTipCapGwei,
+			ResubmissionTimeout:       txmgr.DefaultBatcherFlagValues.ResubmissionTimeout,
+			ReceiptQueryInterval:      1 * time.Second,
+			NetworkTimeout:            txmgr.DefaultBatcherFlagValues.NetworkTimeout,
+			TxSendTimeout:             txmgr.DefaultBatcherFlagValues.TxSendTimeout,
+			TxNotInMempoolTimeout:     txmgr.DefaultBatcherFlagValues.TxNotInMempoolTimeout,
+		},
+	}, nil, nil))
 
 	s.p = p
 	s.cancel = cancel
@@ -117,7 +131,7 @@ func (s *ProposerTestSuite) TestProposeTxLists() {
 		cfg.L2SuggestedFeeRecipient,
 		cfg.ProposeBlockTxGasLimit,
 		cfg.ExtraData,
-		config.NewChainConfig(s.RPCClient.L2.ChainID, new(big.Int).SetUint64(s.p.protocolConfigs.OntakeForkHeight)),
+		config.NewChainConfig(s.p.protocolConfigs),
 	)
 
 	emptyTxListBytes, err := rlp.EncodeToBytes(types.Transactions{})
@@ -148,7 +162,8 @@ func (s *ProposerTestSuite) TestProposeTxLists() {
 	}
 
 	for _, txCandidate := range txCandidates {
-		receipt, err := p.txmgr.Send(ctx, txCandidate)
+		txMgr, _ := p.txmgrSelector.Select()
+		receipt, err := txMgr.Send(ctx, txCandidate)
 		s.Nil(err)
 		s.Nil(encoding.TryParsingCustomErrorFromReceipt(ctx, p.rpc.L1, p.proposerAddress, receipt))
 	}
@@ -178,6 +193,7 @@ func (s *ProposerTestSuite) TestProposeOpNoEmptyBlock() {
 			p.LocalAddresses,
 			p.MaxProposedTxListsPerEpoch,
 			0,
+			p.chainConfig,
 		)
 		time.Sleep(time.Second)
 	}

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.24;
+pragma solidity ^0.8.27;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "../L1/ITaikoL1.sol";
@@ -143,7 +143,7 @@ contract SgxVerifier is EssentialContract, IVerifier {
         TaikoData.TierProof calldata _proof
     )
         external
-        onlyFromNamed(LibStrings.B_TAIKO)
+        onlyFromNamedEither(LibStrings.B_TAIKO, LibStrings.B_TIER_TEE_ANY)
     {
         // Do not run proof verification to contest an existing proof
         if (_ctx.isContesting) return;
@@ -164,10 +164,21 @@ contract SgxVerifier is EssentialContract, IVerifier {
 
         if (!_isInstanceValid(id, oldInstance)) revert SGX_INVALID_INSTANCE();
 
-        if (oldInstance != newInstance) {
+        if (newInstance != oldInstance && newInstance != address(0)) {
             _replaceInstance(id, oldInstance, newInstance);
         }
     }
+
+    /// @inheritdoc IVerifier
+    function verifyBatchProof(
+        ContextV2[] calldata, /*_ctxs*/
+        TaikoData.TierProof calldata /*_proof*/
+    )
+        external
+        view
+        notImplemented
+        onlyFromNamedEither(LibStrings.B_TAIKO, LibStrings.B_TIER_TEE_ANY)
+    { }
 
     function taikoChainId() internal view virtual returns (uint64) {
         return ITaikoL1(resolve(LibStrings.B_TAIKO, false)).getConfig().chainId;

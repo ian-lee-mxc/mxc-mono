@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.24;
+pragma solidity ^0.8.27;
 
 import "forge-std/src/Test.sol";
 
@@ -17,7 +17,7 @@ import "../contracts/tko/TaikoToken.sol";
 import "../contracts/L1/TaikoL1.sol";
 import "../contracts/verifiers/SgxVerifier.sol";
 import "../contracts/verifiers/SP1Verifier.sol";
-import "../contracts/verifiers/RiscZeroVerifier.sol";
+import "../contracts/verifiers/Risc0Verifier.sol";
 import "../test/L1/TestTierProvider.sol";
 import "../contracts/L1/provers/GuardianProver.sol";
 import "../contracts/bridge/QuotaManager.sol";

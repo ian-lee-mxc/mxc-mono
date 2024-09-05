@@ -12,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
 
+	"github.com/taikoxyz/taiko-mono/packages/taiko-client/bindings"
 	"github.com/taikoxyz/taiko-mono/packages/taiko-client/bindings/encoding"
 	"github.com/taikoxyz/taiko-mono/packages/taiko-client/driver/signer"
 	"github.com/taikoxyz/taiko-mono/packages/taiko-client/internal/utils"
@@ -65,7 +66,7 @@ func (c *AnchorTxConstructor) AssembleAnchorTx(
 		"baseFee", utils.WeiToGWei(baseFee),
 		"gasUsed", parentGasUsed,
 	)
-
+	// #nosec G115
 	return c.rpc.TaikoL2.Anchor(opts, l1Hash, l1Header.Root, l1Height.Uint64(), uint32(parentGasUsed))
 }
 
@@ -76,8 +77,7 @@ func (c *AnchorTxConstructor) AssembleAnchorV2Tx(
 	anchorBlockID *big.Int,
 	anchorStateRoot common.Hash,
 	parentGasUsed uint64,
-	gasIssuancePerSecond uint32,
-	basefeeAdjustmentQuotient uint8,
+	baseFeeConfig *bindings.TaikoDataBaseFeeConfig,
 	// Height of the L2 block which including the TaikoL2.anchorV2 transaction.
 	l2Height *big.Int,
 	baseFee *big.Int,
@@ -93,18 +93,17 @@ func (c *AnchorTxConstructor) AssembleAnchorV2Tx(
 		"anchorBlockId", anchorBlockID,
 		"anchorStateRoot", anchorStateRoot,
 		"parentGasUsed", parentGasUsed,
-		"gasIssuancePerSecond", gasIssuancePerSecond,
-		"basefeeAdjustmentQuotient", basefeeAdjustmentQuotient,
+		"gasIssuancePerSecond", baseFeeConfig.GasIssuancePerSecond,
+		"basefeeAdjustmentQuotient", baseFeeConfig.AdjustmentQuotient,
 		"baseFee", utils.WeiToGWei(baseFee),
 	)
-
+	// #nosec G115
 	return c.rpc.TaikoL2.AnchorV2(
 		opts,
 		anchorBlockID.Uint64(),
 		anchorStateRoot,
 		uint32(parentGasUsed),
-		gasIssuancePerSecond,
-		basefeeAdjustmentQuotient,
+		*baseFeeConfig,
 	)
 }
 

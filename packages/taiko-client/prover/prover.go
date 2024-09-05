@@ -47,8 +47,7 @@ type Prover struct {
 	protocolConfig *bindings.TaikoDataConfig
 
 	// States
-	sharedState     *state.SharedState
-	genesisHeightL1 uint64
+	sharedState *state.SharedState
 
 	// Event handlers
 	blockProposedHandler       handler.BlockProposedHandler
@@ -70,7 +69,8 @@ type Prover struct {
 	proofGenerationCh chan *proofProducer.ProofWithHeader
 
 	// Transactions manager
-	txmgr *txmgr.SimpleTxManager
+	txmgr        *txmgr.SimpleTxManager
+	privateTxmgr *txmgr.SimpleTxManager
 
 	ctx context.Context
 	wg  sync.WaitGroup
@@ -83,11 +83,16 @@ func (p *Prover) InitFromCli(ctx context.Context, c *cli.Context) error {
 		return err
 	}
 
-	return InitFromConfig(ctx, p, cfg, nil)
+	return InitFromConfig(ctx, p, cfg, nil, nil)
 }
 
 // InitFromConfig initializes the prover instance based on the given configurations.
-func InitFromConfig(ctx context.Context, p *Prover, cfg *Config, txMgr *txmgr.SimpleTxManager) (err error) {
+func InitFromConfig(
+	ctx context.Context,
+	p *Prover, cfg *Config,
+	txMgr *txmgr.SimpleTxManager,
+	privateTxMgr *txmgr.SimpleTxManager,
+) (err error) {
 	p.cfg = cfg
 	p.ctx = ctx
 	// Initialize state which will be shared by event handlers.
@@ -158,8 +163,25 @@ func InitFromConfig(ctx context.Context, p *Prover, cfg *Config, txMgr *txmgr.Si
 		}
 	}
 
+	if privateTxMgr != nil {
+		p.privateTxmgr = privateTxMgr
+	} else {
+		if cfg.PrivateTxmgrConfigs != nil && len(cfg.PrivateTxmgrConfigs.L1RPCURL) > 0 {
+			if p.privateTxmgr, err = txmgr.NewSimpleTxManager(
+				"privateMempoolProver",
+				log.Root(),
+				&metrics.TxMgrMetrics,
+				*cfg.PrivateTxmgrConfigs,
+			); err != nil {
+				return err
+			}
+		} else {
+			p.privateTxmgr = nil
+		}
+	}
+
 	// Proof submitters
-	if err := p.initProofSubmitters(p.txmgr, txBuilder, tiers); err != nil {
+	if err := p.initProofSubmitters(txBuilder, tiers); err != nil {
 		return err
 	}
 
@@ -168,6 +190,7 @@ func InitFromConfig(ctx context.Context, p *Prover, cfg *Config, txMgr *txmgr.Si
 		p.rpc,
 		p.cfg.ProveBlockGasLimit,
 		p.txmgr,
+		p.privateTxmgr,
 		p.cfg.ProverSetAddress,
 		p.cfg.Graffiti,
 		txBuilder,
@@ -460,7 +483,6 @@ func (p *Prover) selectSubmitter(minTier uint16) proofSubmitter.Submitter {
 			if !p.IsGuardianProver() && s.Tier() >= encoding.TierGuardianMinorityID {
 				continue
 			}
-
 			log.Debug("Proof submitter selected", "tier", s.Tier(), "minTier", minTier)
 			return s
 		}

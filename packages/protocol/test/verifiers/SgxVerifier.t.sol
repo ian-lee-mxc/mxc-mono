@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.24;
+pragma solidity ^0.8.27;
 
 import "../L1/TaikoL1TestBase.sol";
 import "../automata-attestation/common/AttestationBase.t.sol";
@@ -376,51 +376,6 @@ contract TestSgxVerifier is TaikoL1TestBase, AttestationBase {
 
         // `verifyProof()`
         vm.expectRevert(SgxVerifier.SGX_INVALID_INSTANCE.selector);
-        sv.verifyProof(ctx, transition, proof);
-
-        vm.stopPrank();
-    }
-
-    // Test `verifyProof()` call is not taiko or higher tier proof
-    function test_verifyProof_invalidCaller() public {
-        vm.startPrank(Alice); // invalid caller
-
-        // Context
-        IVerifier.Context memory ctx = IVerifier.Context({
-            metaHash: bytes32("ab"),
-            blobHash: bytes32("cd"),
-            prover: Alice,
-            msgSender: Alice,
-            blockId: 10,
-            isContesting: false,
-            blobUsed: false
-        });
-
-        // Transition
-        TaikoData.Transition memory transition = TaikoData.Transition({
-            parentHash: bytes32("12"),
-            blockHash: bytes32("34"),
-            stateRoot: bytes32("56"),
-            graffiti: bytes32("78")
-        });
-
-        // TierProof
-        uint32 id = 0;
-        address newInstance = address(0x33);
-
-        uint64 chainId = L1.getConfig().chainId;
-        bytes32 signedHash = LibPublicInput.hashPublicInputs(
-            transition, address(sv), newInstance, ctx.prover, ctx.metaHash, chainId
-        );
-
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(KNOWN_ADDRESS_PRIV_KEY, signedHash);
-        bytes memory signature = abi.encodePacked(r, s, v);
-
-        bytes memory data = abi.encodePacked(id, newInstance, signature);
-        TaikoData.TierProof memory proof = TaikoData.TierProof({ tier: 100, data: data });
-
-        // `verifyProof()`
-        vm.expectRevert(AddressResolver.RESOLVER_DENIED.selector);
         sv.verifyProof(ctx, transition, proof);
 
         vm.stopPrank();

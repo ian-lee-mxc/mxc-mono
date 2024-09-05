@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.24;
+pragma solidity ^0.8.27;
 
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
@@ -76,7 +76,7 @@ abstract contract EssentialContract is UUPSUpgradeable, Ownable2StepUpgradeable,
         _;
     }
 
-    modifier nonZeroValue(bytes32 _value) {
+    modifier nonZeroValue(uint256 _value) {
         if (_value == 0) revert ZERO_VALUE();
         _;
     }

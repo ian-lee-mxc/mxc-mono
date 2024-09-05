@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.24;
+pragma solidity ^0.8.27;
 
 import "../common/EssentialContract.sol";
 import "./libs/LibData.sol";
@@ -37,11 +37,6 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents {
     modifier emitEventForClient() {
         _;
         emit StateVariablesUpdated(state.slotB);
-    }
-
-    modifier onlyRegisteredProposer() {
-        LibProposing.checkProposerPermission(this);
-        _;
     }
 
     /// @notice Initializes the contract.
@@ -139,20 +134,16 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents {
     )
         external
         payable
-        onlyRegisteredProposer
+        onlyFromOptionalNamed(LibStrings.B_BLOCK_PROPOSER)
         whenNotPaused
         nonReentrant
         emitEventForClient
         returns (TaikoData.BlockMetadata memory meta_, TaikoData.EthDeposit[] memory deposits_)
     {
         TaikoData.Config memory config = getConfig();
-
-        (meta_,, deposits_) = LibProposing.proposeBlock(state, config, this, _params, _txList);
+        (meta_,) = LibProposing.proposeBlock(state, config, this, _params, _txList);
         if (meta_.id >= config.ontakeForkHeight) revert L1_FORK_ERROR();
-
-        if (LibUtils.shouldVerifyBlocks(config, meta_.id, true) && !state.slotB.provingPaused) {
-            LibVerifying.verifyBlocks(state, config, this, config.maxBlocksToVerify);
-        }
+        deposits_ = new TaikoData.EthDeposit[](0);
     }
 
     function proposeBlockV2(
@@ -160,13 +151,15 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents {
         bytes calldata _txList
     )
         external
-        onlyRegisteredProposer
+        onlyFromOptionalNamed(LibStrings.B_BLOCK_PROPOSER)
         whenNotPaused
         nonReentrant
         emitEventForClient
-        returns (TaikoData.BlockMetadataV2 memory)
+        returns (TaikoData.BlockMetadataV2 memory meta_)
     {
-        return _proposeBlock(_params, _txList, getConfig());
+        TaikoData.Config memory config = getConfig();
+        (, meta_) = LibProposing.proposeBlock(state, config, this, _params, _txList);
+        if (meta_.id < config.ontakeForkHeight) revert L1_FORK_ERROR();
     }
 
     /// @inheritdoc ITaikoL1
@@ -175,21 +168,16 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents {
         bytes[] calldata _txListArr
     )
         external
-        onlyRegisteredProposer
+        onlyFromOptionalNamed(LibStrings.B_BLOCK_PROPOSER)
         whenNotPaused
         nonReentrant
         emitEventForClient
         returns (TaikoData.BlockMetadataV2[] memory metaArr_)
     {
-        if (_paramsArr.length == 0 || _paramsArr.length != _txListArr.length) {
-            revert L1_INVALID_PARAMS();
-        }
-
-        metaArr_ = new TaikoData.BlockMetadataV2[](_paramsArr.length);
         TaikoData.Config memory config = getConfig();
-
-        for (uint256 i; i < _paramsArr.length; ++i) {
-            metaArr_[i] = _proposeBlock(_paramsArr[i], _txListArr[i], config);
+        (, metaArr_) = LibProposing.proposeBlocks(state, config, this, _paramsArr, _txListArr);
+        for (uint256 i; i < metaArr_.length; ++i) {
+            if (metaArr_[i].id < config.ontakeForkHeight) revert L1_FORK_ERROR();
         }
     }
 
@@ -204,14 +192,14 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents {
         nonReentrant
         emitEventForClient
     {
-        TaikoData.Config memory config = getConfig();
-        _proveBlock(_blockId, _input, config);
+        LibProving.proveBlock(state, getConfig(), this, _blockId, _input);
     }
 
     /// @inheritdoc ITaikoL1
     function proveBlocks(
         uint64[] calldata _blockIds,
-        bytes[] calldata _inputArr
+        bytes[] calldata _inputs,
+        bytes calldata _batchProof
     )
         external
         whenNotPaused
@@ -219,15 +207,7 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents {
         nonReentrant
         emitEventForClient
     {
-        if (_blockIds.length == 0 || _blockIds.length != _inputArr.length) {
-            revert L1_INVALID_PARAMS();
-        }
-
-        TaikoData.Config memory config = getConfig();
-
-        for (uint256 i; i < _blockIds.length; ++i) {
-            _proveBlock(_blockIds[i], _inputArr[i], config);
-        }
+        LibProving.proveBlocks(state, getConfig(), this, _blockIds, _inputs, _batchProof);
     }
 
     /// @inheritdoc ITaikoL1
@@ -272,6 +252,14 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents {
     /// @param _blockId Index of the block.
     /// @return blk_ The block.
     function getBlock(uint64 _blockId) external view returns (TaikoData.Block memory blk_) {
+        (TaikoData.BlockV2 memory blk,) = LibUtils.getBlock(state, getConfig(), _blockId);
+        blk_ = LibData.blockV2toV1(blk);
+    }
+
+    /// @notice Gets the details of a block.
+    /// @param _blockId Index of the block.
+    /// @return blk_ The block.
+    function getBlockV2(uint64 _blockId) external view returns (TaikoData.BlockV2 memory blk_) {
         (blk_,) = LibUtils.getBlock(state, getConfig(), _blockId);
     }
 
@@ -352,7 +340,7 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents {
     }
 
     /// @inheritdoc ITaikoL1
-    function getConfig() public pure virtual override returns (TaikoData.Config memory) {
+    function getConfig() public pure virtual returns (TaikoData.Config memory) {
         return TaikoData.Config({
             chainId: LibNetwork.GENEVA,
             blockMaxProposals: 3_240_000, // = 7200 * 45
@@ -362,41 +350,15 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents {
             livenessBond: 0, // 125 Taiko token
             stateRootSyncInternal: 16,
             maxAnchorHeightOffset: 64,
-            basefeeAdjustmentQuotient: 8,
-            basefeeSharingPctg: 75,
-            gasIssuancePerSecond: 5_000_000,
+            baseFeeConfig: TaikoData.BaseFeeConfig({
+                adjustmentQuotient: 8,
+                sharingPctg: 75,
+                gasIssuancePerSecond: 5_000_000,
+                minGasExcess: 1_340_000_000,
+                maxGasIssuancePerBlock: 600_000_000 // two minutes
+             }),
             ontakeForkHeight: 0 // = 7200 * 52
          });
-    }
-
-    function _proposeBlock(
-        bytes calldata _params,
-        bytes calldata _txList,
-        TaikoData.Config memory _config
-    )
-        internal
-        returns (TaikoData.BlockMetadataV2 memory meta_)
-    {
-        (, meta_,) = LibProposing.proposeBlock(state, _config, this, _params, _txList);
-        if (meta_.id < _config.ontakeForkHeight) revert L1_FORK_ERROR();
-
-        if (LibUtils.shouldVerifyBlocks(_config, meta_.id, true) && !state.slotB.provingPaused) {
-            LibVerifying.verifyBlocks(state, _config, this, _config.maxBlocksToVerify);
-        }
-    }
-
-    function _proveBlock(
-        uint64 _blockId,
-        bytes calldata _input,
-        TaikoData.Config memory _config
-    )
-        internal
-    {
-        LibProving.proveBlock(state, _config, this, _blockId, _input);
-
-        if (LibUtils.shouldVerifyBlocks(_config, _blockId, false)) {
-            LibVerifying.verifyBlocks(state, _config, this, _config.maxBlocksToVerify);
-        }
     }
 
     /// @dev chain_pauser is supposed to be a cold wallet.
