@@ -2,14 +2,14 @@
 pragma solidity 0.8.27;
 
 import "../L1/TaikoL1.sol";
-import "./LibRollupAddressCache.sol";
+import "./addrcache/RollupAddressCache.sol";
 
 /// @title MainnetTaikoL1
 /// @dev This contract shall be deployed to replace its parent contract on Ethereum for Taiko
 /// mainnet to reduce gas cost.
 /// @notice See the documentation in {TaikoL1}.
 /// @custom:security-contact security@taiko.xyz
-contract MainnetMoonchainL1 is TaikoL1 {
+contract MainnetMoonchainL1 is TaikoL1, RollupAddressCache {
     /// @inheritdoc ITaikoL1
     function getConfig() public pure override returns (TaikoData.Config memory) {
         // All hard-coded configurations:
@@ -27,18 +27,21 @@ contract MainnetMoonchainL1 is TaikoL1 {
             blockRingBufferSize: 3_600_000, // = 7200 * 50
             maxBlocksToVerify: 16,
             blockMaxGasLimit: 240_000_000,
-            livenessBond: 125e18, // 125 Taiko token
+            livenessBond: 0, // 125 Taiko token
             stateRootSyncInternal: 16,
             maxAnchorHeightOffset: 64,
-            basefeeAdjustmentQuotient: 8,
-            basefeeSharingPctg: 75,
-            gasIssuancePerSecond: 5_000_000,
+            baseFeeConfig: TaikoData.BaseFeeConfig({
+                adjustmentQuotient: 8,
+                sharingPctg: 75,
+                gasIssuancePerSecond: 5_000_000,
+                minGasExcess: 1_340_000_000, // correspond to 0.008847185 gwei basefee
+                maxGasIssuancePerBlock: 600_000_000 // two minutes
+             }),
             ontakeForkHeight: 0 // = 7200 * 52
          });
     }
 
     function _getAddress(uint64 _chainId, bytes32 _name) internal view override returns (address) {
-        (bool found, address addr) = LibRollupAddressCache.getAddress(_chainId, _name);
-        return found ? addr : super._getAddress(_chainId, _name);
+        return getAddress(_chainId, _name, super._getAddress);
     }
 }

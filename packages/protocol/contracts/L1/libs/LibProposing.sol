@@ -231,7 +231,7 @@ library LibProposing {
                 timestamp: local.params.timestamp,
                 anchorBlockId: local.params.anchorBlockId,
                 minTier: 0, // to be initialized below
-                blobUsed: _txList.length == 0,
+                blobUsed: false,
                 parentMetaHash: local.params.parentMetaHash,
                 proposer: msg.sender,
                 livenessBond: _config.livenessBond,

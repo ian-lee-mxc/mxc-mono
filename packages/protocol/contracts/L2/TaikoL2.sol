@@ -117,23 +117,6 @@ contract TaikoL2 is EssentialContract {
         parentGasTarget = 0;
     }
 
-    function initMoonchain(
-        address _owner,
-        address _addressManager,
-        uint64 _l1ChainId,
-        uint64 _gasExcess
-    )
-        external
-        reinitializer(3)
-    {
-        __Essential_init(_owner, _addressManager);
-        l1ChainId = _l1ChainId;
-        parentTimestamp = uint64(block.timestamp);
-        parentGasExcess = _gasExcess;
-        parentGasTarget = uint64(block.gaslimit);
-        (publicInputHash,) = _calcPublicInputHash(block.number);
-    }
-
     /// @notice Anchors the latest L1 block details to L2 for cross-layer
     /// message verification.
     /// @dev This function can be called freely as the golden touch private key is publicly known,
@@ -154,7 +137,7 @@ contract TaikoL2 is EssentialContract {
         onlyGoldenTouch
         nonReentrant
     {
-        if (block.number >= ontakeForkHeight()) revert L2_FORK_ERROR();
+        //        if (block.number >= ontakeForkHeight()) revert L2_FORK_ERROR();
 
         // Verify ancestor hashes
         uint256 parentId = block.number - 1;
@@ -167,15 +150,15 @@ contract TaikoL2 is EssentialContract {
 
         if (!skipFeeCheck() && block.basefee != basefee) revert L2_BASEFEE_MISMATCH();
 
-        if (_l1BlockId > lastSyncedBlock) {
-            // Store the L1's state root as a signal to the local signal service to
-            // allow for multi-hop bridging.
-            ISignalService(resolve(LibStrings.B_SIGNAL_SERVICE, false)).syncChainData(
-                l1ChainId, LibStrings.H_STATE_ROOT, _l1BlockId, _l1StateRoot
-            );
-
-            lastSyncedBlock = _l1BlockId;
-        }
+        //        if (_l1BlockId > lastSyncedBlock) {
+        //            // Store the L1's state root as a signal to the local signal service to
+        //            // allow for multi-hop bridging.
+        //            ISignalService(resolve(LibStrings.B_SIGNAL_SERVICE, false)).syncChainData(
+        //                l1ChainId, LibStrings.H_STATE_ROOT, _l1BlockId, _l1StateRoot
+        //            );
+        //
+        //            lastSyncedBlock = _l1BlockId;
+        //        }
 
         // Update state variables
         bytes32 parentHash = blockhash(parentId);
@@ -341,7 +324,7 @@ contract TaikoL2 is EssentialContract {
     /// @notice Tells if we need to validate basefee (for simulation).
     /// @return Returns true to skip checking basefee mismatch.
     function skipFeeCheck() public pure virtual returns (bool) {
-        return false;
+        return true;
     }
 
     function ontakeForkHeight() public pure virtual returns (uint64) {
@@ -383,7 +366,7 @@ contract TaikoL2 is EssentialContract {
     }
 
     function _calcPublicInputHash(uint256 _blockId)
-        private
+        internal
         view
         returns (bytes32 publicInputHashOld, bytes32 publicInputHashNew)
     {

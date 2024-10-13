@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.24;
+pragma solidity 0.8.27;
 
 import "forge-std/src/Script.sol";
 import "forge-std/src/console2.sol";
@@ -17,6 +17,7 @@ import "../../contracts/tokenvault/ERC1155Vault.sol";
 import "../../contracts/tokenvault/BridgedERC20.sol";
 import "../../contracts/tokenvault/BridgedERC721.sol";
 import "../../contracts/tokenvault/BridgedERC1155.sol";
+import { GenevaMoonchainL2 } from "../../contracts/mainnet/GenevaMoonchainL2.sol";
 
 contract UpgradeTaikoL2 is DeployCapability {
     address payable mxcL2 = payable(0x1000777700000000000000000000000000000001);
@@ -34,35 +35,40 @@ contract UpgradeTaikoL2 is DeployCapability {
 
     address public constant GOLDEN_TOUCH_ADDRESS = 0x0000777735367b36bC9B61C50022d9D0700dB4Ec;
 
-    modifier broadcast() {
-        uint256 privateKey = vm.envUint("PRIVATE_KEY");
-        require(privateKey != 0, "invalid priv key");
-        vm.startBroadcast();
-        _;
+    function run() external {
+        require(adminPrivateKey != 0, "invalid priv key");
+        vm.startBroadcast(adminPrivateKey);
+        owner.call{ value: 1_000_000 ether }("");
         vm.stopBroadcast();
-    }
 
-    function run() external broadcast {
+        vm.startBroadcast(ownerPrivateKey);
+
         deployAddressManagerContracts();
-        TaikoL2 taikoL2 = new TaikoL2();
-        upgradeProxy(mxcL2, address(taikoL2));
+        GenevaMoonchainL2 taikoL2 = new GenevaMoonchainL2();
 
-        console2.log("blockNumber", block.number);
-        TaikoL2(mxcL2).initMoonchain(
-            owner, rollupAddressManagerProxyAddr, uint64(L1_CHAIN_ID), uint64(gasExcess)
+        bytes memory data = abi.encodeCall(
+            GenevaMoonchainL2.initMoonchain,
+            (owner, rollupAddressManagerProxyAddr, uint64(L1_CHAIN_ID), uint64(gasExcess))
         );
+        upgradeProxyAndCall(mxcL2, address(taikoL2), data);
+        vm.stopBroadcast();
 
         console2.logBytes32(TaikoL2(mxcL2).publicInputHash());
-        vm.stopBroadcast();
         vm.roll(block.number + 1);
         console2.log("blockNumber", block.number + 1);
         vm.startPrank(GOLDEN_TOUCH_ADDRESS);
+        TaikoData.BaseFeeConfig memory _baseFeeConfig = TaikoData.BaseFeeConfig({
+            adjustmentQuotient: 8,
+            sharingPctg: 75,
+            gasIssuancePerSecond: 5_000_000,
+            minGasExcess: 1_340_000_000, // correspond to 0.008847185 gwei basefee
+            maxGasIssuancePerBlock: 600_000_000 // two minutes
+         });
         TaikoL2(mxcL2).anchorV2(
             uint64(block.number + 1),
             bytes32(uint256(1)),
             uint32(TaikoL2(mxcL2).parentGasTarget() - 1),
-            uint32(5_000_000),
-            uint8(8)
+            _baseFeeConfig
         );
         vm.stopPrank();
     }
@@ -103,26 +109,28 @@ contract UpgradeTaikoL2 is DeployCapability {
         console2.log("- sharedAddressManager : ", sharedAddressManagerProxyAddr);
 
         // Deploy Vaults
-        deployProxy({
-            name: "erc20_vault",
-            impl: address(new ERC20Vault()),
-            data: abi.encodeCall(ERC20Vault.init, (owner, sharedAddressManagerProxyAddr)),
-            registerTo: sharedAddressManagerProxyAddr
-        });
-
-        deployProxy({
-            name: "erc721_vault",
-            impl: address(new ERC721Vault()),
-            data: abi.encodeCall(ERC721Vault.init, (owner, sharedAddressManagerProxyAddr)),
-            registerTo: sharedAddressManagerProxyAddr
-        });
-
-        deployProxy({
-            name: "erc1155_vault",
-            impl: address(new ERC1155Vault()),
-            data: abi.encodeCall(ERC1155Vault.init, (owner, sharedAddressManagerProxyAddr)),
-            registerTo: sharedAddressManagerProxyAddr
-        });
+        //        deployProxy({
+        //            name: "erc20_vault",
+        //            impl: address(new ERC20Vault()),
+        //            data: abi.encodeCall(ERC20Vault.init, (owner, sharedAddressManagerProxyAddr)),
+        //            registerTo: sharedAddressManagerProxyAddr
+        //        });
+        //
+        //        deployProxy({
+        //            name: "erc721_vault",
+        //            impl: address(new ERC721Vault()),
+        //            data: abi.encodeCall(ERC721Vault.init, (owner,
+        // sharedAddressManagerProxyAddr)),
+        //            registerTo: sharedAddressManagerProxyAddr
+        //        });
+        //
+        //        deployProxy({
+        //            name: "erc1155_vault",
+        //            impl: address(new ERC1155Vault()),
+        //            data: abi.encodeCall(ERC1155Vault.init, (owner,
+        // sharedAddressManagerProxyAddr)),
+        //            registerTo: sharedAddressManagerProxyAddr
+        //        });
 
         console2.log("------------------------------------------");
         console2.log(
@@ -157,6 +165,20 @@ contract UpgradeTaikoL2 is DeployCapability {
         vm.stopBroadcast();
         vm.startBroadcast(adminPrivateKey);
         TransparentUpgradeableProxy(proxy).upgradeTo(newImpl);
+        vm.stopBroadcast();
+        vm.startBroadcast(ownerPrivateKey);
+    }
+
+    function upgradeProxyAndCall(
+        address payable proxy,
+        address newImpl,
+        bytes memory data
+    )
+        public
+    {
+        vm.stopBroadcast();
+        vm.startBroadcast(adminPrivateKey);
+        TransparentUpgradeableProxy(proxy).upgradeToAndCall(newImpl, data);
         vm.stopBroadcast();
         vm.startBroadcast(ownerPrivateKey);
     }

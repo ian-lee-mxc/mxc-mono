@@ -64,6 +64,41 @@ var (
 			MaxGasIssuancePerBlock: 600_000_000,
 		},
 	}
+	MoonchainGenevaProtocolConfig = &bindings.TaikoDataConfig{
+		ChainId:               params.MoonchainGenevaNetworkID.Uint64(),
+		BlockMaxProposals:     3_240_000,
+		BlockRingBufferSize:   3_600_000,
+		MaxBlocksToVerify:     16,
+		BlockMaxGasLimit:      240_000_000,
+		LivenessBond:          new(big.Int).SetInt64(0),
+		StateRootSyncInternal: 16,
+		MaxAnchorHeightOffset: 64,
+		OntakeForkHeight:      501303,
+		BaseFeeConfig: bindings.TaikoDataBaseFeeConfig{
+			AdjustmentQuotient:     8,
+			GasIssuancePerSecond:   5_000_000,
+			MinGasExcess:           1_340_000_000,
+			MaxGasIssuancePerBlock: 600_000_000,
+		},
+	}
+	MoonchainMainnetProtocolConfig = &bindings.TaikoDataConfig{
+		ChainId:               params.MoonchainMainnetNetworkID.Uint64(),
+		BlockMaxProposals:     3_240_000,
+		BlockRingBufferSize:   3_600_000,
+		MaxBlocksToVerify:     16,
+		BlockMaxGasLimit:      240_000_000,
+		LivenessBond:          new(big.Int).SetInt64(0),
+		StateRootSyncInternal: 16,
+		MaxAnchorHeightOffset: 64,
+		OntakeForkHeight:      0,
+		BaseFeeConfig: bindings.TaikoDataBaseFeeConfig{
+			AdjustmentQuotient:     8,
+			GasIssuancePerSecond:   5_000_000,
+			MinGasExcess:           1_340_000_000,
+			MaxGasIssuancePerBlock: 600_000_000,
+		},
+	}
+
 )
 
 // GetProtocolConfig returns the protocol config for the given chain ID.
@@ -73,7 +108,9 @@ func GetProtocolConfig(chainID uint64) *bindings.TaikoDataConfig {
 		return HeklaProtocolConfig
 	case params.TaikoMainnetNetworkID.Uint64():
 		return MainnetProtocolConfig
+	case params.MoonchainGenevaNetworkID.Uint64(): return MoonchainGenevaProtocolConfig
+	case params.MoonchainMainnetNetworkID.Uint64(): return MoonchainMainnetProtocolConfig
 	default:
-		return InternlDevnetProtocolConfig
+		return MoonchainGenevaProtocolConfig
 	}
 }

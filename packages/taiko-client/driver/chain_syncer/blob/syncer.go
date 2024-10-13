@@ -527,8 +527,7 @@ func (s *Syncer) checkLastVerifiedBlockMismatch(ctx context.Context) (*rpc.Reorg
 	if err != nil {
 		return nil, err
 	}
-
-	if s.state.GetL2Head().Number.Uint64() < stateVars.B.LastVerifiedBlockId {
+	if s.state.GetL2Head().Number.Uint64() < stateVars.B.LastVerifiedBlockId || s.state.GetL2Head().Number.Uint64() >= s.state.OnTakeForkHeight.Uint64()  {
 		return reorgCheckResult, nil
 	}
 

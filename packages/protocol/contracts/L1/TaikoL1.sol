@@ -66,67 +66,6 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents {
         state.__reserve1 = 0;
     }
 
-    /// @notice CHANGE(MOONCHAIN): Reinitialize the contract.
-    /// @param _owner The owner of this contract. msg.sender will be used if this value is zero.
-    /// @param _rollupAddressManager The address of the {AddressManager} contract.
-    /// @param _genesisBlockHash The block hash of the genesis block.
-    /// @param _toPause true to pause the contract by default.
-    function initMigrate(
-        address _owner,
-        address _rollupAddressManager,
-        bytes32 _genesisBlockHash,
-        uint64 _l2LatestHeight,
-        bool _toPause
-    )
-        external
-        reinitializer(2)
-    {
-        __Essential_init(_owner, _rollupAddressManager);
-        doMigrate(_genesisBlockHash, _l2LatestHeight);
-        if (_toPause) _pause();
-
-        TaikoData.BlockParamsV2 memory params = TaikoData.BlockParamsV2(
-            address(0),
-            bytes32(0),
-            bytes32(uint256(1)),
-            0,
-            uint64(block.timestamp),
-            uint32(0),
-            uint32(0),
-            uint8(0)
-        );
-        bytes memory _params = abi.encode(params);
-
-        bytes memory _txList = "0x";
-        LibProposing.proposeBlock(state, getConfig(), this, _params, _txList);
-    }
-
-    function doMigrate(bytes32 _genesisBlockHash, uint64 _l2LatestHeight) private {
-        TaikoData.Config memory _config = getConfig();
-        // Init state
-        state.slotA.genesisHeight = uint64(LibUtils.getBlockNumber());
-        state.slotA.genesisTimestamp = uint64(block.timestamp);
-        state.slotB.numBlocks = _l2LatestHeight + 1;
-        state.slotB.lastVerifiedBlockId = _l2LatestHeight;
-        TaikoData.SlotB memory b = state.slotB;
-
-        state.blocks[0].nextTransitionId = 1;
-        state.blocks[0].blockId = 0;
-        state.blocks[0].verifiedTransitionId = 1;
-        state.transitions[0][1].blockHash = _genesisBlockHash;
-
-        TaikoData.Block storage blk = state.blocks[(b.numBlocks - 1) % _config.blockRingBufferSize];
-        blk.metaHash = bytes32(uint256(1));
-        blk.blockId = _l2LatestHeight;
-        blk.proposedIn = _l2LatestHeight;
-        blk.verifiedTransitionId = 1;
-        blk.nextTransitionId = 2;
-        TaikoData.TransitionState storage ts =
-            state.transitions[(b.numBlocks - 1) % _config.blockRingBufferSize][1];
-        ts.blockHash = bytes32(uint256(1));
-        ts.stateRoot = bytes32(uint256(1));
-    }
-
     /// @inheritdoc ITaikoL1
     function proposeBlock(
         bytes calldata _params,

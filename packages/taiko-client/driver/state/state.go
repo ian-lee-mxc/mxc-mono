@@ -71,11 +71,15 @@ func (s *State) init(ctx context.Context) error {
 	log.Info("OnTake fork height", "L2 height", s.OnTakeForkHeight)
 
 	// Set the L2 head's latest known L1 origin as current L1 sync cursor.
-	latestL2KnownL1Header, err := s.rpc.LatestL2KnownL1Header(ctx)
+	//latestL2KnownL1Header, err := s.rpc.LatestL2KnownL1Header(ctx)
+	//if err != nil {
+	//	return err
+	//}
+	upgradeHead,err := s.rpc.L1.HeaderByNumber(ctx, big.NewInt(84339230))
 	if err != nil {
 		return err
 	}
-	s.l1Current.Store(latestL2KnownL1Header)
+	s.l1Current.Store(upgradeHead)
 
 	// L1 head
 	l1Head, err := s.rpc.L1.HeaderByNumber(ctx, nil)
@@ -178,6 +182,7 @@ func (s *State) eventLoop(ctx context.Context) {
 				"prover", e.Prover,
 			)
 		case newHead := <-l1HeadCh:
+			log.Info("L1 head ticker", "height", newHead.Number, "current", s.GetL1Current().Number)
 			s.setL1Head(newHead)
 			s.l1HeadsFeed.Send(newHead)
 		case newHead := <-l2HeadCh:
