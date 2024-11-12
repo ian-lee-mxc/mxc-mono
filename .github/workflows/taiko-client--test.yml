@@ -2,7 +2,7 @@ name: "CI"
 
 on:
   push:
-    branches: [moonchain-dev]
+    branches: [moonchain-geneva]
     paths:
       - "packages/taiko-client/**"
   pull_request:
