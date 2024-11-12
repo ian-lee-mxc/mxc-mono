@@ -233,7 +233,7 @@ func (s *Syncer) onBlockProposed(
 	}
 	if err != nil {
 		// CHANGE(MOONCHAIN): upgrade height may anchor failed
-		if meta.GetBlockID().Uint64() == encoding.GetProtocolConfig(s.rpc.L2.ChainID.Uint64()).OntakeForkHeight {
+		if meta.GetBlockID().Uint64()-1 == encoding.GetProtocolConfig(s.rpc.L2.ChainID.Uint64()).OntakeForkHeight {
 			parent, err = s.rpc.L2.HeaderByNumber(ctx, meta.GetBlockID())
 			if err != nil {
 				return fmt.Errorf("failed to fetch L2 parent block migrate: %w", err)
