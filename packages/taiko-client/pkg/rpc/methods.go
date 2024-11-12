@@ -295,6 +295,11 @@ func (c *Client) CalculateBaseFee(
 			return nil, fmt.Errorf("failed to fetch parent gas target: %w", err)
 		}
 
+		// CHANGE(MOONCHAIN): if block migrate, do not AdjustExcess
+		isMigrate := encoding.GetProtocolConfig(c.L2.ChainID.Uint64()).OntakeForkHeight == l2Head.Number.Uint64()
+		if isMigrate {
+			parentGasTarget = 0
+		}
 		if newGasTarget != parentGasTarget && parentGasTarget != 0 {
 			oldParentGasExcess, err := c.TaikoL2.ParentGasExcess(
 				&bind.CallOpts{BlockNumber: l2Head.Number, Context: ctx},
@@ -317,6 +322,7 @@ func (c *Client) CalculateBaseFee(
 				return nil, fmt.Errorf("failed to fetch parent gas excess: %w", err)
 			}
 		}
+
 		baseFeeInfo, err = c.TaikoL2.CalculateBaseFee(
 			&bind.CallOpts{BlockNumber: l2Head.Number, Context: ctx},
 			*baseFeeConfig,

@@ -168,6 +168,10 @@ func (h *BlockProposedEventHandler) checkL1Reorg(
 	ctx context.Context,
 	meta metadata.TaikoBlockMetaData,
 ) error {
+	// Skip before ontake blocks
+	if meta.GetBlockID().Uint64() < encoding.GetProtocolConfig(h.rpc.L2.ChainID.Uint64()).OntakeForkHeight {
+		return nil
+	}
 	// Check whether the L2 EE's anchored L1 info, to see if the L1 chain has been reorged.
 	reorgCheckResult, err := h.rpc.CheckL1Reorg(
 		ctx,

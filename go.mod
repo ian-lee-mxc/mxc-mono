@@ -332,7 +332,7 @@ exclude (
 	github.com/ethereum/go-ethereum v1.14.7
 )
 
-replace github.com/ethereum/go-ethereum v1.13.15 => github.com/mxczkevm/mxc-geth v0.0.1-alpha
+replace github.com/ethereum/go-ethereum v1.13.15 => github.com/MXCzkEVM/mxc-geth v0.0.1-alpha
 
 replace github.com/ethereum-optimism/optimism v1.7.4 => github.com/taikoxyz/optimism v0.0.0-20240627102435-4845247ff00c
 

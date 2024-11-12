@@ -73,7 +73,7 @@ var (
 		LivenessBond:          new(big.Int).SetInt64(0),
 		StateRootSyncInternal: 16,
 		MaxAnchorHeightOffset: 64,
-		OntakeForkHeight:      501303,
+		OntakeForkHeight:      703020,
 		BaseFeeConfig: bindings.TaikoDataBaseFeeConfig{
 			AdjustmentQuotient:     8,
 			GasIssuancePerSecond:   5_000_000,
@@ -98,7 +98,6 @@ var (
 			MaxGasIssuancePerBlock: 600_000_000,
 		},
 	}
-
 )
 
 // GetProtocolConfig returns the protocol config for the given chain ID.
@@ -108,8 +107,10 @@ func GetProtocolConfig(chainID uint64) *bindings.TaikoDataConfig {
 		return HeklaProtocolConfig
 	case params.TaikoMainnetNetworkID.Uint64():
 		return MainnetProtocolConfig
-	case params.MoonchainGenevaNetworkID.Uint64(): return MoonchainGenevaProtocolConfig
-	case params.MoonchainMainnetNetworkID.Uint64(): return MoonchainMainnetProtocolConfig
+	case params.MoonchainGenevaNetworkID.Uint64():
+		return MoonchainGenevaProtocolConfig
+	case params.MoonchainMainnetNetworkID.Uint64():
+		return MoonchainMainnetProtocolConfig
 	default:
 		return MoonchainGenevaProtocolConfig
 	}

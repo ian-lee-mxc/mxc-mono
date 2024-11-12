@@ -368,6 +368,10 @@ func (s *Syncer) insertNewHead(
 		if err != nil {
 			return nil, fmt.Errorf("failed to fetch anchor block: %w", err)
 		}
+		if anchorBlockHeader.Root == (common.Hash{}) {
+			anchorBlockHeader.Root = parent.Root
+		}
+
 		anchorTx, err = s.anchorConstructor.AssembleAnchorV2Tx(
 			ctx,
 			new(big.Int).SetUint64(meta.GetAnchorBlockID()),
@@ -527,7 +531,7 @@ func (s *Syncer) checkLastVerifiedBlockMismatch(ctx context.Context) (*rpc.Reorg
 	if err != nil {
 		return nil, err
 	}
-	if s.state.GetL2Head().Number.Uint64() < stateVars.B.LastVerifiedBlockId || s.state.GetL2Head().Number.Uint64() >= s.state.OnTakeForkHeight.Uint64()  {
+	if s.state.GetL2Head().Number.Uint64() < stateVars.B.LastVerifiedBlockId || s.state.GetL2Head().Number.Uint64() >= s.state.OnTakeForkHeight.Uint64() {
 		return reorgCheckResult, nil
 	}
 
