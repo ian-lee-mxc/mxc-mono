@@ -232,7 +232,17 @@ func (s *Syncer) onBlockProposed(
 		parent, err = s.rpc.L2ParentByBlockID(ctx, meta.GetBlockID())
 	}
 	if err != nil {
-		return fmt.Errorf("failed to fetch L2 parent block: %w", err)
+		// CHANGE(MOONCHAIN): upgrade height may anchor failed
+		if meta.GetBlockID().Uint64() == encoding.GetProtocolConfig(s.rpc.L2.ChainID.Uint64()).OntakeForkHeight {
+			parent, err = s.rpc.L2.HeaderByNumber(ctx, meta.GetBlockID())
+			if err != nil {
+				return fmt.Errorf("failed to fetch L2 parent block: %w", err)
+			}
+		}
+		parent, err = s.rpc.L2ParentByBlockID(ctx, meta.GetBlockID())
+		if err != nil {
+			return fmt.Errorf("failed to fetch L2 parent block: %w", err)
+		}
 	}
 
 	log.Debug(
