@@ -5,6 +5,7 @@ import (
 	"math/big"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/taikoxyz/taiko-mono/packages/taiko-client/bindings/encoding"
 
@@ -135,7 +136,7 @@ func (s *State) eventLoop(ctx context.Context) {
 		l2BlockProposedV2Sub.Unsubscribe()
 		l2TransitionProvedV2Sub.Unsubscribe()
 	}()
-
+	l1HeadTicker := time.NewTicker(time.Millisecond * 1500)
 	for {
 		select {
 		case <-ctx.Done():
@@ -177,10 +178,17 @@ func (s *State) eventLoop(ctx context.Context) {
 				"hash", common.Hash(e.BlockHash),
 				"prover", e.Prover,
 			)
-		case newHead := <-l1HeadCh:
-			log.Info("L1 head ticker", "height", newHead.Number, "current", s.GetL1Current().Number)
+		case <-l1HeadTicker.C:
+			newHead, err := s.rpc.L1.HeaderByNumber(ctx, nil)
+			if err != nil {
+				log.Error("Get L1 head error", "error", err)
+			}
+			log.Debug("L1 head ticker", "height", newHead.Number, "current", s.GetL1Current().Number)
 			s.setL1Head(newHead)
 			s.l1HeadsFeed.Send(newHead)
+			// case newHead := <-l1HeadCh:
+		// 	s.setL1Head(newHead)
+		// 	s.l1HeadsFeed.Send(newHead)
 		case newHead := <-l2HeadCh:
 			s.setL2Head(newHead)
 		}
