@@ -94,6 +94,11 @@ func (h *BlockProposedEventHandler) Handle(
 		end()
 		return nil
 	}
+	if len(h.proofSubmissionCh) == cap(h.proofSubmissionCh) {
+		log.Info("onBlockProposed callback early return", "proofSubmissionChannelLength", len(h.proofSubmissionCh))
+		end()
+		return nil
+	}
 
 	// Wait for the corresponding L2 block being mined in node.
 	if _, err := h.rpc.WaitL2Header(ctx, meta.GetBlockID()); err != nil {
