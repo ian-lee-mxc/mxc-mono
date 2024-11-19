@@ -243,4 +243,17 @@ library TaikoData {
         mapping(address account => uint256 bond) bondBalance;
         uint256[43] __gap;
     }
+
+    struct StakingState {
+        mapping(address => uint256) stakingBalances;
+        mapping(address => uint256) lastClaimedTime;
+        mapping(address => uint256) withdrawalRequestTime;
+        uint256 totalBalance;
+        uint256 totalReward;
+        uint64 lastDepositRewardTime; // last deposit reward time
+        uint64 __reserved1;
+        uint64 __reserved2;
+        uint64 __reserved3;
+        uint256[40] __gap;
+    }
 }

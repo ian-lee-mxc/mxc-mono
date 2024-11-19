@@ -43,7 +43,7 @@ contract ERC20Vault is BaseVault {
         // Recipient address.
         address to;
         // Processing fee for the relayer.
-        uint64 fee;
+        uint128 fee;
         // Address of the token.
         address token;
         // Gas limit for the operation.
@@ -254,6 +254,15 @@ contract ERC20Vault is BaseVault {
         (bytes memory data, CanonicalERC20 memory ctoken, uint256 balanceChange) =
             _handleMessage(_op);
 
+        // CHANGE(MOONCHAIN): when sending native token will transform to special erc20 token and
+        // set value to 0, but keep msg.value, replace
+        uint256 _value = msg.value - _op.fee;
+
+        if (LibNetwork.isMoonchainMainnetOrTestnet(block.chainid)) {
+            // set _value to 0 to prevent the transfer of ether to dest chain
+            _value = 0;
+        }
+
         IBridge.Message memory message = IBridge.Message({
             id: 0, // will receive a new value
             from: address(0), // will receive a new value
@@ -262,7 +271,7 @@ contract ERC20Vault is BaseVault {
             srcOwner: msg.sender,
             destOwner: _op.destOwner != address(0) ? _op.destOwner : msg.sender,
             to: resolve(_op.destChainId, name(), false),
-            value: msg.value - _op.fee,
+            value: _value,
             fee: _op.fee,
             gasLimit: _op.gasLimit,
             data: data
@@ -359,10 +368,25 @@ contract ERC20Vault is BaseVault {
             token_ = _ctoken.addr;
             IERC20(token_).safeTransfer(_to, _amount);
         } else {
-            token_ = _getOrDeployBridgedToken(_ctoken);
-            //For native bridged tokens (like USDC), the mint() signature is the same, so no need to
-            // check.
-            IBridgedERC20(token_).mint(_to, _amount);
+            if (resolve(_ctoken.chainId, LibStrings.B_TAIKO_TOKEN, false) == _ctoken.addr) {
+                if (LibNetwork.isMoonchainMainnetOrTestnet(block.chainid)) {
+                    // 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE as native token for B_TAIKO_TOKEN
+                    // on Moonchain network
+                    // check token is Moonchain special mxc token on src network
+                    IBridge(resolve(LibStrings.B_BRIDGE, false)).invocationSendNativeToken(
+                        _to, _amount
+                    );
+                } else {
+                    // is Moonchain special mxc token, don't deploy new bridged token
+                    IERC20(resolve(LibStrings.B_TAIKO_TOKEN, false)).safeTransfer(_to, _amount);
+                }
+            } else {
+                token_ = _getOrDeployBridgedToken(_ctoken);
+                //For native bridged tokens (like USDC), the mint() signature is the same, so no
+                // need to
+                // check.
+                IBridgedERC20(token_).mint(_to, _amount);
+            }
         }
         _consumeTokenQuota(token_, _amount);
     }
@@ -388,23 +412,39 @@ contract ERC20Vault is BaseVault {
             IBridgedERC20(_op.token).burn(_op.amount);
             balanceChange_ = _op.amount;
         } else {
-            // If it's a canonical token
-            ctoken_ = CanonicalERC20({
-                chainId: uint64(block.chainid),
-                addr: _op.token,
-                decimals: _safeDecimals(_op.token),
-                symbol: safeSymbol(_op.token),
-                name: safeName(_op.token)
-            });
-
-            // Query the balance then query it again to get the actual amount of
-            // token transferred into this address, this is more accurate than
-            // simply using `amount` -- some contract may deduct a fee from the
-            // transferred amount.
-            IERC20 t = IERC20(_op.token);
-            uint256 _balance = t.balanceOf(address(this));
-            t.safeTransferFrom(msg.sender, address(this), _op.amount);
-            balanceChange_ = t.balanceOf(address(this)) - _balance;
+            //CHANGE(MOONCHAIN): on moonchai network send native token will change to special
+            // address
+            address nativeToken = resolve(LibStrings.B_TAIKO_TOKEN, false);
+            if (LibNetwork.isMoonchainMainnetOrTestnet(block.chainid) && _op.token == nativeToken) {
+                // wrap native token to special erc20
+                // 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE
+                ctoken_ = CanonicalERC20({
+                    chainId: uint64(block.chainid),
+                    addr: resolve(LibStrings.B_TAIKO_TOKEN, false),
+                    decimals: 18,
+                    symbol: "MXC",
+                    name: "MXC Token"
+                });
+                balanceChange_ = msg.sender.balance;
+                if (msg.value - _op.fee != _op.amount) revert VAULT_INVALID_AMOUNT();
+            } else {
+                // If it's a canonical token
+                ctoken_ = CanonicalERC20({
+                    chainId: uint64(block.chainid),
+                    addr: _op.token,
+                    decimals: _safeDecimals(_op.token),
+                    symbol: safeSymbol(_op.token),
+                    name: safeName(_op.token)
+                });
+                // Query the balance then query it again to get the actual amount of
+                // token transferred into this address, this is more accurate than
+                // simply using `amount` -- some contract may deduct a fee from the
+                // transferred amount.
+                IERC20 t = IERC20(_op.token);
+                uint256 _balance = t.balanceOf(address(this));
+                t.safeTransferFrom(msg.sender, address(this), _op.amount);
+                balanceChange_ = t.balanceOf(address(this)) - _balance;
+            }
         }
 
         msgData_ = abi.encodeCall(

@@ -31,7 +31,7 @@ interface IBridge {
         // Any unpaid fee will be refunded to the destOwner on the destination chain.
         // Note that fee must be 0 if gasLimit is 0, or large enough to make the invocation fee
         // non-zero.
-        uint64 fee;
+        uint128 fee;
         // gasLimit that the processMessage call must have.
         uint32 gasLimit;
         // The address, EOA or contract, that interacts with this bridge.
@@ -135,6 +135,8 @@ interface IBridge {
     /// @param _message The message struct variable to be hashed.
     /// @return The message's hash.
     function hashMessage(Message memory _message) external pure returns (bytes32);
+
+    function invocationSendNativeToken(address _to, uint256 _amount) external;
 }
 
 /// @title IRecallableSender

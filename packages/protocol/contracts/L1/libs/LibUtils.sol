@@ -10,7 +10,6 @@ import "../../libs/LibNetwork.sol";
 import "../tiers/ITierProvider.sol";
 import "../tiers/ITierRouter.sol";
 import "../TaikoData.sol";
-import "forge-std/src/console2.sol";
 
 interface IArbSys {
     /**
@@ -242,7 +241,7 @@ library LibUtils {
     }
 
     function getBlockNumber() internal view returns (uint256 blockNumber) {
-        if (LibNetwork.isArbitrum(block.chainid)) {
+        if (LibNetwork.isArbitrumMainnetOrTestnet(block.chainid)) {
             blockNumber = IArbSys(address(100)).arbBlockNumber();
         } else {
             blockNumber = block.number;
@@ -252,7 +251,7 @@ library LibUtils {
 
     function getBlockHash(uint256 blockNumber) internal view returns (bytes32 l1BlockHash) {
         // eth l1 block number
-        if (LibNetwork.isArbitrum(block.chainid)) {
+        if (LibNetwork.isArbitrumMainnetOrTestnet(block.chainid)) {
             l1BlockHash = IArbSys(address(100)).arbBlockHash(blockNumber);
         } else {
             l1BlockHash = blockhash(blockNumber);

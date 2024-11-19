@@ -297,11 +297,12 @@ library LibProposing {
 
         LibBonds.debitBond(_state, _resolver, msg.sender, _config.livenessBond);
 
+        // CHANGE(MOONCHAIN): remove bribe
         // Bribe the block builder. Unlike 1559-tips, this tip is only made
         // if this transaction succeeds.
-        if (msg.value != 0 && block.coinbase != address(0)) {
-            address(block.coinbase).sendEtherAndVerify(msg.value);
-        }
+        // if (msg.value != 0 && block.coinbase != address(0)) {
+        //     address(block.coinbase).sendEtherAndVerify(msg.value);
+        // }
 
         if (local.postFork) {
             emit BlockProposedV2(meta_.id, meta_);

@@ -8,7 +8,7 @@ import "../L2/TaikoL2.sol";
 /// mainnet to reduce gas cost.
 /// @notice See the documentation in {TaikoL1}.
 /// @custom:security-contact security@taiko.xyz
-contract GenevaMoonchainL2 is TaikoL2 {
+contract MainnetMoonchainL2 is TaikoL2 {
     function initMoonchain(
         address _owner,
         address _addressManager,
@@ -16,7 +16,7 @@ contract GenevaMoonchainL2 is TaikoL2 {
         uint64 _gasExcess
     )
         external
-        reinitializer(4)
+        reinitializer(3)
     {
         __Essential_init(_owner, _addressManager);
         l1ChainId = _l1ChainId;

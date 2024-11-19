@@ -82,6 +82,10 @@ library LibVerifying {
                 blk = _state.blocks[local.slot];
                 if (blk.blockId != local.blockId) revert L1_BLOCK_MISMATCH();
 
+                // CHANGE(MOONCHAIN): migrate blockHash
+                if (local.blockId == _config.ontakeForkHeight + 2) {
+                    local.blockHash = _state.transitions[local.slot][1].key;
+                }
                 local.tid = LibUtils.getTransitionId(_state, blk, local.slot, local.blockHash);
                 // When `tid` is 0, it indicates that there is no proven
                 // transition with its parentHash equal to the blockHash of the
@@ -96,6 +100,8 @@ library LibVerifying {
                     blk.verifiedTransitionId = local.tid;
                     local.lastVerifiedTransitionId = local.tid;
                     local.prover = _state.transitions[local.slot][local.tid].prover;
+                    _state.transitions[local.slot][local.tid].blockHash = blk.metaHash;
+
                     ++local.blockId;
                     ++local.numBlocksVerified;
                     continue;

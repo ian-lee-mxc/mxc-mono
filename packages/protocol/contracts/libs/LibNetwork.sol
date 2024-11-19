@@ -52,8 +52,12 @@ library LibNetwork {
         return _chainId >= 32_300 && _chainId <= 32_400;
     }
 
-    function isArbitrum(uint256 _chainId) internal pure returns (bool) {
+    function isArbitrumMainnetOrTestnet(uint256 _chainId) internal pure returns (bool) {
         return _chainId == LibNetwork.ARBITRUM || _chainId == LibNetwork.ARBITRUM_SEPOLIA;
+    }
+
+    function isMoonchainMainnetOrTestnet(uint256 _chainId) internal pure returns (bool) {
+        return _chainId == LibNetwork.MOONCHAIN || _chainId == LibNetwork.GENEVA;
     }
 
     /// @dev Checks if the chain supports Dencun hardfork. Note that this check doesn't need to be
@@ -63,6 +67,6 @@ library LibNetwork {
     function isDencunSupported(uint256 _chainId) internal pure returns (bool) {
         return _chainId == LibNetwork.ETHEREUM_MAINNET || _chainId == LibNetwork.ETHEREUM_HOLESKY
             || _chainId == LibNetwork.ETHEREUM_SEPOLIA || isTaikoDevnet(_chainId)
-            || isArbitrum(_chainId);
+            || isArbitrumMainnetOrTestnet(_chainId) || isMoonchainMainnetOrTestnet(_chainId);
     }
 }

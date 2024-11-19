@@ -14,7 +14,7 @@ abstract contract TierProviderBase is ITierProvider {
     /// asynchronous, this grace period allows provers to defer submissions until gas
     /// prices become more favorable, potentially reducing transaction costs.
     uint16 public constant GRACE_PERIOD = 240; // minutes
-    uint96 public constant BOND_UNIT = 75 ether; // TAIKO tokens
+    uint96 public constant BOND_UNIT = 0 ether; // TAIKO tokens
 
     /// @inheritdoc ITierProvider
     /// @notice Each tier, except the top tier, has a validity bond that is 75 TAIKO higher than the
@@ -22,7 +22,7 @@ abstract contract TierProviderBase is ITierProvider {
     function getTier(uint16 _tierId) public pure virtual returns (ITierProvider.Tier memory) {
         if (_tierId == LibTiers.TIER_OPTIMISTIC) {
             // cooldownWindow is 1440 minutes and provingWindow is 15 minutes
-            return _buildTier("", BOND_UNIT, 1440, 15);
+            return _buildTier("", BOND_UNIT, 0, 15);
         }
 
         // TEE Tiers
@@ -43,13 +43,13 @@ abstract contract TierProviderBase is ITierProvider {
         // Guardian Minority Tiers
         if (_tierId == LibTiers.TIER_GUARDIAN_MINORITY) {
             // cooldownWindow is 240 minutes and provingWindow is 2880 minutes
-            return _buildTier(LibStrings.B_TIER_GUARDIAN_MINORITY, BOND_UNIT * 4, 240, 2880);
+            return _buildTier(LibStrings.B_TIER_GUARDIAN_MINORITY, BOND_UNIT * 4, 0, 2880);
         }
 
         // Guardian Major Tiers
         if (_tierId == LibTiers.TIER_GUARDIAN) {
             // cooldownWindow is 1440 minutes and provingWindow is 2880 minutes
-            return _buildTier(LibStrings.B_TIER_GUARDIAN, 0, 1440, 2880);
+            return _buildTier(LibStrings.B_TIER_GUARDIAN, 0, 0, 2880);
         }
 
         revert TIER_NOT_FOUND();

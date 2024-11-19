@@ -40,6 +40,9 @@ import "../contracts/tokenvault/ERC721Vault.sol";
 import "../contracts/tokenvault/ERC1155Vault.sol";
 import "../contracts/verifiers/SgxVerifier.sol";
 import { GenevaMoonchainL1 } from "../contracts/mainnet/GenevaMoonchainL1.sol";
+import { MxcToken } from "../contracts/tko/MxcToken.sol";
+import { EthMxcPriceAggregator } from "../contracts/bridge/EthMxcPriceAggregator.sol";
+import "../contracts/mainnet/MainnetMoonchainL1.sol";
 
 interface ArbSys {
     /**
@@ -74,6 +77,12 @@ contract DeployOnMoonchainL1 is DeployCapability {
     uint256 public NUM_MIN_MAJORITY_GUARDIANS = vm.envUint("NUM_MIN_MAJORITY_GUARDIANS");
     uint256 public NUM_MIN_MINORITY_GUARDIANS = vm.envUint("NUM_MIN_MINORITY_GUARDIANS");
     uint256 public MOONCHAIN_MIGRATE_BLOCK_ID = vm.envUint("MOONCHAIN_MIGRATE_BLOCK_ID");
+    address public PROPOSER_ADDRESS = vm.envAddress("PROPOSER_ADDRESS");
+    bool public IS_MAINNET = vm.envBool("IS_MAINNET");
+
+    uint256 public ethMxcPrice = 500_000;
+    address constant HARDCODE_MXC_NATIVE_TOKEN_ADDR =
+        address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
     function deployArbSysTest() internal {
         ArbSys arbSysTest = new ArbSysTest();
@@ -96,6 +105,20 @@ contract DeployOnMoonchainL1 is DeployCapability {
         vm.stopBroadcast();
         vm.startBroadcast(vm.envUint("ADMIN_KEY"));
         TransparentUpgradeableProxy(proxy).upgradeTo(newImpl);
+        vm.stopBroadcast();
+        vm.startBroadcast(vm.envUint("PRIVATE_KEY"));
+    }
+
+    function upgradeProxyAndCall(
+        address payable proxy,
+        address newImpl,
+        bytes memory data
+    )
+        public
+    {
+        vm.stopBroadcast();
+        vm.startBroadcast(vm.envUint("ADMIN_KEY"));
+        TransparentUpgradeableProxy(proxy).upgradeToAndCall(newImpl, data);
         vm.stopBroadcast();
         vm.startBroadcast(vm.envUint("PRIVATE_KEY"));
     }
@@ -143,6 +166,26 @@ contract DeployOnMoonchainL1 is DeployCapability {
             uint64(MOONCHAIN_MIGRATE_BLOCK_ID),
             vm.envBool("PAUSE_TAIKO_L1")
         );
+        address mxcTokenAddr = AddressManager(rollupAddressManager).getAddress(
+            uint64(block.chainid), LibStrings.B_TAIKO_TOKEN
+        );
+        // reinitialize the mxc token
+        addressNotNull(mxcTokenAddr, "mxcTokenAddr");
+        MxcToken mxcToken = MxcToken(payable(mxcTokenAddr));
+        mxcToken.init2(
+            rollupAddressManager,
+            contractOwner,
+            vm.envAddress("OLD_TOKEN_VAULT_ADDRESS"),
+            msg.sender
+        );
+
+        // deploy eth mxc price aggregator
+        deployProxy({
+            name: "ethmxc_price_aggregator",
+            impl: address(new EthMxcPriceAggregator(int256(ethMxcPrice))),
+            data: abi.encodeCall(EthMxcPriceAggregator.init, (int256(ethMxcPrice))),
+            registerTo: address(sharedAddressManager)
+        });
 
         if (vm.envAddress("SHARED_ADDRESS_MANAGER") == address(0)) {
             SignalService(signalServiceAddr).authorize(taikoL1Addr, true);
@@ -150,6 +193,11 @@ contract DeployOnMoonchainL1 is DeployCapability {
 
         uint64 l2ChainId = taikoL1.getConfig().chainId;
         require(l2ChainId != block.chainid, "same chainid");
+
+        // set remote taiko_token address
+        AddressManager(sharedAddressManager).setAddress(
+            uint64(l2ChainId), LibStrings.B_TAIKO_TOKEN, HARDCODE_MXC_NATIVE_TOKEN_ADDR
+        );
 
         console2.log("------------------------------------------");
         console2.log("msg.sender: ", msg.sender);
@@ -319,7 +367,16 @@ contract DeployOnMoonchainL1 is DeployCapability {
         copyRegister(rollupAddressManager, _sharedAddressManager, "signal_service");
         copyRegister(rollupAddressManager, _sharedAddressManager, "bridge");
 
-        upgradeProxy(payable(vm.envAddress("TAIKO_L1_ADDRESS")), address(new GenevaMoonchainL1()));
+        if (IS_MAINNET) {
+            upgradeProxy(
+                payable(vm.envAddress("TAIKO_L1_ADDRESS")), address(new MainnetMoonchainL1())
+            );
+        } else {
+            upgradeProxy(
+                payable(vm.envAddress("TAIKO_L1_ADDRESS")), address(new GenevaMoonchainL1())
+            );
+        }
+        upgradeProxy(payable(vm.envAddress("TAIKO_TOKEN")), address(new MxcToken()));
         register(rollupAddressManager, "taiko", vm.envAddress("TAIKO_L1_ADDRESS"));
 
         //        deployProxy({
@@ -401,13 +458,17 @@ contract DeployOnMoonchainL1 is DeployCapability {
         console2.log("PemCertChainLib", address(pemCertChainLib));
         console2.log("AutomataDcapVaAttestation", automataProxy);
 
-        deployProxy({
+        address proverSetProxy = deployProxy({
             name: "prover_set",
             impl: address(new ProverSet()),
             data: abi.encodeCall(
                 ProverSet.init, (owner, vm.envAddress("PROVER_SET_ADMIN"), rollupAddressManager)
             )
         });
+
+        ProverSet(payable(proverSetProxy)).enableProver(PROPOSER_ADDRESS, true);
+        ProverSet(payable(proverSetProxy)).enableProver(guardianProver, true);
+        ProverSet(payable(proverSetProxy)).enableProver(guardians[0], true);
 
         deployZKVerifiers(owner, rollupAddressManager);
     }

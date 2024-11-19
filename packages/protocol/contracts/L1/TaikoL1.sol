@@ -90,6 +90,7 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents {
         bytes calldata _txList
     )
         external
+        virtual
         onlyFromOptionalNamed(LibStrings.B_BLOCK_PROPOSER)
         whenNotPaused
         nonReentrant
@@ -107,6 +108,7 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents {
         bytes[] calldata _txListArr
     )
         external
+        virtual
         onlyFromOptionalNamed(LibStrings.B_BLOCK_PROPOSER)
         whenNotPaused
         nonReentrant
@@ -281,12 +283,12 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents {
     /// @inheritdoc ITaikoL1
     function getConfig() public pure virtual returns (TaikoData.Config memory) {
         return TaikoData.Config({
-            chainId: LibNetwork.GENEVA,
-            blockMaxProposals: 3_240_000, // = 7200 * 45
-            blockRingBufferSize: 3_600_000, // = 7200 * 50
+            chainId: LibNetwork.TAIKO_MAINNET,
+            blockMaxProposals: 324_000, // = 7200 * 45
+            blockRingBufferSize: 360_000, // = 7200 * 50
             maxBlocksToVerify: 16,
             blockMaxGasLimit: 240_000_000,
-            livenessBond: 0, // 125 Taiko token
+            livenessBond: 125e18, // 125 Taiko token
             stateRootSyncInternal: 16,
             maxAnchorHeightOffset: 64,
             baseFeeConfig: TaikoData.BaseFeeConfig({
@@ -296,7 +298,7 @@ contract TaikoL1 is EssentialContract, ITaikoL1, TaikoEvents {
                 minGasExcess: 1_340_000_000,
                 maxGasIssuancePerBlock: 600_000_000 // two minutes
              }),
-            ontakeForkHeight: 0 // = 7200 * 52
+            ontakeForkHeight: 374_400 // = 7200 * 52
          });
     }
 

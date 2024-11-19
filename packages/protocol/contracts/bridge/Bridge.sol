@@ -9,6 +9,7 @@ import "../libs/LibMath.sol";
 import "../signal/ISignalService.sol";
 import "./IBridge.sol";
 import "./IQuotaManager.sol";
+import "./IAggregatorInterface.sol";
 
 /// @title Bridge
 /// @notice See the documentation for {IBridge}.
@@ -119,10 +120,33 @@ contract Bridge is EssentialContract, IBridge {
         __reserved3 = 0;
     }
 
+    function forkInit(address _owner, address _sharedAddressManager) external reinitializer(3) {
+        require(
+            StorageSlot.getAddressSlot(
+                bytes32(0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103)
+            ).value == msg.sender
+        );
+        __Essential_init(_owner, _sharedAddressManager);
+        // reset some previously used slots for future reuse
+        __reserved1 = 0;
+        __reserved2 = 0;
+        __reserved3 = 0;
+    }
+
     /// @notice Delegates a given token's voting power to the bridge itself.
     /// @param _anyToken Any token that supports delegation.
     function selfDelegate(address _anyToken) external nonZeroAddr(_anyToken) {
         ERC20VotesUpgradeable(_anyToken).delegate(address(this));
+    }
+
+    function invocationSendNativeToken(
+        address _to,
+        uint256 _amount
+    )
+        external
+        onlyFromNamed(LibStrings.B_ERC20_VAULT)
+    {
+        _to.sendEtherAndVerify(_amount);
     }
 
     /// @inheritdoc IBridge
@@ -149,8 +173,23 @@ contract Bridge is EssentialContract, IBridge {
         // Verify destination chain.
         if (!destChainEnabled) revert B_INVALID_CHAINID();
 
-        // Ensure the sent value matches the expected amount.
-        if (_message.value + _message.fee != msg.value) revert B_INVALID_VALUE();
+        // CHANGE(MOONCHAIN): does not support sending native token, please use the wrapped token
+        // instead.
+        if (_message.value > 0) {
+            revert B_OUT_OF_ETH_QUOTA();
+        }
+
+        // CHANGE(MOONCHAIN): msg.value of sendMessage on Moonchain set to msg.value -
+        // _message.value - _message.fee - _op.amount = 0;
+        // and _message.value will always 0, so we can skip this check only on Moonchain and sender
+        // is ERC20Vault
+        // is Moonchain && sender is ERC20Vault
+        if (
+            LibNetwork.isMoonchainMainnetOrTestnet(block.chainid)
+                && msg.sender == resolve(LibStrings.B_ERC20_VAULT, false)
+        ) { } else if (_message.value + _message.fee != msg.value) {
+            revert B_INVALID_VALUE();
+        }
 
         message_ = _message;
 
@@ -190,6 +229,11 @@ contract Bridge is EssentialContract, IBridge {
         );
 
         _updateMessageStatus(msgHash, Status.RECALLED);
+
+        // CHANGE(moonchain): does not support sending native token, please use the wrapped token
+        // instead.
+        if (_message.value > 0) revert B_OUT_OF_ETH_QUOTA();
+
         if (!_consumeEtherQuota(_message.value)) revert B_OUT_OF_ETH_QUOTA();
 
         // Execute the recall logic based on the contract's support for the
@@ -205,7 +249,13 @@ contract Bridge is EssentialContract, IBridge {
             // Must reset the context after the message call
             _resetContext();
         } else {
-            _message.srcOwner.sendEtherAndVerify(_message.value, _SEND_ETHER_GAS_LIMIT);
+            uint256 _ADD_GAS_LIMIT = 0;
+            if (LibNetwork.isArbitrumMainnetOrTestnet(block.chainid)) {
+                _ADD_GAS_LIMIT += 1_000_000;
+            }
+            _message.srcOwner.sendEtherAndVerify(
+                _message.value, _SEND_ETHER_GAS_LIMIT + _ADD_GAS_LIMIT
+            );
         }
     }
 
@@ -232,6 +282,10 @@ contract Bridge is EssentialContract, IBridge {
         if (_message.srcChainId == 0 || _message.srcChainId == block.chainid) {
             revert B_INVALID_CHAINID();
         }
+
+        // CHANGE(moonchain): does not support sending native token, please use the wrapped token
+        // instead.
+        if (_message.value > 0) revert B_OUT_OF_ETH_QUOTA();
 
         ProcessingStats memory stats;
         stats.processedByRelayer = msg.sender != _message.destOwner;
@@ -272,9 +326,37 @@ contract Bridge is EssentialContract, IBridge {
             }
         }
 
+        uint256 _ADD_GAS_LIMIT = 0;
+        if (LibNetwork.isArbitrumMainnetOrTestnet(block.chainid)) {
+            _ADD_GAS_LIMIT + 1_000_000;
+        }
         if (_message.fee != 0) {
-            refundAmount += _message.fee;
+            // if on moonchain, we need to convert the fee from eth to mxc
+            uint256 messageFee = _message.fee;
 
+            if (LibNetwork.isMoonchainMainnetOrTestnet(block.chainid) && _message.fee > 0) {
+                uint256 _ethPrice = uint256(
+                    IAggregatorInterface(resolve(LibStrings.B_ETHMXC_PRICE_AGGREGATOR, false))
+                        .latestAnswer()
+                );
+                if (_ethPrice == 0) _ethPrice = 500_000; // default eth/mxc price 500000
+                messageFee = messageFee * _ethPrice;
+
+                // if message srcChain is Moonchain, we need to convert the fee from mxc to eth
+            } else if (
+                LibNetwork.isMoonchainMainnetOrTestnet(_message.srcChainId) && _message.fee > 0
+            ) {
+                uint256 _ethPrice = uint256(
+                    IAggregatorInterface(resolve(LibStrings.B_ETHMXC_PRICE_AGGREGATOR, false))
+                        .latestAnswer()
+                );
+                if (_ethPrice == 0) _ethPrice = 500_000; // default eth/mxc price 500000
+                messageFee = messageFee / _ethPrice;
+                if (messageFee == 0) {
+                    messageFee = 1;
+                }
+            }
+            refundAmount += messageFee;
             if (stats.processedByRelayer && _message.gasLimit != 0) {
                 unchecked {
                     // The relayer (=message processor) needs to get paid from the fee, and below it
@@ -288,24 +370,29 @@ contract Bridge is EssentialContract, IBridge {
                     uint256 refund = stats.numCacheOps * _GAS_REFUND_PER_CACHE_OPERATION;
                     // Taking into account the encoded message calldata cost, and can count with 16
                     // gas per bytes (vs. checking each and every byte if zero or non-zero)
+
+                    uint256 __GAS_OVERHEAD = GAS_OVERHEAD;
+                    if (LibNetwork.isArbitrumMainnetOrTestnet(block.chainid)) {
+                        __GAS_OVERHEAD += 5_000_000;
+                    }
                     stats.gasUsedInFeeCalc = uint32(
-                        GAS_OVERHEAD + gasStart + _messageCalldataCost(_message.data.length)
+                        __GAS_OVERHEAD + gasStart + _messageCalldataCost(_message.data.length)
                             - gasleft()
                     );
 
                     uint256 gasCharged = refund.max(stats.gasUsedInFeeCalc) - refund;
-                    uint256 maxFee = gasCharged * _message.fee / _message.gasLimit;
+                    uint256 maxFee = gasCharged * messageFee / _message.gasLimit;
                     uint256 baseFee = gasCharged * block.basefee;
                     uint256 fee =
-                        (baseFee >= maxFee ? maxFee : (maxFee + baseFee) >> 1).min(_message.fee);
+                        (baseFee >= maxFee ? maxFee : (maxFee + baseFee) >> 1).min(messageFee);
 
                     refundAmount -= fee;
-                    msg.sender.sendEtherAndVerify(fee, _SEND_ETHER_GAS_LIMIT);
+                    msg.sender.sendEtherAndVerify(fee, _SEND_ETHER_GAS_LIMIT + _ADD_GAS_LIMIT);
                 }
             }
         }
 
-        _message.destOwner.sendEtherAndVerify(refundAmount, _SEND_ETHER_GAS_LIMIT);
+        _message.destOwner.sendEtherAndVerify(refundAmount, _SEND_ETHER_GAS_LIMIT + _ADD_GAS_LIMIT);
 
         _updateMessageStatus(msgHash, status_);
         emit MessageProcessed(msgHash, _message, stats);
@@ -325,11 +412,21 @@ contract Bridge is EssentialContract, IBridge {
         bytes32 msgHash = hashMessage(_message);
         _checkStatus(msgHash, Status.RETRIABLE);
 
+        // CHANGE(moonchain): arbitrum or ethereum does not support sending native token, please use
+        // the wrapped token instead.
+        if (_message.value > 0) revert B_OUT_OF_ETH_QUOTA();
+
         if (!_consumeEtherQuota(_message.value)) revert B_OUT_OF_ETH_QUOTA();
 
         bool succeeded;
         if (_unableToInvokeMessageCall(_message, resolve(LibStrings.B_SIGNAL_SERVICE, false))) {
-            succeeded = _message.destOwner.sendEther(_message.value, _SEND_ETHER_GAS_LIMIT, "");
+            uint256 __ADD_GAS_LIMIT = 0;
+            if (LibNetwork.isArbitrumMainnetOrTestnet(block.chainid)) {
+                __ADD_GAS_LIMIT += 1_000_000;
+            }
+            succeeded = _message.destOwner.sendEther(
+                _message.value, _SEND_ETHER_GAS_LIMIT + __ADD_GAS_LIMIT, ""
+            );
         } else {
             if ((_message.gasLimit == 0 || _isLastAttempt) && msg.sender != _message.destOwner) {
                 revert B_PERMISSION_DENIED();
@@ -660,8 +757,13 @@ contract Bridge is EssentialContract, IBridge {
             && _message.to.isContract();
     }
 
-    function _invocationGasLimit(Message calldata _message) private pure returns (uint256) {
+    function _invocationGasLimit(Message calldata _message) private view returns (uint256) {
+        // CHANGE(MOONCHAIN): if the message processing on Arbitrum, the minGas need to scale up
+        // more higher enough
         uint256 minGasRequired = getMessageMinGasLimit(_message.data.length);
+        if (LibNetwork.isArbitrumMainnetOrTestnet(block.chainid)) {
+            minGasRequired += 5_000_000;
+        }
         unchecked {
             return minGasRequired.max(_message.gasLimit) - minGasRequired;
         }

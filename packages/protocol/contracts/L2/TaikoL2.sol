@@ -150,15 +150,15 @@ contract TaikoL2 is EssentialContract {
 
         if (!skipFeeCheck() && block.basefee != basefee) revert L2_BASEFEE_MISMATCH();
 
-        //        if (_l1BlockId > lastSyncedBlock) {
-        //            // Store the L1's state root as a signal to the local signal service to
-        //            // allow for multi-hop bridging.
-        //            ISignalService(resolve(LibStrings.B_SIGNAL_SERVICE, false)).syncChainData(
-        //                l1ChainId, LibStrings.H_STATE_ROOT, _l1BlockId, _l1StateRoot
-        //            );
-        //
-        //            lastSyncedBlock = _l1BlockId;
-        //        }
+        if (_l1BlockId > lastSyncedBlock) {
+            // Store the L1's state root as a signal to the local signal service to
+            // allow for multi-hop bridging.
+            ISignalService(resolve(LibStrings.B_SIGNAL_SERVICE, false)).syncChainData(
+                l1ChainId, LibStrings.H_STATE_ROOT, _l1BlockId, _l1StateRoot
+            );
+
+            lastSyncedBlock = _l1BlockId;
+        }
 
         // Update state variables
         bytes32 parentHash = blockhash(parentId);
@@ -324,7 +324,7 @@ contract TaikoL2 is EssentialContract {
     /// @notice Tells if we need to validate basefee (for simulation).
     /// @return Returns true to skip checking basefee mismatch.
     function skipFeeCheck() public pure virtual returns (bool) {
-        return true;
+        return false;
     }
 
     function ontakeForkHeight() public pure virtual returns (uint64) {

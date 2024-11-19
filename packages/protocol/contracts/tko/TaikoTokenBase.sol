@@ -10,8 +10,8 @@ import "../common/LibStrings.sol";
 /// contract list.
 /// We can simplify the code since we no longer need to maintain upgradability with Hekla.
 abstract contract TaikoTokenBase0 is EssentialContract {
-    // solhint-disable var-name-mixedcase
-    uint256[50] private __slots_previously_used_by_ERC20SnapshotUpgradeable;
+// solhint-disable var-name-mixedcase
+//    uint256[50] private __slots_previously_used_by_ERC20SnapshotUpgradeable;
 }
 
 /// @title TaikoTokenBase
