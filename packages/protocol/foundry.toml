@@ -56,3 +56,6 @@ wrap_comments = true
 
 [profile.genesis]
 test = "genesis"
+
+[profile.layer2]
+evm_version = "shanghai"

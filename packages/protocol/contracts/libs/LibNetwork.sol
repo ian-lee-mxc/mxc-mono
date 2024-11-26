@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.27;
+pragma solidity ^0.8.24;
 
 /// @title LibNetwork
 library LibNetwork {
@@ -16,7 +16,8 @@ library LibNetwork {
 
     uint64 internal constant TAIKO_MAINNET = 167_000;
     uint64 internal constant TAIKO_HEKLA = 167_009;
-    uint64 internal constant GENEVA = 5_167_003;
+    uint64 internal constant WANNSEE = 5_167_003;
+    uint64 internal constant GENEVA = 5_167_004;
     uint64 internal constant TAIKO = 167_000;
     uint64 internal constant MOONCHAIN = 18_686;
 
@@ -57,7 +58,8 @@ library LibNetwork {
     }
 
     function isMoonchainMainnetOrTestnet(uint256 _chainId) internal pure returns (bool) {
-        return _chainId == LibNetwork.MOONCHAIN || _chainId == LibNetwork.GENEVA;
+        return _chainId == LibNetwork.MOONCHAIN || _chainId == LibNetwork.GENEVA
+            || _chainId == LibNetwork.WANNSEE;
     }
 
     /// @dev Checks if the chain supports Dencun hardfork. Note that this check doesn't need to be
@@ -67,6 +69,6 @@ library LibNetwork {
     function isDencunSupported(uint256 _chainId) internal pure returns (bool) {
         return _chainId == LibNetwork.ETHEREUM_MAINNET || _chainId == LibNetwork.ETHEREUM_HOLESKY
             || _chainId == LibNetwork.ETHEREUM_SEPOLIA || isTaikoDevnet(_chainId)
-            || isArbitrumMainnetOrTestnet(_chainId) || isMoonchainMainnetOrTestnet(_chainId);
+            || isArbitrumMainnetOrTestnet(_chainId);
     }
 }

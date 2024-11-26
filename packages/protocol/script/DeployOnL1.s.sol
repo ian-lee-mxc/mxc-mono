@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.27;
+pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@risc0/contracts/groth16/RiscZeroGroth16Verifier.sol";
@@ -38,6 +38,7 @@ import "../test/L1/TestTierProvider.sol";
 import "../test/DeployCapability.sol";
 import "../contracts/verifiers/Risc0Verifier.sol";
 import "../contracts/verifiers/SP1Verifier.sol";
+import { BridgedERC20V2 } from "../contracts/tokenvault/BridgedERC20V2.sol";
 
 /// @title DeployOnL1
 /// @notice This script deploys the core Taiko protocol smart contract on L1,
@@ -197,11 +198,11 @@ contract DeployOnL1 is DeployCapability {
         console2.log("- sharedAddressManager : ", sharedAddressManager);
 
         // Deploy Vaults
-        deployProxy({
-            name: "mainnet_erc20_vault",
-            impl: address(new MainnetERC20Vault()),
-            data: abi.encodeCall(ERC20Vault.init, (owner, sharedAddressManager))
-        });
+        //        deployProxy({
+        //            name: "mainnet_erc20_vault",
+        //            impl: address(new MainnetERC20Vault()),
+        //            data: abi.encodeCall(ERC20Vault.init, (owner, sharedAddressManager))
+        //        });
         deployProxy({
             name: "erc20_vault",
             impl: address(new ERC20Vault()),
@@ -209,11 +210,11 @@ contract DeployOnL1 is DeployCapability {
             registerTo: sharedAddressManager
         });
 
-        deployProxy({
-            name: "mainnet_erc721_vault",
-            impl: address(new MainnetERC721Vault()),
-            data: abi.encodeCall(ERC721Vault.init, (owner, sharedAddressManager))
-        });
+        //        deployProxy({
+        //            name: "mainnet_erc721_vault",
+        //            impl: address(new MainnetERC721Vault()),
+        //            data: abi.encodeCall(ERC721Vault.init, (owner, sharedAddressManager))
+        //        });
         deployProxy({
             name: "erc721_vault",
             impl: address(new ERC721Vault()),
@@ -221,11 +222,11 @@ contract DeployOnL1 is DeployCapability {
             registerTo: sharedAddressManager
         });
 
-        deployProxy({
-            name: "mainnet_erc1155_vault",
-            impl: address(new MainnetERC1155Vault()),
-            data: abi.encodeCall(ERC1155Vault.init, (owner, sharedAddressManager))
-        });
+        //        deployProxy({
+        //            name: "mainnet_erc1155_vault",
+        //            impl: address(new MainnetERC1155Vault()),
+        //            data: abi.encodeCall(ERC1155Vault.init, (owner, sharedAddressManager))
+        //        });
         deployProxy({
             name: "erc1155_vault",
             impl: address(new ERC1155Vault()),
@@ -249,7 +250,7 @@ contract DeployOnL1 is DeployCapability {
         console2.log("- sharedAddressManager : ", sharedAddressManager);
 
         // Deploy Bridged token implementations
-        register(sharedAddressManager, "bridged_erc20", address(new BridgedERC20()));
+        register(sharedAddressManager, "bridged_erc20", address(new BridgedERC20V2()));
         register(sharedAddressManager, "bridged_erc721", address(new BridgedERC721()));
         register(sharedAddressManager, "bridged_erc1155", address(new BridgedERC1155()));
     }

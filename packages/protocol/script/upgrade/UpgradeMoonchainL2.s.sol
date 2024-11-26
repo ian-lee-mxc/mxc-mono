@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.27;
+pragma solidity ^0.8.24;
 
 import "forge-std/src/Script.sol";
 import "forge-std/src/console2.sol";
@@ -20,6 +20,7 @@ import "../../contracts/tokenvault/BridgedERC1155.sol";
 import "../../contracts/mainnet/GenevaMoonchainL2.sol";
 import "../../contracts/mainnet/MainnetMoonchainL2.sol";
 import { EthMxcPriceAggregator } from "../../contracts/bridge/EthMxcPriceAggregator.sol";
+import { BridgedERC20V2 } from "../../contracts/tokenvault/BridgedERC20V2.sol";
 
 contract UpgradeMoonchainL2 is DeployCapability {
     address payable mxcL2 = payable(0x1000777700000000000000000000000000000001);
@@ -41,7 +42,7 @@ contract UpgradeMoonchainL2 is DeployCapability {
     function run() external {
         require(adminPrivateKey != 0, "invalid priv key");
         vm.startBroadcast(ownerPrivateKey);
-        //        deployAddressManagerContracts();
+        deployAddressManagerContracts();
 
         if (isMainnet) {
             console2.log("isMainnet");
@@ -117,28 +118,26 @@ contract UpgradeMoonchainL2 is DeployCapability {
         console2.log("- sharedAddressManager : ", sharedAddressManagerProxyAddr);
 
         // Deploy Vaults
-        //        deployProxy({
-        //            name: "erc20_vault",
-        //            impl: address(new ERC20Vault()),
-        //            data: abi.encodeCall(ERC20Vault.init, (owner, sharedAddressManagerProxyAddr)),
-        //            registerTo: sharedAddressManagerProxyAddr
-        //        });
-        //
-        //        deployProxy({
-        //            name: "erc721_vault",
-        //            impl: address(new ERC721Vault()),
-        //            data: abi.encodeCall(ERC721Vault.init, (owner,
-        // sharedAddressManagerProxyAddr)),
-        //            registerTo: sharedAddressManagerProxyAddr
-        //        });
-        //
-        //        deployProxy({
-        //            name: "erc1155_vault",
-        //            impl: address(new ERC1155Vault()),
-        //            data: abi.encodeCall(ERC1155Vault.init, (owner,
-        // sharedAddressManagerProxyAddr)),
-        //            registerTo: sharedAddressManagerProxyAddr
-        //        });
+        deployProxy({
+            name: "erc20_vault",
+            impl: address(new ERC20Vault()),
+            data: abi.encodeCall(ERC20Vault.init, (owner, sharedAddressManagerProxyAddr)),
+            registerTo: sharedAddressManagerProxyAddr
+        });
+
+        deployProxy({
+            name: "erc721_vault",
+            impl: address(new ERC721Vault()),
+            data: abi.encodeCall(ERC721Vault.init, (owner, sharedAddressManagerProxyAddr)),
+            registerTo: sharedAddressManagerProxyAddr
+        });
+
+        deployProxy({
+            name: "erc1155_vault",
+            impl: address(new ERC1155Vault()),
+            data: abi.encodeCall(ERC1155Vault.init, (owner, sharedAddressManagerProxyAddr)),
+            registerTo: sharedAddressManagerProxyAddr
+        });
 
         console2.log("------------------------------------------");
         console2.log(
@@ -160,7 +159,7 @@ contract UpgradeMoonchainL2 is DeployCapability {
         register(rollupAddressManagerProxyAddr, "signal_service", address(signalSericeProxyAddr));
 
         // Deploy Bridged token implementations
-        register(sharedAddressManagerProxyAddr, "bridged_erc20", address(new BridgedERC20()));
+        register(sharedAddressManagerProxyAddr, "bridged_erc20", address(new BridgedERC20V2()));
         register(sharedAddressManagerProxyAddr, "bridged_erc721", address(new BridgedERC721()));
         register(sharedAddressManagerProxyAddr, "bridged_erc1155", address(new BridgedERC1155()));
     }

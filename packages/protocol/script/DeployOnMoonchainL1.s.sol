@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.27;
+pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/utils/Strings.sol";
 
@@ -43,6 +43,7 @@ import { GenevaMoonchainL1 } from "../contracts/mainnet/GenevaMoonchainL1.sol";
 import { MxcToken } from "../contracts/tko/MxcToken.sol";
 import { EthMxcPriceAggregator } from "../contracts/bridge/EthMxcPriceAggregator.sol";
 import "../contracts/mainnet/MainnetMoonchainL1.sol";
+import { BridgedERC20V2 } from "../contracts/tokenvault/BridgedERC20V2.sol";
 
 interface ArbSys {
     /**
@@ -191,14 +192,6 @@ contract DeployOnMoonchainL1 is DeployCapability {
             SignalService(signalServiceAddr).authorize(taikoL1Addr, true);
         }
 
-        uint64 l2ChainId = taikoL1.getConfig().chainId;
-        require(l2ChainId != block.chainid, "same chainid");
-
-        // set remote taiko_token address
-        AddressManager(sharedAddressManager).setAddress(
-            uint64(l2ChainId), LibStrings.B_TAIKO_TOKEN, HARDCODE_MXC_NATIVE_TOKEN_ADDR
-        );
-
         console2.log("------------------------------------------");
         console2.log("msg.sender: ", msg.sender);
         console2.log("address(this): ", address(this));
@@ -218,6 +211,10 @@ contract DeployOnMoonchainL1 is DeployCapability {
 
         // ---------------------------------------------------------------
         // Register L2 addresses
+        // set remote taiko_token address
+        uint64 l2ChainId = taikoL1.getConfig().chainId;
+        require(l2ChainId != block.chainid, "same chainid");
+        register(sharedAddressManager, "taiko_token", HARDCODE_MXC_NATIVE_TOKEN_ADDR, l2ChainId);
         register(rollupAddressManager, "taiko", vm.envAddress("TAIKO_L2_ADDRESS"), l2ChainId);
         register(
             rollupAddressManager, "signal_service", vm.envAddress("L2_SIGNAL_SERVICE"), l2ChainId
@@ -340,7 +337,7 @@ contract DeployOnMoonchainL1 is DeployCapability {
         console2.log("- sharedAddressManager : ", sharedAddressManager);
 
         // Deploy Bridged token implementations
-        register(sharedAddressManager, "bridged_erc20", address(new BridgedERC20()));
+        register(sharedAddressManager, "bridged_erc20", address(new BridgedERC20V2()));
         register(sharedAddressManager, "bridged_erc721", address(new BridgedERC721()));
         register(sharedAddressManager, "bridged_erc1155", address(new BridgedERC1155()));
     }
