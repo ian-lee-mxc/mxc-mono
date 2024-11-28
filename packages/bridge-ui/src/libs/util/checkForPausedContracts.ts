@@ -28,10 +28,9 @@ export const checkForPausedContracts = async () => {
           functionName: 'paused',
         });
       } catch (error) {
-        //todo: will this ever happen and if so what do we do?
+        // todo: will this ever happen and if so what do we do?
         // Right now we assume something is very off and we should stop the user from doing anything
         console.error('Error checking for paused contracts', error);
-
         return true;
       }
     }),
