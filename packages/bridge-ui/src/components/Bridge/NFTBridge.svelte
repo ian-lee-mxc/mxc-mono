@@ -10,7 +10,7 @@
   import { Step, Stepper } from '$components/Stepper';
   import { hasBridge } from '$libs/bridge/bridges';
   import { BridgePausedError } from '$libs/error';
-  import { ETHToken } from '$libs/token';
+  import { ETHToken, testERC20Tokens } from '$libs/token';
   import { isBridgePaused } from '$libs/util/checkForPausedContracts';
   import { type Account, account } from '$stores/account';
 
@@ -104,7 +104,7 @@
     $recipientAddress = $account?.address || null;
     $destOwnerAddress = $account?.address || null;
     bridgingStatus = BridgingStatus.PENDING;
-    $selectedToken = ETHToken;
+    $selectedToken = testERC20Tokens[0];
     importMethod === null;
     $importDone = false;
     $selectedNFTs = [];

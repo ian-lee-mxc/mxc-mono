@@ -61,6 +61,7 @@
           bind:needsManualReviewConfirmation
           bind:hasEnoughEth
           bind:hasEnoughFundsToContinue />
+          
       {:else if activeStep === BridgeSteps.RECIPIENT}
         <!-- RECIPIENT STEP -->
         <RecipientStep bind:this={recipientStepComponent} bind:hasEnoughEth bind:needsManualRecipientConfirmation />

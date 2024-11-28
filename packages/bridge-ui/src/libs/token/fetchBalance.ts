@@ -20,7 +20,7 @@ const log = getLogger('token:getBalance');
 export async function fetchBalance({ userAddress, token, srcChainId, destChainId }: GetBalanceArgs) {
   let tokenBalance: GetBalanceReturnType;
   log('getBalance', { userAddress, token, srcChainId, destChainId });
-  if (!token || token.type === TokenType.ETH) {
+  if (!token || token.type === TokenType.ETH || token.symbol === 'MXC') {
     // If no token is passed in, we assume is ETH
     tokenBalance = await getBalance(config, { address: userAddress, chainId: srcChainId });
   } else if (token.type === TokenType.ERC20) {

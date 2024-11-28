@@ -16,6 +16,8 @@
 
   import NoneOption from './NoneOption.svelte';
   import RecommendedFee from './RecommendedFee.svelte';
+  import { connectedSourceChain } from '$stores/network';
+  import { chains } from '$libs/chain';
 
   export let small = false;
   export let textOnly = false;
@@ -36,6 +38,10 @@
   let tempProcessingFeeMethod = $processingFeeMethod;
 
   let tempprocessingFee = $processingFee;
+
+  $: currentChainId = $connectedSourceChain?.id;
+  $: currentChain = chains.find(chain => chain.id === currentChainId)
+
 
   // Public API
   export function resetProcessingFee() {
@@ -160,11 +166,11 @@
       <span class="text-secondary-content">{$t('processing_fee.title')}</span>
       <span class=" text-primary-content mt-[4px]">
         {#if $calculatingProcessingFee}
-          <LoadingText mask="0.0017730224073" /> ETH
+          <LoadingText mask="0.0017730224073" /> {currentChain?.nativeCurrency.symbol}
         {:else if errorCalculatingRecommendedAmount && $processingFeeMethod === ProcessingFeeMethod.RECOMMENDED}
           <FlatAlert type="warning" message={$t('processing_fee.recommended.error')} />
         {:else}
-          {formatEther($processingFee ?? BigInt(0))} ETH {#if $processingFee !== recommendedAmount}
+          {formatEther($processingFee ?? BigInt(0))} {currentChain?.nativeCurrency.symbol} {#if $processingFee !== recommendedAmount}
             <span class="text-primary-link">| {$t('common.customized')}</span>
           {/if}
         {/if}
