@@ -212,15 +212,22 @@ export class ERC20Bridge extends Bridge {
 
     if (!wallet || !wallet.account || !wallet.chain) throw new Error('Wallet is not connected');
 
-    const requireAllowance = await this.requireAllowance({
-      amount,
-      tokenAddress: token,
-      ownerAddress: wallet.account.address,
-      spenderAddress: tokenVaultAddress,
-    });
+    const isMXC = args.token === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+    if (!isMXC) {
+      const requireAllowance = await this.requireAllowance({
+        amount,
+        tokenAddress: token,
+        ownerAddress: wallet.account.address,
+        spenderAddress: tokenVaultAddress,
+      });
 
-    if (requireAllowance) {
-      throw new InsufficientAllowanceError(`Insufficient allowance for the amount ${amount}`);
+      if (requireAllowance)
+        throw new InsufficientAllowanceError(`Insufficient allowance for the amount ${amount}`);
+    }
+    let value = 0n
+    if (isMXC) {
+      value = args.amount
+      args.amount = 0n
     }
 
     const { tokenVaultContract, sendERC20Args } = await ERC20Bridge._prepareTransaction(args);
@@ -232,7 +239,7 @@ export class ERC20Bridge extends Bridge {
         abi: erc20VaultAbi,
         functionName: 'sendToken',
         args: [sendERC20Args],
-        value: fee,
+        value: value + fee,
       });
       log('Simulate contract', request);
 

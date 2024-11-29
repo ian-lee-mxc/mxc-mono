@@ -88,10 +88,10 @@
           ? $allApproved || approving
           : approving);
 
-  $: isERC20 = $selectedToken?.type === TokenType.ERC20;
+  $: isERC20 = $selectedToken?.type === TokenType.ERC20 && $selectedToken?.symbol !== 'MXC';
   $: isERC721 = $selectedToken?.type === TokenType.ERC721;
   $: isERC1155 = $selectedToken?.type === TokenType.ERC1155;
-  $: isETH = $selectedToken?.type === TokenType.ETH;
+  $: isETH = $selectedToken?.type === TokenType.ETH || $selectedToken?.symbol === 'MXC';
 
   $: validApprovalStatus = $allApproved;
 
@@ -101,7 +101,7 @@
     $needsApprovalReset;
 
   $: commonConditions =
-    validApprovalStatus &&
+    (isERC20 ? validApprovalStatus : true) &&
     !bridging &&
     hasAddress &&
     hasNetworks &&
@@ -109,7 +109,7 @@
     $selectedToken &&
     !$validatingAmount &&
     !$insufficientBalance &&
-    $allApproved &&
+    (isERC20 ? $allApproved : true) &&
     !paused;
 
   $: erc20ConditionsSatisfied =
