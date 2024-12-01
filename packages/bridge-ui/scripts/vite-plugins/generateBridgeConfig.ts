@@ -1,7 +1,9 @@
 import dotenv from 'dotenv';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { dirname } from 'path';
 import { Project, SourceFile, VariableDeclarationKind } from 'ts-morph';
+import { fileURLToPath } from 'url';
 
 import configuredBridgesSchema from '../../config/schemas/configuredBridges.schema.json';
 import type { BridgeConfig, ConfiguredBridgesType, RoutingMap } from '../../src/libs/bridge/types';
@@ -16,9 +18,9 @@ const logger = new PluginLogger(pluginName);
 
 const skip = process.env.SKIP_ENV_VALIDATION === 'true';
 
-const currentDir = path.resolve(new URL(import.meta.url).pathname);
-
-const outputPath = path.join(path.dirname(currentDir), '../../src/generated/bridgeConfig.ts');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const outputPath = path.join(__dirname, '../../src/generated/bridgeConfig.ts');
 
 export function generateBridgeConfig() {
   return {

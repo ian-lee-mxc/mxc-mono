@@ -1,29 +1,30 @@
-import { zeroAddress } from 'viem';
+// import { zeroAddress } from 'viem';
 
 import { customToken } from '$customToken';
-import { getConfiguredChainIds } from '$libs/chain';
 
+// import { getConfiguredChainIds } from '$libs/chain';
 import { type Token, TokenAttributeKey, TokenType } from './types';
 
-const chains = getConfiguredChainIds();
+// const chains = getConfiguredChainIds();
 
-const zeroAddressMap = chains.reduce((acc, chainId) => ({ ...acc, [chainId]: zeroAddress }), {});
+// const zeroAddressMap = chains.reduce((acc, chainId) => ({ ...acc, [chainId]: zeroAddress }), {});
 
-export const ETHToken: Token = {
-  name: 'Ether',
-  addresses: zeroAddressMap,
-  decimals: 18,
-  symbol: 'ETH',
-  type: TokenType.ETH,
-};
+// export const ETHToken: Token = {
+//   name: 'Ether',
+//   addresses: zeroAddressMap,
+//   decimals: 18,
+//   symbol: 'MXC',
+//   type: TokenType.ETH,
+// };
 
 export const testERC20Tokens: Token[] = customToken.filter((token) => token.type === TokenType.ERC20);
+export const ETHToken: Token = testERC20Tokens[0]
 
 export const testNFT: Token[] = customToken.filter(
   (token) => token.type === TokenType.ERC721 || token.type === TokenType.ERC1155,
 );
 
-export const tokens = [ETHToken, ...testERC20Tokens];
+export const tokens = [...testERC20Tokens];
 
 export const getTokensByType = (type: TokenType): Token[] => tokens.filter((token) => token.type === type);
 

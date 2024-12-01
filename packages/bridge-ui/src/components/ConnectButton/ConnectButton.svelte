@@ -4,7 +4,7 @@
 
   import { ActionButton } from '$components/Button';
   import { Icon } from '$components/Icon';
-  import { getChainImage } from '$libs/chain';
+  import { chains, getChainImage } from '$libs/chain';
   import { web3modal } from '$libs/connect';
   import { refreshUserBalance, renderEthBalance } from '$libs/util/balance';
   import { noop } from '$libs/util/noop';
@@ -33,6 +33,8 @@
 
   $: balance = $ethBalance || 0n;
 
+  $: currentChain = chains.find(chain => chain.id === currentChainId)
+  
   onMount(async () => {
     unsubscribeWeb3Modal = web3modal.subscribeState(onWeb3Modal);
     await refreshUserBalance();
@@ -52,6 +54,7 @@
     <span class="flex items-center text-secondary-content justify-self-start gap-4 md:text-normal text-sm">
       {#if !$isMobile}
         {renderEthBalance(balance, 6)}
+        {currentChain?.nativeCurrency.symbol}
       {/if}
       <span
         class="flex items-center justify-center h-[35px] min-w-[133px] text-center text-tertiary-content btn-glass-bg rounded-full px-[10px] py-[4px] bg-tertiary-background">

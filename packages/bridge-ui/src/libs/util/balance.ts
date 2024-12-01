@@ -18,7 +18,7 @@ export function renderBalance(balance: Maybe<GetBalanceReturnType>): string {
 }
 
 export function renderEthBalance(balance: bigint, maxlength = 8): string {
-  return `${truncateString(formatEther(balance).toString(), maxlength, '')} ETH`;
+  return `${truncateString(formatEther(balance).toString(), maxlength, '')}`;
 }
 
 export const refreshUserBalance = async () => {
