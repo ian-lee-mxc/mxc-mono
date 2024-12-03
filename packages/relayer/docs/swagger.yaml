@@ -49,7 +49,7 @@ info:
     name: MIT
     url: https://github.com/taikoxyz/taiko-mono/blob/main/LICENSE.md
   termsOfService: http://swagger.io/terms/
-  title: Taiko Bridge Relayer API
+  title: Moonchain Bridge Relayer API
   version: "1.0"
 paths:
   /blockInfo:

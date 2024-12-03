@@ -3,7 +3,7 @@
   */
 
 [data-glow-border] {
-  --base: 333;
+  --base: 222;
   --border-size: calc(var(--border, 2) * 1px);
   --spotlight-size: calc(var(--size, 150) * 1px);
   --hue: calc(var(--base) + (var(--xp, 0) * var(--spread, 0)));
