@@ -169,7 +169,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "relayer.hekla.taiko.xyz",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "Taiko Bridge Relayer API",
+	Title:            "Moonchain Bridge Relayer API",
 	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

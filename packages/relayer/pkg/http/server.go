@@ -29,7 +29,7 @@ type ethClient interface {
 	) (common.Address, error)
 }
 
-// @title Taiko Bridge Relayer API
+// @title Moonchain Bridge Relayer API
 // @version 1.0
 // @termsOfService http://swagger.io/terms/
 

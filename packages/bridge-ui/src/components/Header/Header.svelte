@@ -37,7 +37,7 @@
  ">
   <div class="flex justify-between items-center w-full">
     <div class="lg:w-[226px] w-auto">
-      <LogoWithText class="md:w-[125px] w-[77px]" />
+      <LogoWithText class="md:w-[158px] w-[77px]" />
     </div>
 
     {#if isBridgePage || isTransactionsPage}
