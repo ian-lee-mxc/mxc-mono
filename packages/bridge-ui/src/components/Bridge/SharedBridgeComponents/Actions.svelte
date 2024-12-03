@@ -88,10 +88,10 @@
           ? $allApproved || approving
           : approving);
 
-  $: isERC20 = $selectedToken?.type === TokenType.ERC20 && $selectedToken?.symbol !== 'MXC';
+  $: isERC20 = $selectedToken?.type === TokenType.ERC20 && !($selectedToken?.symbol === $connectedSourceChain?.nativeCurrency.symbol);
   $: isERC721 = $selectedToken?.type === TokenType.ERC721;
   $: isERC1155 = $selectedToken?.type === TokenType.ERC1155;
-  $: isETH = $selectedToken?.type === TokenType.ETH || $selectedToken?.symbol === 'MXC';
+  $: isETH = $selectedToken?.type === TokenType.ETH || ($selectedToken?.symbol === $connectedSourceChain?.nativeCurrency.symbol);
 
   $: validApprovalStatus = $allApproved;
 

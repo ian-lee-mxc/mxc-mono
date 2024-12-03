@@ -3,7 +3,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 export const bridgeAbi = [
-  { type: 'receive', stateMutability: 'payable' },
   {
     type: 'function',
     inputs: [],
@@ -16,6 +15,13 @@ export const bridgeAbi = [
     inputs: [],
     name: 'GAS_RESERVE',
     outputs: [{ name: '', internalType: 'uint32', type: 'uint32' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'RELAYER_MAX_PROOF_BYTES',
+    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
     stateMutability: 'view',
   },
   {
@@ -59,7 +65,7 @@ export const bridgeAbi = [
         type: 'tuple',
         components: [
           { name: 'id', internalType: 'uint64', type: 'uint64' },
-          { name: 'fee', internalType: 'uint64', type: 'uint64' },
+          { name: 'fee', internalType: 'uint128', type: 'uint128' },
           { name: 'gasLimit', internalType: 'uint32', type: 'uint32' },
           { name: 'from', internalType: 'address', type: 'address' },
           { name: 'srcChainId', internalType: 'uint64', type: 'uint64' },
@@ -73,6 +79,20 @@ export const bridgeAbi = [
       },
     ],
     name: 'failMessage',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: '_owner', internalType: 'address', type: 'address' },
+      {
+        name: '_sharedAddressManager',
+        internalType: 'address',
+        type: 'address',
+      },
+    ],
+    name: 'forkInit',
     outputs: [],
     stateMutability: 'nonpayable',
   },
@@ -92,7 +112,7 @@ export const bridgeAbi = [
         type: 'tuple',
         components: [
           { name: 'id', internalType: 'uint64', type: 'uint64' },
-          { name: 'fee', internalType: 'uint64', type: 'uint64' },
+          { name: 'fee', internalType: 'uint128', type: 'uint128' },
           { name: 'gasLimit', internalType: 'uint32', type: 'uint32' },
           { name: 'from', internalType: 'address', type: 'address' },
           { name: 'srcChainId', internalType: 'uint64', type: 'uint64' },
@@ -112,6 +132,13 @@ export const bridgeAbi = [
   {
     type: 'function',
     inputs: [],
+    name: 'impl',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
     name: 'inNonReentrant',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
     stateMutability: 'view',
@@ -120,7 +147,11 @@ export const bridgeAbi = [
     type: 'function',
     inputs: [
       { name: '_owner', internalType: 'address', type: 'address' },
-      { name: '_addressManager', internalType: 'address', type: 'address' },
+      {
+        name: '_sharedAddressManager',
+        internalType: 'address',
+        type: 'address',
+      },
     ],
     name: 'init',
     outputs: [],
@@ -130,6 +161,16 @@ export const bridgeAbi = [
     type: 'function',
     inputs: [],
     name: 'init2',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: '_to', internalType: 'address', type: 'address' },
+      { name: '_amount', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'invocationSendNativeToken',
     outputs: [],
     stateMutability: 'nonpayable',
   },
@@ -152,7 +193,7 @@ export const bridgeAbi = [
         type: 'tuple',
         components: [
           { name: 'id', internalType: 'uint64', type: 'uint64' },
-          { name: 'fee', internalType: 'uint64', type: 'uint64' },
+          { name: 'fee', internalType: 'uint128', type: 'uint128' },
           { name: 'gasLimit', internalType: 'uint32', type: 'uint32' },
           { name: 'from', internalType: 'address', type: 'address' },
           { name: 'srcChainId', internalType: 'uint64', type: 'uint64' },
@@ -179,7 +220,7 @@ export const bridgeAbi = [
         type: 'tuple',
         components: [
           { name: 'id', internalType: 'uint64', type: 'uint64' },
-          { name: 'fee', internalType: 'uint64', type: 'uint64' },
+          { name: 'fee', internalType: 'uint128', type: 'uint128' },
           { name: 'gasLimit', internalType: 'uint32', type: 'uint32' },
           { name: 'from', internalType: 'address', type: 'address' },
           { name: 'srcChainId', internalType: 'uint64', type: 'uint64' },
@@ -206,7 +247,7 @@ export const bridgeAbi = [
         type: 'tuple',
         components: [
           { name: 'id', internalType: 'uint64', type: 'uint64' },
-          { name: 'fee', internalType: 'uint64', type: 'uint64' },
+          { name: 'fee', internalType: 'uint128', type: 'uint128' },
           { name: 'gasLimit', internalType: 'uint32', type: 'uint32' },
           { name: 'from', internalType: 'address', type: 'address' },
           { name: 'srcChainId', internalType: 'uint64', type: 'uint64' },
@@ -283,7 +324,7 @@ export const bridgeAbi = [
         type: 'tuple',
         components: [
           { name: 'id', internalType: 'uint64', type: 'uint64' },
-          { name: 'fee', internalType: 'uint64', type: 'uint64' },
+          { name: 'fee', internalType: 'uint128', type: 'uint128' },
           { name: 'gasLimit', internalType: 'uint32', type: 'uint32' },
           { name: 'from', internalType: 'address', type: 'address' },
           { name: 'srcChainId', internalType: 'uint64', type: 'uint64' },
@@ -298,7 +339,14 @@ export const bridgeAbi = [
       { name: '_proof', internalType: 'bytes', type: 'bytes' },
     ],
     name: 'processMessage',
-    outputs: [],
+    outputs: [
+      { name: 'status_', internalType: 'enum IBridge.Status', type: 'uint8' },
+      {
+        name: 'reason_',
+        internalType: 'enum IBridge.StatusReason',
+        type: 'uint8',
+      },
+    ],
     stateMutability: 'nonpayable',
   },
   {
@@ -317,7 +365,7 @@ export const bridgeAbi = [
         type: 'tuple',
         components: [
           { name: 'id', internalType: 'uint64', type: 'uint64' },
-          { name: 'fee', internalType: 'uint64', type: 'uint64' },
+          { name: 'fee', internalType: 'uint128', type: 'uint128' },
           { name: 'gasLimit', internalType: 'uint32', type: 'uint32' },
           { name: 'from', internalType: 'address', type: 'address' },
           { name: 'srcChainId', internalType: 'uint64', type: 'uint64' },
@@ -350,7 +398,7 @@ export const bridgeAbi = [
       { name: '_allowZeroAddress', internalType: 'bool', type: 'bool' },
     ],
     name: 'resolve',
-    outputs: [{ name: '', internalType: 'address payable', type: 'address' }],
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
     stateMutability: 'view',
   },
   {
@@ -360,7 +408,7 @@ export const bridgeAbi = [
       { name: '_allowZeroAddress', internalType: 'bool', type: 'bool' },
     ],
     name: 'resolve',
-    outputs: [{ name: '', internalType: 'address payable', type: 'address' }],
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
     stateMutability: 'view',
   },
   {
@@ -372,7 +420,7 @@ export const bridgeAbi = [
         type: 'tuple',
         components: [
           { name: 'id', internalType: 'uint64', type: 'uint64' },
-          { name: 'fee', internalType: 'uint64', type: 'uint64' },
+          { name: 'fee', internalType: 'uint128', type: 'uint128' },
           { name: 'gasLimit', internalType: 'uint32', type: 'uint32' },
           { name: 'from', internalType: 'address', type: 'address' },
           { name: 'srcChainId', internalType: 'uint64', type: 'uint64' },
@@ -392,6 +440,13 @@ export const bridgeAbi = [
   },
   {
     type: 'function',
+    inputs: [{ name: '_anyToken', internalType: 'address', type: 'address' }],
+    name: 'selfDelegate',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
     inputs: [
       {
         name: '_message',
@@ -399,7 +454,7 @@ export const bridgeAbi = [
         type: 'tuple',
         components: [
           { name: 'id', internalType: 'uint64', type: 'uint64' },
-          { name: 'fee', internalType: 'uint64', type: 'uint64' },
+          { name: 'fee', internalType: 'uint128', type: 'uint128' },
           { name: 'gasLimit', internalType: 'uint32', type: 'uint32' },
           { name: 'from', internalType: 'address', type: 'address' },
           { name: 'srcChainId', internalType: 'uint64', type: 'uint64' },
@@ -421,7 +476,7 @@ export const bridgeAbi = [
         type: 'tuple',
         components: [
           { name: 'id', internalType: 'uint64', type: 'uint64' },
-          { name: 'fee', internalType: 'uint64', type: 'uint64' },
+          { name: 'fee', internalType: 'uint128', type: 'uint128' },
           { name: 'gasLimit', internalType: 'uint32', type: 'uint32' },
           { name: 'from', internalType: 'address', type: 'address' },
           { name: 'srcChainId', internalType: 'uint64', type: 'uint64' },
@@ -532,7 +587,7 @@ export const bridgeAbi = [
         type: 'tuple',
         components: [
           { name: 'id', internalType: 'uint64', type: 'uint64' },
-          { name: 'fee', internalType: 'uint64', type: 'uint64' },
+          { name: 'fee', internalType: 'uint128', type: 'uint128' },
           { name: 'gasLimit', internalType: 'uint32', type: 'uint32' },
           { name: 'from', internalType: 'address', type: 'address' },
           { name: 'srcChainId', internalType: 'uint64', type: 'uint64' },
@@ -553,6 +608,7 @@ export const bridgeAbi = [
           { name: 'gasUsedInFeeCalc', internalType: 'uint32', type: 'uint32' },
           { name: 'proofSize', internalType: 'uint32', type: 'uint32' },
           { name: 'numCacheOps', internalType: 'uint32', type: 'uint32' },
+          { name: 'processedByRelayer', internalType: 'bool', type: 'bool' },
         ],
         indexed: false,
       },
@@ -575,7 +631,7 @@ export const bridgeAbi = [
         type: 'tuple',
         components: [
           { name: 'id', internalType: 'uint64', type: 'uint64' },
-          { name: 'fee', internalType: 'uint64', type: 'uint64' },
+          { name: 'fee', internalType: 'uint128', type: 'uint128' },
           { name: 'gasLimit', internalType: 'uint32', type: 'uint32' },
           { name: 'from', internalType: 'address', type: 'address' },
           { name: 'srcChainId', internalType: 'uint64', type: 'uint64' },
@@ -693,10 +749,11 @@ export const bridgeAbi = [
   { type: 'error', inputs: [], name: 'B_INVALID_FEE' },
   { type: 'error', inputs: [], name: 'B_INVALID_GAS_LIMIT' },
   { type: 'error', inputs: [], name: 'B_INVALID_STATUS' },
-  { type: 'error', inputs: [], name: 'B_INVALID_USER' },
   { type: 'error', inputs: [], name: 'B_INVALID_VALUE' },
   { type: 'error', inputs: [], name: 'B_MESSAGE_NOT_SENT' },
+  { type: 'error', inputs: [], name: 'B_OUT_OF_ETH_QUOTA' },
   { type: 'error', inputs: [], name: 'B_PERMISSION_DENIED' },
+  { type: 'error', inputs: [], name: 'B_PROOF_TOO_LARGE' },
   { type: 'error', inputs: [], name: 'B_RETRY_FAILED' },
   { type: 'error', inputs: [], name: 'B_SIGNAL_NOT_RECEIVED' },
   { type: 'error', inputs: [], name: 'ETH_TRANSFER_FAILED' },
@@ -714,7 +771,8 @@ export const bridgeAbi = [
     ],
     name: 'RESOLVER_ZERO_ADDR',
   },
-  { type: 'error', inputs: [], name: 'ZERO_ADDR_MANAGER' },
+  { type: 'error', inputs: [], name: 'ZERO_ADDRESS' },
+  { type: 'error', inputs: [], name: 'ZERO_VALUE' },
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -723,38 +781,13 @@ export const bridgeAbi = [
 
 export const crossChainSyncAbi = [
   {
-    type: 'function',
-    inputs: [{ name: 'blockId', internalType: 'uint64', type: 'uint64' }],
-    name: 'getSyncedSnippet',
-    outputs: [
-      {
-        name: 'snippet',
-        internalType: 'struct ICrossChainSync.Snippet',
-        type: 'tuple',
-        components: [
-          { name: 'remoteBlockId', internalType: 'uint64', type: 'uint64' },
-          { name: 'syncedInBlock', internalType: 'uint64', type: 'uint64' },
-          { name: 'blockHash', internalType: 'bytes32', type: 'bytes32' },
-          { name: 'stateRoot', internalType: 'bytes32', type: 'bytes32' },
-        ],
-      },
-    ],
-    stateMutability: 'view',
-  },
-  {
     type: 'event',
     anonymous: false,
     inputs: [
       {
-        name: 'syncedInBlock',
-        internalType: 'uint64',
-        type: 'uint64',
-        indexed: true,
-      },
-      {
-        name: 'blockId',
-        internalType: 'uint64',
-        type: 'uint64',
+        name: 'srcHeight',
+        internalType: 'uint256',
+        type: 'uint256',
         indexed: true,
       },
       {
@@ -764,13 +797,27 @@ export const crossChainSyncAbi = [
         indexed: false,
       },
       {
-        name: 'stateRoot',
+        name: 'signalRoot',
         internalType: 'bytes32',
         type: 'bytes32',
         indexed: false,
       },
     ],
     name: 'CrossChainSynced',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: 'number', internalType: 'uint256', type: 'uint256' }],
+    name: 'getCrossChainBlockHash',
+    outputs: [{ name: '', internalType: 'bytes32', type: 'bytes32' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: 'number', internalType: 'uint256', type: 'uint256' }],
+    name: 'getCrossChainSignalRoot',
+    outputs: [{ name: '', internalType: 'bytes32', type: 'bytes32' }],
+    stateMutability: 'view',
   },
 ] as const
 
@@ -779,13 +826,6 @@ export const crossChainSyncAbi = [
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 export const erc1155VaultAbi = [
-  {
-    type: 'function',
-    inputs: [],
-    name: 'MAX_TOKEN_PER_TXN',
-    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
-    stateMutability: 'view',
-  },
   {
     type: 'function',
     inputs: [],
@@ -825,6 +865,13 @@ export const erc1155VaultAbi = [
   {
     type: 'function',
     inputs: [],
+    name: 'impl',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
     name: 'inNonReentrant',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
     stateMutability: 'view',
@@ -833,7 +880,11 @@ export const erc1155VaultAbi = [
     type: 'function',
     inputs: [
       { name: '_owner', internalType: 'address', type: 'address' },
-      { name: '_addressManager', internalType: 'address', type: 'address' },
+      {
+        name: '_sharedAddressManager',
+        internalType: 'address',
+        type: 'address',
+      },
     ],
     name: 'init',
     outputs: [],
@@ -895,7 +946,7 @@ export const erc1155VaultAbi = [
         type: 'tuple',
         components: [
           { name: 'id', internalType: 'uint64', type: 'uint64' },
-          { name: 'fee', internalType: 'uint64', type: 'uint64' },
+          { name: 'fee', internalType: 'uint128', type: 'uint128' },
           { name: 'gasLimit', internalType: 'uint32', type: 'uint32' },
           { name: 'from', internalType: 'address', type: 'address' },
           { name: 'srcChainId', internalType: 'uint64', type: 'uint64' },
@@ -963,7 +1014,7 @@ export const erc1155VaultAbi = [
       { name: '_allowZeroAddress', internalType: 'bool', type: 'bool' },
     ],
     name: 'resolve',
-    outputs: [{ name: '', internalType: 'address payable', type: 'address' }],
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
     stateMutability: 'view',
   },
   {
@@ -973,7 +1024,7 @@ export const erc1155VaultAbi = [
       { name: '_allowZeroAddress', internalType: 'bool', type: 'bool' },
     ],
     name: 'resolve',
-    outputs: [{ name: '', internalType: 'address payable', type: 'address' }],
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
     stateMutability: 'view',
   },
   {
@@ -1003,7 +1054,7 @@ export const erc1155VaultAbi = [
         type: 'tuple',
         components: [
           { name: 'id', internalType: 'uint64', type: 'uint64' },
-          { name: 'fee', internalType: 'uint64', type: 'uint64' },
+          { name: 'fee', internalType: 'uint128', type: 'uint128' },
           { name: 'gasLimit', internalType: 'uint32', type: 'uint32' },
           { name: 'from', internalType: 'address', type: 'address' },
           { name: 'srcChainId', internalType: 'uint64', type: 'uint64' },
@@ -1355,14 +1406,15 @@ export const erc1155VaultAbi = [
     ],
     name: 'RESOLVER_ZERO_ADDR',
   },
+  { type: 'error', inputs: [], name: 'VAULT_INSUFFICIENT_FEE' },
   { type: 'error', inputs: [], name: 'VAULT_INTERFACE_NOT_SUPPORTED' },
   { type: 'error', inputs: [], name: 'VAULT_INVALID_AMOUNT' },
   { type: 'error', inputs: [], name: 'VAULT_INVALID_TOKEN' },
   { type: 'error', inputs: [], name: 'VAULT_INVALID_TO_ADDR' },
-  { type: 'error', inputs: [], name: 'VAULT_MAX_TOKEN_PER_TXN_EXCEEDED' },
   { type: 'error', inputs: [], name: 'VAULT_PERMISSION_DENIED' },
   { type: 'error', inputs: [], name: 'VAULT_TOKEN_ARRAY_MISMATCH' },
-  { type: 'error', inputs: [], name: 'ZERO_ADDR_MANAGER' },
+  { type: 'error', inputs: [], name: 'ZERO_ADDRESS' },
+  { type: 'error', inputs: [], name: 'ZERO_VALUE' },
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1407,8 +1459,8 @@ export const erc20VaultAbi = [
   {
     type: 'function',
     inputs: [{ name: 'btoken', internalType: 'address', type: 'address' }],
-    name: 'btokenBlacklist',
-    outputs: [{ name: 'blacklisted', internalType: 'bool', type: 'bool' }],
+    name: 'btokenDenylist',
+    outputs: [{ name: 'denied', internalType: 'bool', type: 'bool' }],
     stateMutability: 'view',
   },
   {
@@ -1445,6 +1497,13 @@ export const erc20VaultAbi = [
   {
     type: 'function',
     inputs: [],
+    name: 'impl',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
     name: 'inNonReentrant',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
     stateMutability: 'view',
@@ -1453,7 +1512,11 @@ export const erc20VaultAbi = [
     type: 'function',
     inputs: [
       { name: '_owner', internalType: 'address', type: 'address' },
-      { name: '_addressManager', internalType: 'address', type: 'address' },
+      {
+        name: '_sharedAddressManager',
+        internalType: 'address',
+        type: 'address',
+      },
     ],
     name: 'init',
     outputs: [],
@@ -1499,7 +1562,7 @@ export const erc20VaultAbi = [
         type: 'tuple',
         components: [
           { name: 'id', internalType: 'uint64', type: 'uint64' },
-          { name: 'fee', internalType: 'uint64', type: 'uint64' },
+          { name: 'fee', internalType: 'uint128', type: 'uint128' },
           { name: 'gasLimit', internalType: 'uint32', type: 'uint32' },
           { name: 'from', internalType: 'address', type: 'address' },
           { name: 'srcChainId', internalType: 'uint64', type: 'uint64' },
@@ -1567,7 +1630,7 @@ export const erc20VaultAbi = [
       { name: '_allowZeroAddress', internalType: 'bool', type: 'bool' },
     ],
     name: 'resolve',
-    outputs: [{ name: '', internalType: 'address payable', type: 'address' }],
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
     stateMutability: 'view',
   },
   {
@@ -1577,7 +1640,7 @@ export const erc20VaultAbi = [
       { name: '_allowZeroAddress', internalType: 'bool', type: 'bool' },
     ],
     name: 'resolve',
-    outputs: [{ name: '', internalType: 'address payable', type: 'address' }],
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
     stateMutability: 'view',
   },
   {
@@ -1591,7 +1654,7 @@ export const erc20VaultAbi = [
           { name: 'destChainId', internalType: 'uint64', type: 'uint64' },
           { name: 'destOwner', internalType: 'address', type: 'address' },
           { name: 'to', internalType: 'address', type: 'address' },
-          { name: 'fee', internalType: 'uint64', type: 'uint64' },
+          { name: 'fee', internalType: 'uint128', type: 'uint128' },
           { name: 'token', internalType: 'address', type: 'address' },
           { name: 'gasLimit', internalType: 'uint32', type: 'uint32' },
           { name: 'amount', internalType: 'uint256', type: 'uint256' },
@@ -1606,7 +1669,7 @@ export const erc20VaultAbi = [
         type: 'tuple',
         components: [
           { name: 'id', internalType: 'uint64', type: 'uint64' },
-          { name: 'fee', internalType: 'uint64', type: 'uint64' },
+          { name: 'fee', internalType: 'uint128', type: 'uint128' },
           { name: 'gasLimit', internalType: 'uint32', type: 'uint32' },
           { name: 'from', internalType: 'address', type: 'address' },
           { name: 'srcChainId', internalType: 'uint64', type: 'uint64' },
@@ -1928,6 +1991,12 @@ export const erc20VaultAbi = [
       { name: 'from', internalType: 'address', type: 'address', indexed: true },
       { name: 'to', internalType: 'address', type: 'address', indexed: true },
       {
+        name: 'canonicalChainId',
+        internalType: 'uint64',
+        type: 'uint64',
+        indexed: false,
+      },
+      {
         name: 'destChainId',
         internalType: 'uint64',
         type: 'uint64',
@@ -1997,13 +2066,16 @@ export const erc20VaultAbi = [
   },
   { type: 'error', inputs: [], name: 'VAULT_BTOKEN_BLACKLISTED' },
   { type: 'error', inputs: [], name: 'VAULT_CTOKEN_MISMATCH' },
+  { type: 'error', inputs: [], name: 'VAULT_INSUFFICIENT_FEE' },
   { type: 'error', inputs: [], name: 'VAULT_INVALID_AMOUNT' },
+  { type: 'error', inputs: [], name: 'VAULT_INVALID_CTOKEN' },
   { type: 'error', inputs: [], name: 'VAULT_INVALID_NEW_BTOKEN' },
   { type: 'error', inputs: [], name: 'VAULT_INVALID_TOKEN' },
   { type: 'error', inputs: [], name: 'VAULT_INVALID_TO_ADDR' },
   { type: 'error', inputs: [], name: 'VAULT_LAST_MIGRATION_TOO_CLOSE' },
   { type: 'error', inputs: [], name: 'VAULT_PERMISSION_DENIED' },
-  { type: 'error', inputs: [], name: 'ZERO_ADDR_MANAGER' },
+  { type: 'error', inputs: [], name: 'ZERO_ADDRESS' },
+  { type: 'error', inputs: [], name: 'ZERO_VALUE' },
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2011,13 +2083,6 @@ export const erc20VaultAbi = [
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 export const erc721VaultAbi = [
-  {
-    type: 'function',
-    inputs: [],
-    name: 'MAX_TOKEN_PER_TXN',
-    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
-    stateMutability: 'view',
-  },
   {
     type: 'function',
     inputs: [],
@@ -2057,6 +2122,13 @@ export const erc721VaultAbi = [
   {
     type: 'function',
     inputs: [],
+    name: 'impl',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
     name: 'inNonReentrant',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
     stateMutability: 'view',
@@ -2065,7 +2137,11 @@ export const erc721VaultAbi = [
     type: 'function',
     inputs: [
       { name: '_owner', internalType: 'address', type: 'address' },
-      { name: '_addressManager', internalType: 'address', type: 'address' },
+      {
+        name: '_sharedAddressManager',
+        internalType: 'address',
+        type: 'address',
+      },
     ],
     name: 'init',
     outputs: [],
@@ -2113,7 +2189,7 @@ export const erc721VaultAbi = [
         type: 'tuple',
         components: [
           { name: 'id', internalType: 'uint64', type: 'uint64' },
-          { name: 'fee', internalType: 'uint64', type: 'uint64' },
+          { name: 'fee', internalType: 'uint128', type: 'uint128' },
           { name: 'gasLimit', internalType: 'uint32', type: 'uint32' },
           { name: 'from', internalType: 'address', type: 'address' },
           { name: 'srcChainId', internalType: 'uint64', type: 'uint64' },
@@ -2181,7 +2257,7 @@ export const erc721VaultAbi = [
       { name: '_allowZeroAddress', internalType: 'bool', type: 'bool' },
     ],
     name: 'resolve',
-    outputs: [{ name: '', internalType: 'address payable', type: 'address' }],
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
     stateMutability: 'view',
   },
   {
@@ -2191,7 +2267,7 @@ export const erc721VaultAbi = [
       { name: '_allowZeroAddress', internalType: 'bool', type: 'bool' },
     ],
     name: 'resolve',
-    outputs: [{ name: '', internalType: 'address payable', type: 'address' }],
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
     stateMutability: 'view',
   },
   {
@@ -2221,7 +2297,7 @@ export const erc721VaultAbi = [
         type: 'tuple',
         components: [
           { name: 'id', internalType: 'uint64', type: 'uint64' },
-          { name: 'fee', internalType: 'uint64', type: 'uint64' },
+          { name: 'fee', internalType: 'uint128', type: 'uint128' },
           { name: 'gasLimit', internalType: 'uint32', type: 'uint32' },
           { name: 'from', internalType: 'address', type: 'address' },
           { name: 'srcChainId', internalType: 'uint64', type: 'uint64' },
@@ -2573,14 +2649,15 @@ export const erc721VaultAbi = [
     ],
     name: 'RESOLVER_ZERO_ADDR',
   },
+  { type: 'error', inputs: [], name: 'VAULT_INSUFFICIENT_FEE' },
   { type: 'error', inputs: [], name: 'VAULT_INTERFACE_NOT_SUPPORTED' },
   { type: 'error', inputs: [], name: 'VAULT_INVALID_AMOUNT' },
   { type: 'error', inputs: [], name: 'VAULT_INVALID_TOKEN' },
   { type: 'error', inputs: [], name: 'VAULT_INVALID_TO_ADDR' },
-  { type: 'error', inputs: [], name: 'VAULT_MAX_TOKEN_PER_TXN_EXCEEDED' },
   { type: 'error', inputs: [], name: 'VAULT_PERMISSION_DENIED' },
   { type: 'error', inputs: [], name: 'VAULT_TOKEN_ARRAY_MISMATCH' },
-  { type: 'error', inputs: [], name: 'ZERO_ADDR_MANAGER' },
+  { type: 'error', inputs: [], name: 'ZERO_ADDRESS' },
+  { type: 'error', inputs: [], name: 'ZERO_VALUE' },
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2625,11 +2702,10 @@ export const erc1155Abi = [
   {
     type: 'function',
     inputs: [
-      { name: '_account', internalType: 'address', type: 'address' },
-      { name: '_ids', internalType: 'uint256[]', type: 'uint256[]' },
-      { name: '_amounts', internalType: 'uint256[]', type: 'uint256[]' },
+      { name: '_id', internalType: 'uint256', type: 'uint256' },
+      { name: '_amount', internalType: 'uint256', type: 'uint256' },
     ],
-    name: 'burnBatch',
+    name: 'burn',
     outputs: [],
     stateMutability: 'nonpayable',
   },
@@ -2646,6 +2722,13 @@ export const erc1155Abi = [
   {
     type: 'function',
     inputs: [],
+    name: 'impl',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
     name: 'inNonReentrant',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
     stateMutability: 'view',
@@ -2654,7 +2737,11 @@ export const erc1155Abi = [
     type: 'function',
     inputs: [
       { name: '_owner', internalType: 'address', type: 'address' },
-      { name: '_addressManager', internalType: 'address', type: 'address' },
+      {
+        name: '_sharedAddressManager',
+        internalType: 'address',
+        type: 'address',
+      },
       { name: '_srcToken', internalType: 'address', type: 'address' },
       { name: '_srcChainId', internalType: 'uint256', type: 'uint256' },
       { name: '_symbol', internalType: 'string', type: 'string' },
@@ -2749,7 +2836,7 @@ export const erc1155Abi = [
       { name: '_allowZeroAddress', internalType: 'bool', type: 'bool' },
     ],
     name: 'resolve',
-    outputs: [{ name: '', internalType: 'address payable', type: 'address' }],
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
     stateMutability: 'view',
   },
   {
@@ -2759,7 +2846,7 @@ export const erc1155Abi = [
       { name: '_allowZeroAddress', internalType: 'bool', type: 'bool' },
     ],
     name: 'resolve',
-    outputs: [{ name: '', internalType: 'address payable', type: 'address' }],
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
     stateMutability: 'view',
   },
   {
@@ -2814,7 +2901,7 @@ export const erc1155Abi = [
   },
   {
     type: 'function',
-    inputs: [{ name: 'interfaceId', internalType: 'bytes4', type: 'bytes4' }],
+    inputs: [{ name: '_interfaceId', internalType: 'bytes4', type: 'bytes4' }],
     name: 'supportsInterface',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
     stateMutability: 'view',
@@ -3064,7 +3151,6 @@ export const erc1155Abi = [
   { type: 'error', inputs: [], name: 'BTOKEN_INVALID_PARAMS' },
   { type: 'error', inputs: [], name: 'BTOKEN_INVALID_PARAMS' },
   { type: 'error', inputs: [], name: 'BTOKEN_INVALID_TO_ADDR' },
-  { type: 'error', inputs: [], name: 'BTOKEN_INVALID_TO_ADDR' },
   { type: 'error', inputs: [], name: 'FUNC_NOT_IMPLEMENTED' },
   { type: 'error', inputs: [], name: 'INVALID_PAUSE_STATUS' },
   { type: 'error', inputs: [], name: 'REENTRANT_CALL' },
@@ -3079,7 +3165,8 @@ export const erc1155Abi = [
     ],
     name: 'RESOLVER_ZERO_ADDR',
   },
-  { type: 'error', inputs: [], name: 'ZERO_ADDR_MANAGER' },
+  { type: 'error', inputs: [], name: 'ZERO_ADDRESS' },
+  { type: 'error', inputs: [], name: 'ZERO_VALUE' },
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3182,6 +3269,13 @@ export const erc20Abi = [
   {
     type: 'function',
     inputs: [],
+    name: 'impl',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
     name: 'inNonReentrant',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
     stateMutability: 'view',
@@ -3200,7 +3294,11 @@ export const erc20Abi = [
     type: 'function',
     inputs: [
       { name: '_owner', internalType: 'address', type: 'address' },
-      { name: '_addressManager', internalType: 'address', type: 'address' },
+      {
+        name: '_sharedAddressManager',
+        internalType: 'address',
+        type: 'address',
+      },
       { name: '_srcToken', internalType: 'address', type: 'address' },
       { name: '_srcChainId', internalType: 'uint256', type: 'uint256' },
       { name: '_decimals', internalType: 'uint8', type: 'uint8' },
@@ -3306,7 +3404,7 @@ export const erc20Abi = [
       { name: '_allowZeroAddress', internalType: 'bool', type: 'bool' },
     ],
     name: 'resolve',
-    outputs: [{ name: '', internalType: 'address payable', type: 'address' }],
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
     stateMutability: 'view',
   },
   {
@@ -3316,7 +3414,7 @@ export const erc20Abi = [
       { name: '_allowZeroAddress', internalType: 'bool', type: 'bool' },
     ],
     name: 'resolve',
-    outputs: [{ name: '', internalType: 'address payable', type: 'address' }],
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
     stateMutability: 'view',
   },
   {
@@ -3332,6 +3430,13 @@ export const erc20Abi = [
     name: 'srcToken',
     outputs: [{ name: '', internalType: 'address', type: 'address' }],
     stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: '_interfaceId', internalType: 'bytes4', type: 'bytes4' }],
+    name: 'supportsInterface',
+    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+    stateMutability: 'pure',
   },
   {
     type: 'function',
@@ -3625,7 +3730,6 @@ export const erc20Abi = [
   { type: 'error', inputs: [], name: 'BTOKEN_INVALID_PARAMS' },
   { type: 'error', inputs: [], name: 'BTOKEN_INVALID_PARAMS' },
   { type: 'error', inputs: [], name: 'BTOKEN_INVALID_TO_ADDR' },
-  { type: 'error', inputs: [], name: 'BTOKEN_INVALID_TO_ADDR' },
   { type: 'error', inputs: [], name: 'BTOKEN_MINT_DISALLOWED' },
   { type: 'error', inputs: [], name: 'FUNC_NOT_IMPLEMENTED' },
   { type: 'error', inputs: [], name: 'INVALID_PAUSE_STATUS' },
@@ -3641,7 +3745,8 @@ export const erc20Abi = [
     ],
     name: 'RESOLVER_ZERO_ADDR',
   },
-  { type: 'error', inputs: [], name: 'ZERO_ADDR_MANAGER' },
+  { type: 'error', inputs: [], name: 'ZERO_ADDRESS' },
+  { type: 'error', inputs: [], name: 'ZERO_VALUE' },
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3682,10 +3787,7 @@ export const erc721Abi = [
   },
   {
     type: 'function',
-    inputs: [
-      { name: '_account', internalType: 'address', type: 'address' },
-      { name: '_tokenId', internalType: 'uint256', type: 'uint256' },
-    ],
+    inputs: [{ name: '_tokenId', internalType: 'uint256', type: 'uint256' }],
     name: 'burn',
     outputs: [],
     stateMutability: 'nonpayable',
@@ -3710,6 +3812,13 @@ export const erc721Abi = [
   {
     type: 'function',
     inputs: [],
+    name: 'impl',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
     name: 'inNonReentrant',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
     stateMutability: 'view',
@@ -3718,7 +3827,11 @@ export const erc721Abi = [
     type: 'function',
     inputs: [
       { name: '_owner', internalType: 'address', type: 'address' },
-      { name: '_addressManager', internalType: 'address', type: 'address' },
+      {
+        name: '_sharedAddressManager',
+        internalType: 'address',
+        type: 'address',
+      },
       { name: '_srcToken', internalType: 'address', type: 'address' },
       { name: '_srcChainId', internalType: 'uint256', type: 'uint256' },
       { name: '_symbol', internalType: 'string', type: 'string' },
@@ -3819,7 +3932,7 @@ export const erc721Abi = [
       { name: '_allowZeroAddress', internalType: 'bool', type: 'bool' },
     ],
     name: 'resolve',
-    outputs: [{ name: '', internalType: 'address payable', type: 'address' }],
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
     stateMutability: 'view',
   },
   {
@@ -3829,7 +3942,7 @@ export const erc721Abi = [
       { name: '_allowZeroAddress', internalType: 'bool', type: 'bool' },
     ],
     name: 'resolve',
-    outputs: [{ name: '', internalType: 'address payable', type: 'address' }],
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
     stateMutability: 'view',
   },
   {
@@ -3868,16 +3981,6 @@ export const erc721Abi = [
   {
     type: 'function',
     inputs: [],
-    name: 'source',
-    outputs: [
-      { name: '', internalType: 'address', type: 'address' },
-      { name: '', internalType: 'uint256', type: 'uint256' },
-    ],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
     name: 'srcChainId',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
     stateMutability: 'view',
@@ -3891,7 +3994,7 @@ export const erc721Abi = [
   },
   {
     type: 'function',
-    inputs: [{ name: 'interfaceId', internalType: 'bytes4', type: 'bytes4' }],
+    inputs: [{ name: '_interfaceId', internalType: 'bytes4', type: 'bytes4' }],
     name: 'supportsInterface',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
     stateMutability: 'view',
@@ -4135,7 +4238,6 @@ export const erc721Abi = [
   { type: 'error', inputs: [], name: 'BTOKEN_INVALID_PARAMS' },
   { type: 'error', inputs: [], name: 'BTOKEN_INVALID_PARAMS' },
   { type: 'error', inputs: [], name: 'BTOKEN_INVALID_TO_ADDR' },
-  { type: 'error', inputs: [], name: 'BTOKEN_INVALID_TO_ADDR' },
   { type: 'error', inputs: [], name: 'FUNC_NOT_IMPLEMENTED' },
   { type: 'error', inputs: [], name: 'INVALID_PAUSE_STATUS' },
   { type: 'error', inputs: [], name: 'REENTRANT_CALL' },
@@ -4150,7 +4252,8 @@ export const erc721Abi = [
     ],
     name: 'RESOLVER_ZERO_ADDR',
   },
-  { type: 'error', inputs: [], name: 'ZERO_ADDR_MANAGER' },
+  { type: 'error', inputs: [], name: 'ZERO_ADDRESS' },
+  { type: 'error', inputs: [], name: 'ZERO_VALUE' },
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -4361,6 +4464,13 @@ export const quotaManagerAbi = [
   {
     type: 'function',
     inputs: [],
+    name: 'impl',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
     name: 'inNonReentrant',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
     stateMutability: 'view',
@@ -4369,7 +4479,11 @@ export const quotaManagerAbi = [
     type: 'function',
     inputs: [
       { name: '_owner', internalType: 'address', type: 'address' },
-      { name: '_addressManager', internalType: 'address', type: 'address' },
+      {
+        name: '_sharedAddressManager',
+        internalType: 'address',
+        type: 'address',
+      },
       { name: '_quotaPeriod', internalType: 'uint24', type: 'uint24' },
     ],
     name: 'init',
@@ -4440,7 +4554,7 @@ export const quotaManagerAbi = [
       { name: '_allowZeroAddress', internalType: 'bool', type: 'bool' },
     ],
     name: 'resolve',
-    outputs: [{ name: '', internalType: 'address payable', type: 'address' }],
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
     stateMutability: 'view',
   },
   {
@@ -4450,8 +4564,15 @@ export const quotaManagerAbi = [
       { name: '_allowZeroAddress', internalType: 'bool', type: 'bool' },
     ],
     name: 'resolve',
-    outputs: [{ name: '', internalType: 'address payable', type: 'address' }],
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
     stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: '_quotaPeriod', internalType: 'uint24', type: 'uint24' }],
+    name: 'setQuotaPeriod',
+    outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
     type: 'function',
@@ -4603,6 +4724,19 @@ export const quotaManagerAbi = [
     anonymous: false,
     inputs: [
       {
+        name: 'quotaPeriod',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'QuotaPeriodUpdated',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
         name: 'token',
         internalType: 'address',
         type: 'address',
@@ -4665,7 +4799,8 @@ export const quotaManagerAbi = [
     ],
     name: 'RESOLVER_ZERO_ADDR',
   },
-  { type: 'error', inputs: [], name: 'ZERO_ADDR_MANAGER' },
+  { type: 'error', inputs: [], name: 'ZERO_ADDRESS' },
+  { type: 'error', inputs: [], name: 'ZERO_VALUE' },
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

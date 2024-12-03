@@ -212,8 +212,8 @@ export class ERC20Bridge extends Bridge {
 
     if (!wallet || !wallet.account || !wallet.chain) throw new Error('Wallet is not connected');
 
-    const isMXC = args.token === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
-    if (!isMXC) {
+    const isNativeMXC = args.token === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+    if (!isNativeMXC) {
       const requireAllowance = await this.requireAllowance({
         amount,
         tokenAddress: token,
@@ -225,7 +225,7 @@ export class ERC20Bridge extends Bridge {
         throw new InsufficientAllowanceError(`Insufficient allowance for the amount ${amount}`);
     }
     let value = 0n
-    if (isMXC) {
+    if (isNativeMXC) {
       value = args.amount
       args.amount = 0n
     }
