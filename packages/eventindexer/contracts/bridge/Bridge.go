@@ -47,7 +47,7 @@ type IBridgeContext struct {
 // IBridgeMessage is an auto generated low-level Go binding around an user-defined struct.
 type IBridgeMessage struct {
 	Id          uint64
-	Fee         uint64
+	Fee         *big.Int
 	GasLimit    uint32
 	From        common.Address
 	SrcChainId  uint64
@@ -61,7 +61,7 @@ type IBridgeMessage struct {
 
 // BridgeMetaData contains all meta data concerning the Bridge contract.
 var BridgeMetaData = &bind.MetaData{
-	ABI: "[{\"type\":\"function\",\"name\":\"GAS_OVERHEAD\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"GAS_RESERVE\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"RELAYER_MAX_PROOF_BYTES\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"acceptOwnership\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"addressManager\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"context\",\"inputs\":[],\"outputs\":[{\"name\":\"ctx_\",\"type\":\"tuple\",\"internalType\":\"structIBridge.Context\",\"components\":[{\"name\":\"msgHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"from\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"srcChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"}]}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"failMessage\",\"inputs\":[{\"name\":\"_message\",\"type\":\"tuple\",\"internalType\":\"structIBridge.Message\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"fee\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gasLimit\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"from\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"srcChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"srcOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"destChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"destOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"to\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"getMessageMinGasLimit\",\"inputs\":[{\"name\":\"dataLength\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[{\"name\":\"\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"stateMutability\":\"pure\"},{\"type\":\"function\",\"name\":\"hashMessage\",\"inputs\":[{\"name\":\"_message\",\"type\":\"tuple\",\"internalType\":\"structIBridge.Message\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"fee\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gasLimit\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"from\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"srcChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"srcOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"destChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"destOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"to\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"pure\"},{\"type\":\"function\",\"name\":\"impl\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"inNonReentrant\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"init\",\"inputs\":[{\"name\":\"_owner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"_addressManager\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"init2\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"isDestChainEnabled\",\"inputs\":[{\"name\":\"_chainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"}],\"outputs\":[{\"name\":\"enabled_\",\"type\":\"bool\",\"internalType\":\"bool\"},{\"name\":\"destBridge_\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"isMessageFailed\",\"inputs\":[{\"name\":\"_message\",\"type\":\"tuple\",\"internalType\":\"structIBridge.Message\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"fee\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gasLimit\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"from\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"srcChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"srcOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"destChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"destOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"to\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"_proof\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"isMessageReceived\",\"inputs\":[{\"name\":\"_message\",\"type\":\"tuple\",\"internalType\":\"structIBridge.Message\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"fee\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gasLimit\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"from\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"srcChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"srcOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"destChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"destOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"to\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"_proof\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"isMessageSent\",\"inputs\":[{\"name\":\"_message\",\"type\":\"tuple\",\"internalType\":\"structIBridge.Message\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"fee\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gasLimit\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"from\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"srcChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"srcOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"destChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"destOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"to\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}],\"outputs\":[{\"name\":\"\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"lastUnpausedAt\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint64\",\"internalType\":\"uint64\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"messageStatus\",\"inputs\":[{\"name\":\"msgHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"outputs\":[{\"name\":\"status\",\"type\":\"uint8\",\"internalType\":\"enumIBridge.Status\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"nextMessageId\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint64\",\"internalType\":\"uint64\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"owner\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"pause\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"paused\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"pendingOwner\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"processMessage\",\"inputs\":[{\"name\":\"_message\",\"type\":\"tuple\",\"internalType\":\"structIBridge.Message\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"fee\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gasLimit\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"from\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"srcChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"srcOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"destChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"destOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"to\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"_proof\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[{\"name\":\"status_\",\"type\":\"uint8\",\"internalType\":\"enumIBridge.Status\"},{\"name\":\"reason_\",\"type\":\"uint8\",\"internalType\":\"enumIBridge.StatusReason\"}],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"proxiableUUID\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"recallMessage\",\"inputs\":[{\"name\":\"_message\",\"type\":\"tuple\",\"internalType\":\"structIBridge.Message\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"fee\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gasLimit\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"from\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"srcChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"srcOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"destChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"destOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"to\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"_proof\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"renounceOwnership\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"resolve\",\"inputs\":[{\"name\":\"_chainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"_name\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"_allowZeroAddress\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"addresspayable\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"resolve\",\"inputs\":[{\"name\":\"_name\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"_allowZeroAddress\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"addresspayable\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"retryMessage\",\"inputs\":[{\"name\":\"_message\",\"type\":\"tuple\",\"internalType\":\"structIBridge.Message\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"fee\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gasLimit\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"from\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"srcChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"srcOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"destChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"destOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"to\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"_isLastAttempt\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"selfDelegate\",\"inputs\":[{\"name\":\"_anyToken\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"sendMessage\",\"inputs\":[{\"name\":\"_message\",\"type\":\"tuple\",\"internalType\":\"structIBridge.Message\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"fee\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gasLimit\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"from\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"srcChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"srcOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"destChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"destOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"to\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}],\"outputs\":[{\"name\":\"msgHash_\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"message_\",\"type\":\"tuple\",\"internalType\":\"structIBridge.Message\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"fee\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gasLimit\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"from\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"srcChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"srcOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"destChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"destOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"to\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}],\"stateMutability\":\"payable\"},{\"type\":\"function\",\"name\":\"signalForFailedMessage\",\"inputs\":[{\"name\":\"_msgHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"pure\"},{\"type\":\"function\",\"name\":\"transferOwnership\",\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"unpause\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"upgradeTo\",\"inputs\":[{\"name\":\"newImplementation\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"upgradeToAndCall\",\"inputs\":[{\"name\":\"newImplementation\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[],\"stateMutability\":\"payable\"},{\"type\":\"event\",\"name\":\"AdminChanged\",\"inputs\":[{\"name\":\"previousAdmin\",\"type\":\"address\",\"indexed\":false,\"internalType\":\"address\"},{\"name\":\"newAdmin\",\"type\":\"address\",\"indexed\":false,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"BeaconUpgraded\",\"inputs\":[{\"name\":\"beacon\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"Initialized\",\"inputs\":[{\"name\":\"version\",\"type\":\"uint8\",\"indexed\":false,\"internalType\":\"uint8\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"MessageProcessed\",\"inputs\":[{\"name\":\"msgHash\",\"type\":\"bytes32\",\"indexed\":true,\"internalType\":\"bytes32\"},{\"name\":\"message\",\"type\":\"tuple\",\"indexed\":false,\"internalType\":\"structIBridge.Message\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"fee\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gasLimit\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"from\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"srcChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"srcOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"destChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"destOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"to\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"stats\",\"type\":\"tuple\",\"indexed\":false,\"internalType\":\"structBridge.ProcessingStats\",\"components\":[{\"name\":\"gasUsedInFeeCalc\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"proofSize\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"numCacheOps\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"processedByRelayer\",\"type\":\"bool\",\"internalType\":\"bool\"}]}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"MessageSent\",\"inputs\":[{\"name\":\"msgHash\",\"type\":\"bytes32\",\"indexed\":true,\"internalType\":\"bytes32\"},{\"name\":\"message\",\"type\":\"tuple\",\"indexed\":false,\"internalType\":\"structIBridge.Message\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"fee\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"gasLimit\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"from\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"srcChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"srcOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"destChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"destOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"to\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"MessageStatusChanged\",\"inputs\":[{\"name\":\"msgHash\",\"type\":\"bytes32\",\"indexed\":true,\"internalType\":\"bytes32\"},{\"name\":\"status\",\"type\":\"uint8\",\"indexed\":false,\"internalType\":\"enumIBridge.Status\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"OwnershipTransferStarted\",\"inputs\":[{\"name\":\"previousOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"newOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"OwnershipTransferred\",\"inputs\":[{\"name\":\"previousOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"newOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"Paused\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"indexed\":false,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"Unpaused\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"indexed\":false,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"Upgraded\",\"inputs\":[{\"name\":\"implementation\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"error\",\"name\":\"B_INSUFFICIENT_GAS\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"B_INVALID_CHAINID\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"B_INVALID_CONTEXT\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"B_INVALID_FEE\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"B_INVALID_GAS_LIMIT\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"B_INVALID_STATUS\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"B_INVALID_VALUE\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"B_MESSAGE_NOT_SENT\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"B_OUT_OF_ETH_QUOTA\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"B_PERMISSION_DENIED\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"B_PROOF_TOO_LARGE\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"B_RETRY_FAILED\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"B_SIGNAL_NOT_RECEIVED\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"ETH_TRANSFER_FAILED\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"FUNC_NOT_IMPLEMENTED\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"INVALID_PAUSE_STATUS\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"REENTRANT_CALL\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"RESOLVER_DENIED\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"RESOLVER_INVALID_MANAGER\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"RESOLVER_UNEXPECTED_CHAINID\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"RESOLVER_ZERO_ADDR\",\"inputs\":[{\"name\":\"chainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"name\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"type\":\"error\",\"name\":\"ZERO_ADDRESS\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"ZERO_VALUE\",\"inputs\":[]}]",
+	ABI: "[{\"type\":\"function\",\"name\":\"GAS_OVERHEAD\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"GAS_RESERVE\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"RELAYER_MAX_PROOF_BYTES\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"acceptOwnership\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"addressManager\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"context\",\"inputs\":[],\"outputs\":[{\"name\":\"ctx_\",\"type\":\"tuple\",\"internalType\":\"structIBridge.Context\",\"components\":[{\"name\":\"msgHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"from\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"srcChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"}]}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"failMessage\",\"inputs\":[{\"name\":\"_message\",\"type\":\"tuple\",\"internalType\":\"structIBridge.Message\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"fee\",\"type\":\"uint128\",\"internalType\":\"uint128\"},{\"name\":\"gasLimit\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"from\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"srcChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"srcOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"destChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"destOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"to\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"forkInit\",\"inputs\":[{\"name\":\"_owner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"_sharedAddressManager\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"getMessageMinGasLimit\",\"inputs\":[{\"name\":\"dataLength\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[{\"name\":\"\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"stateMutability\":\"pure\"},{\"type\":\"function\",\"name\":\"hashMessage\",\"inputs\":[{\"name\":\"_message\",\"type\":\"tuple\",\"internalType\":\"structIBridge.Message\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"fee\",\"type\":\"uint128\",\"internalType\":\"uint128\"},{\"name\":\"gasLimit\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"from\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"srcChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"srcOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"destChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"destOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"to\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"pure\"},{\"type\":\"function\",\"name\":\"impl\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"inNonReentrant\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"init\",\"inputs\":[{\"name\":\"_owner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"_sharedAddressManager\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"init2\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"invocationSendNativeToken\",\"inputs\":[{\"name\":\"_to\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"_amount\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"isDestChainEnabled\",\"inputs\":[{\"name\":\"_chainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"}],\"outputs\":[{\"name\":\"enabled_\",\"type\":\"bool\",\"internalType\":\"bool\"},{\"name\":\"destBridge_\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"isMessageFailed\",\"inputs\":[{\"name\":\"_message\",\"type\":\"tuple\",\"internalType\":\"structIBridge.Message\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"fee\",\"type\":\"uint128\",\"internalType\":\"uint128\"},{\"name\":\"gasLimit\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"from\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"srcChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"srcOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"destChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"destOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"to\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"_proof\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"isMessageReceived\",\"inputs\":[{\"name\":\"_message\",\"type\":\"tuple\",\"internalType\":\"structIBridge.Message\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"fee\",\"type\":\"uint128\",\"internalType\":\"uint128\"},{\"name\":\"gasLimit\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"from\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"srcChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"srcOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"destChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"destOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"to\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"_proof\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"isMessageSent\",\"inputs\":[{\"name\":\"_message\",\"type\":\"tuple\",\"internalType\":\"structIBridge.Message\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"fee\",\"type\":\"uint128\",\"internalType\":\"uint128\"},{\"name\":\"gasLimit\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"from\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"srcChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"srcOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"destChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"destOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"to\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}],\"outputs\":[{\"name\":\"\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"lastUnpausedAt\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint64\",\"internalType\":\"uint64\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"messageStatus\",\"inputs\":[{\"name\":\"msgHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"outputs\":[{\"name\":\"status\",\"type\":\"uint8\",\"internalType\":\"enumIBridge.Status\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"nextMessageId\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint64\",\"internalType\":\"uint64\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"owner\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"pause\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"paused\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"pendingOwner\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"processMessage\",\"inputs\":[{\"name\":\"_message\",\"type\":\"tuple\",\"internalType\":\"structIBridge.Message\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"fee\",\"type\":\"uint128\",\"internalType\":\"uint128\"},{\"name\":\"gasLimit\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"from\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"srcChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"srcOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"destChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"destOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"to\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"_proof\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[{\"name\":\"status_\",\"type\":\"uint8\",\"internalType\":\"enumIBridge.Status\"},{\"name\":\"reason_\",\"type\":\"uint8\",\"internalType\":\"enumIBridge.StatusReason\"}],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"proxiableUUID\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"recallMessage\",\"inputs\":[{\"name\":\"_message\",\"type\":\"tuple\",\"internalType\":\"structIBridge.Message\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"fee\",\"type\":\"uint128\",\"internalType\":\"uint128\"},{\"name\":\"gasLimit\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"from\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"srcChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"srcOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"destChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"destOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"to\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"_proof\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"renounceOwnership\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"resolve\",\"inputs\":[{\"name\":\"_chainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"_name\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"_allowZeroAddress\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"resolve\",\"inputs\":[{\"name\":\"_name\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"_allowZeroAddress\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"retryMessage\",\"inputs\":[{\"name\":\"_message\",\"type\":\"tuple\",\"internalType\":\"structIBridge.Message\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"fee\",\"type\":\"uint128\",\"internalType\":\"uint128\"},{\"name\":\"gasLimit\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"from\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"srcChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"srcOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"destChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"destOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"to\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"_isLastAttempt\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"selfDelegate\",\"inputs\":[{\"name\":\"_anyToken\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"sendMessage\",\"inputs\":[{\"name\":\"_message\",\"type\":\"tuple\",\"internalType\":\"structIBridge.Message\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"fee\",\"type\":\"uint128\",\"internalType\":\"uint128\"},{\"name\":\"gasLimit\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"from\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"srcChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"srcOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"destChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"destOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"to\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}],\"outputs\":[{\"name\":\"msgHash_\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"message_\",\"type\":\"tuple\",\"internalType\":\"structIBridge.Message\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"fee\",\"type\":\"uint128\",\"internalType\":\"uint128\"},{\"name\":\"gasLimit\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"from\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"srcChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"srcOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"destChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"destOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"to\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}],\"stateMutability\":\"payable\"},{\"type\":\"function\",\"name\":\"signalForFailedMessage\",\"inputs\":[{\"name\":\"_msgHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"pure\"},{\"type\":\"function\",\"name\":\"transferOwnership\",\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"unpause\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"upgradeTo\",\"inputs\":[{\"name\":\"newImplementation\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"upgradeToAndCall\",\"inputs\":[{\"name\":\"newImplementation\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[],\"stateMutability\":\"payable\"},{\"type\":\"event\",\"name\":\"AdminChanged\",\"inputs\":[{\"name\":\"previousAdmin\",\"type\":\"address\",\"indexed\":false,\"internalType\":\"address\"},{\"name\":\"newAdmin\",\"type\":\"address\",\"indexed\":false,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"BeaconUpgraded\",\"inputs\":[{\"name\":\"beacon\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"Initialized\",\"inputs\":[{\"name\":\"version\",\"type\":\"uint8\",\"indexed\":false,\"internalType\":\"uint8\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"MessageProcessed\",\"inputs\":[{\"name\":\"msgHash\",\"type\":\"bytes32\",\"indexed\":true,\"internalType\":\"bytes32\"},{\"name\":\"message\",\"type\":\"tuple\",\"indexed\":false,\"internalType\":\"structIBridge.Message\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"fee\",\"type\":\"uint128\",\"internalType\":\"uint128\"},{\"name\":\"gasLimit\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"from\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"srcChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"srcOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"destChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"destOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"to\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"stats\",\"type\":\"tuple\",\"indexed\":false,\"internalType\":\"structBridge.ProcessingStats\",\"components\":[{\"name\":\"gasUsedInFeeCalc\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"proofSize\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"numCacheOps\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"processedByRelayer\",\"type\":\"bool\",\"internalType\":\"bool\"}]}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"MessageSent\",\"inputs\":[{\"name\":\"msgHash\",\"type\":\"bytes32\",\"indexed\":true,\"internalType\":\"bytes32\"},{\"name\":\"message\",\"type\":\"tuple\",\"indexed\":false,\"internalType\":\"structIBridge.Message\",\"components\":[{\"name\":\"id\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"fee\",\"type\":\"uint128\",\"internalType\":\"uint128\"},{\"name\":\"gasLimit\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"from\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"srcChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"srcOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"destChainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"destOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"to\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"MessageStatusChanged\",\"inputs\":[{\"name\":\"msgHash\",\"type\":\"bytes32\",\"indexed\":true,\"internalType\":\"bytes32\"},{\"name\":\"status\",\"type\":\"uint8\",\"indexed\":false,\"internalType\":\"enumIBridge.Status\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"OwnershipTransferStarted\",\"inputs\":[{\"name\":\"previousOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"newOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"OwnershipTransferred\",\"inputs\":[{\"name\":\"previousOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"newOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"Paused\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"indexed\":false,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"Unpaused\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"indexed\":false,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"Upgraded\",\"inputs\":[{\"name\":\"implementation\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"error\",\"name\":\"B_INSUFFICIENT_GAS\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"B_INVALID_CHAINID\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"B_INVALID_CONTEXT\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"B_INVALID_FEE\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"B_INVALID_GAS_LIMIT\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"B_INVALID_STATUS\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"B_INVALID_VALUE\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"B_MESSAGE_NOT_SENT\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"B_OUT_OF_ETH_QUOTA\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"B_PERMISSION_DENIED\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"B_PROOF_TOO_LARGE\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"B_RETRY_FAILED\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"B_SIGNAL_NOT_RECEIVED\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"ETH_TRANSFER_FAILED\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"FUNC_NOT_IMPLEMENTED\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"INVALID_PAUSE_STATUS\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"REENTRANT_CALL\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"RESOLVER_DENIED\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"RESOLVER_INVALID_MANAGER\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"RESOLVER_UNEXPECTED_CHAINID\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"RESOLVER_ZERO_ADDR\",\"inputs\":[{\"name\":\"chainId\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"name\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"type\":\"error\",\"name\":\"ZERO_ADDRESS\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"ZERO_VALUE\",\"inputs\":[]}]",
 }
 
 // BridgeABI is the input ABI used to generate the binding from.
@@ -396,9 +396,9 @@ func (_Bridge *BridgeCallerSession) GetMessageMinGasLimit(dataLength *big.Int) (
 	return _Bridge.Contract.GetMessageMinGasLimit(&_Bridge.CallOpts, dataLength)
 }
 
-// HashMessage is a free data retrieval call binding the contract method 0xc012fa77.
+// HashMessage is a free data retrieval call binding the contract method 0x4777610e.
 //
-// Solidity: function hashMessage((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message) pure returns(bytes32)
+// Solidity: function hashMessage((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message) pure returns(bytes32)
 func (_Bridge *BridgeCaller) HashMessage(opts *bind.CallOpts, _message IBridgeMessage) ([32]byte, error) {
 	var out []interface{}
 	err := _Bridge.contract.Call(opts, &out, "hashMessage", _message)
@@ -413,16 +413,16 @@ func (_Bridge *BridgeCaller) HashMessage(opts *bind.CallOpts, _message IBridgeMe
 
 }
 
-// HashMessage is a free data retrieval call binding the contract method 0xc012fa77.
+// HashMessage is a free data retrieval call binding the contract method 0x4777610e.
 //
-// Solidity: function hashMessage((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message) pure returns(bytes32)
+// Solidity: function hashMessage((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message) pure returns(bytes32)
 func (_Bridge *BridgeSession) HashMessage(_message IBridgeMessage) ([32]byte, error) {
 	return _Bridge.Contract.HashMessage(&_Bridge.CallOpts, _message)
 }
 
-// HashMessage is a free data retrieval call binding the contract method 0xc012fa77.
+// HashMessage is a free data retrieval call binding the contract method 0x4777610e.
 //
-// Solidity: function hashMessage((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message) pure returns(bytes32)
+// Solidity: function hashMessage((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message) pure returns(bytes32)
 func (_Bridge *BridgeCallerSession) HashMessage(_message IBridgeMessage) ([32]byte, error) {
 	return _Bridge.Contract.HashMessage(&_Bridge.CallOpts, _message)
 }
@@ -534,9 +534,9 @@ func (_Bridge *BridgeCallerSession) IsDestChainEnabled(_chainId uint64) (struct 
 	return _Bridge.Contract.IsDestChainEnabled(&_Bridge.CallOpts, _chainId)
 }
 
-// IsMessageFailed is a free data retrieval call binding the contract method 0x5862f6e1.
+// IsMessageFailed is a free data retrieval call binding the contract method 0x345ebd10.
 //
-// Solidity: function isMessageFailed((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bytes _proof) view returns(bool)
+// Solidity: function isMessageFailed((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bytes _proof) view returns(bool)
 func (_Bridge *BridgeCaller) IsMessageFailed(opts *bind.CallOpts, _message IBridgeMessage, _proof []byte) (bool, error) {
 	var out []interface{}
 	err := _Bridge.contract.Call(opts, &out, "isMessageFailed", _message, _proof)
@@ -551,23 +551,23 @@ func (_Bridge *BridgeCaller) IsMessageFailed(opts *bind.CallOpts, _message IBrid
 
 }
 
-// IsMessageFailed is a free data retrieval call binding the contract method 0x5862f6e1.
+// IsMessageFailed is a free data retrieval call binding the contract method 0x345ebd10.
 //
-// Solidity: function isMessageFailed((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bytes _proof) view returns(bool)
+// Solidity: function isMessageFailed((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bytes _proof) view returns(bool)
 func (_Bridge *BridgeSession) IsMessageFailed(_message IBridgeMessage, _proof []byte) (bool, error) {
 	return _Bridge.Contract.IsMessageFailed(&_Bridge.CallOpts, _message, _proof)
 }
 
-// IsMessageFailed is a free data retrieval call binding the contract method 0x5862f6e1.
+// IsMessageFailed is a free data retrieval call binding the contract method 0x345ebd10.
 //
-// Solidity: function isMessageFailed((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bytes _proof) view returns(bool)
+// Solidity: function isMessageFailed((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bytes _proof) view returns(bool)
 func (_Bridge *BridgeCallerSession) IsMessageFailed(_message IBridgeMessage, _proof []byte) (bool, error) {
 	return _Bridge.Contract.IsMessageFailed(&_Bridge.CallOpts, _message, _proof)
 }
 
-// IsMessageReceived is a free data retrieval call binding the contract method 0xb8acae0e.
+// IsMessageReceived is a free data retrieval call binding the contract method 0x64439840.
 //
-// Solidity: function isMessageReceived((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bytes _proof) view returns(bool)
+// Solidity: function isMessageReceived((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bytes _proof) view returns(bool)
 func (_Bridge *BridgeCaller) IsMessageReceived(opts *bind.CallOpts, _message IBridgeMessage, _proof []byte) (bool, error) {
 	var out []interface{}
 	err := _Bridge.contract.Call(opts, &out, "isMessageReceived", _message, _proof)
@@ -582,23 +582,23 @@ func (_Bridge *BridgeCaller) IsMessageReceived(opts *bind.CallOpts, _message IBr
 
 }
 
-// IsMessageReceived is a free data retrieval call binding the contract method 0xb8acae0e.
+// IsMessageReceived is a free data retrieval call binding the contract method 0x64439840.
 //
-// Solidity: function isMessageReceived((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bytes _proof) view returns(bool)
+// Solidity: function isMessageReceived((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bytes _proof) view returns(bool)
 func (_Bridge *BridgeSession) IsMessageReceived(_message IBridgeMessage, _proof []byte) (bool, error) {
 	return _Bridge.Contract.IsMessageReceived(&_Bridge.CallOpts, _message, _proof)
 }
 
-// IsMessageReceived is a free data retrieval call binding the contract method 0xb8acae0e.
+// IsMessageReceived is a free data retrieval call binding the contract method 0x64439840.
 //
-// Solidity: function isMessageReceived((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bytes _proof) view returns(bool)
+// Solidity: function isMessageReceived((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bytes _proof) view returns(bool)
 func (_Bridge *BridgeCallerSession) IsMessageReceived(_message IBridgeMessage, _proof []byte) (bool, error) {
 	return _Bridge.Contract.IsMessageReceived(&_Bridge.CallOpts, _message, _proof)
 }
 
-// IsMessageSent is a free data retrieval call binding the contract method 0x60620c6b.
+// IsMessageSent is a free data retrieval call binding the contract method 0x91b0b530.
 //
-// Solidity: function isMessageSent((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message) view returns(bool)
+// Solidity: function isMessageSent((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message) view returns(bool)
 func (_Bridge *BridgeCaller) IsMessageSent(opts *bind.CallOpts, _message IBridgeMessage) (bool, error) {
 	var out []interface{}
 	err := _Bridge.contract.Call(opts, &out, "isMessageSent", _message)
@@ -613,16 +613,16 @@ func (_Bridge *BridgeCaller) IsMessageSent(opts *bind.CallOpts, _message IBridge
 
 }
 
-// IsMessageSent is a free data retrieval call binding the contract method 0x60620c6b.
+// IsMessageSent is a free data retrieval call binding the contract method 0x91b0b530.
 //
-// Solidity: function isMessageSent((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message) view returns(bool)
+// Solidity: function isMessageSent((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message) view returns(bool)
 func (_Bridge *BridgeSession) IsMessageSent(_message IBridgeMessage) (bool, error) {
 	return _Bridge.Contract.IsMessageSent(&_Bridge.CallOpts, _message)
 }
 
-// IsMessageSent is a free data retrieval call binding the contract method 0x60620c6b.
+// IsMessageSent is a free data retrieval call binding the contract method 0x91b0b530.
 //
-// Solidity: function isMessageSent((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message) view returns(bool)
+// Solidity: function isMessageSent((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message) view returns(bool)
 func (_Bridge *BridgeCallerSession) IsMessageSent(_message IBridgeMessage) (bool, error) {
 	return _Bridge.Contract.IsMessageSent(&_Bridge.CallOpts, _message)
 }
@@ -958,46 +958,67 @@ func (_Bridge *BridgeTransactorSession) AcceptOwnership() (*types.Transaction, e
 	return _Bridge.Contract.AcceptOwnership(&_Bridge.TransactOpts)
 }
 
-// FailMessage is a paid mutator transaction binding the contract method 0x913b16cb.
+// FailMessage is a paid mutator transaction binding the contract method 0x798bac36.
 //
-// Solidity: function failMessage((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message) returns()
+// Solidity: function failMessage((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message) returns()
 func (_Bridge *BridgeTransactor) FailMessage(opts *bind.TransactOpts, _message IBridgeMessage) (*types.Transaction, error) {
 	return _Bridge.contract.Transact(opts, "failMessage", _message)
 }
 
-// FailMessage is a paid mutator transaction binding the contract method 0x913b16cb.
+// FailMessage is a paid mutator transaction binding the contract method 0x798bac36.
 //
-// Solidity: function failMessage((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message) returns()
+// Solidity: function failMessage((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message) returns()
 func (_Bridge *BridgeSession) FailMessage(_message IBridgeMessage) (*types.Transaction, error) {
 	return _Bridge.Contract.FailMessage(&_Bridge.TransactOpts, _message)
 }
 
-// FailMessage is a paid mutator transaction binding the contract method 0x913b16cb.
+// FailMessage is a paid mutator transaction binding the contract method 0x798bac36.
 //
-// Solidity: function failMessage((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message) returns()
+// Solidity: function failMessage((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message) returns()
 func (_Bridge *BridgeTransactorSession) FailMessage(_message IBridgeMessage) (*types.Transaction, error) {
 	return _Bridge.Contract.FailMessage(&_Bridge.TransactOpts, _message)
 }
 
-// Init is a paid mutator transaction binding the contract method 0xf09a4016.
+// ForkInit is a paid mutator transaction binding the contract method 0x6cbca614.
 //
-// Solidity: function init(address _owner, address _addressManager) returns()
-func (_Bridge *BridgeTransactor) Init(opts *bind.TransactOpts, _owner common.Address, _addressManager common.Address) (*types.Transaction, error) {
-	return _Bridge.contract.Transact(opts, "init", _owner, _addressManager)
+// Solidity: function forkInit(address _owner, address _sharedAddressManager) returns()
+func (_Bridge *BridgeTransactor) ForkInit(opts *bind.TransactOpts, _owner common.Address, _sharedAddressManager common.Address) (*types.Transaction, error) {
+	return _Bridge.contract.Transact(opts, "forkInit", _owner, _sharedAddressManager)
+}
+
+// ForkInit is a paid mutator transaction binding the contract method 0x6cbca614.
+//
+// Solidity: function forkInit(address _owner, address _sharedAddressManager) returns()
+func (_Bridge *BridgeSession) ForkInit(_owner common.Address, _sharedAddressManager common.Address) (*types.Transaction, error) {
+	return _Bridge.Contract.ForkInit(&_Bridge.TransactOpts, _owner, _sharedAddressManager)
+}
+
+// ForkInit is a paid mutator transaction binding the contract method 0x6cbca614.
+//
+// Solidity: function forkInit(address _owner, address _sharedAddressManager) returns()
+func (_Bridge *BridgeTransactorSession) ForkInit(_owner common.Address, _sharedAddressManager common.Address) (*types.Transaction, error) {
+	return _Bridge.Contract.ForkInit(&_Bridge.TransactOpts, _owner, _sharedAddressManager)
 }
 
 // Init is a paid mutator transaction binding the contract method 0xf09a4016.
 //
-// Solidity: function init(address _owner, address _addressManager) returns()
-func (_Bridge *BridgeSession) Init(_owner common.Address, _addressManager common.Address) (*types.Transaction, error) {
-	return _Bridge.Contract.Init(&_Bridge.TransactOpts, _owner, _addressManager)
+// Solidity: function init(address _owner, address _sharedAddressManager) returns()
+func (_Bridge *BridgeTransactor) Init(opts *bind.TransactOpts, _owner common.Address, _sharedAddressManager common.Address) (*types.Transaction, error) {
+	return _Bridge.contract.Transact(opts, "init", _owner, _sharedAddressManager)
 }
 
 // Init is a paid mutator transaction binding the contract method 0xf09a4016.
 //
-// Solidity: function init(address _owner, address _addressManager) returns()
-func (_Bridge *BridgeTransactorSession) Init(_owner common.Address, _addressManager common.Address) (*types.Transaction, error) {
-	return _Bridge.Contract.Init(&_Bridge.TransactOpts, _owner, _addressManager)
+// Solidity: function init(address _owner, address _sharedAddressManager) returns()
+func (_Bridge *BridgeSession) Init(_owner common.Address, _sharedAddressManager common.Address) (*types.Transaction, error) {
+	return _Bridge.Contract.Init(&_Bridge.TransactOpts, _owner, _sharedAddressManager)
+}
+
+// Init is a paid mutator transaction binding the contract method 0xf09a4016.
+//
+// Solidity: function init(address _owner, address _sharedAddressManager) returns()
+func (_Bridge *BridgeTransactorSession) Init(_owner common.Address, _sharedAddressManager common.Address) (*types.Transaction, error) {
+	return _Bridge.Contract.Init(&_Bridge.TransactOpts, _owner, _sharedAddressManager)
 }
 
 // Init2 is a paid mutator transaction binding the contract method 0x069489a2.
@@ -1021,6 +1042,27 @@ func (_Bridge *BridgeTransactorSession) Init2() (*types.Transaction, error) {
 	return _Bridge.Contract.Init2(&_Bridge.TransactOpts)
 }
 
+// InvocationSendNativeToken is a paid mutator transaction binding the contract method 0xf56a8e0a.
+//
+// Solidity: function invocationSendNativeToken(address _to, uint256 _amount) returns()
+func (_Bridge *BridgeTransactor) InvocationSendNativeToken(opts *bind.TransactOpts, _to common.Address, _amount *big.Int) (*types.Transaction, error) {
+	return _Bridge.contract.Transact(opts, "invocationSendNativeToken", _to, _amount)
+}
+
+// InvocationSendNativeToken is a paid mutator transaction binding the contract method 0xf56a8e0a.
+//
+// Solidity: function invocationSendNativeToken(address _to, uint256 _amount) returns()
+func (_Bridge *BridgeSession) InvocationSendNativeToken(_to common.Address, _amount *big.Int) (*types.Transaction, error) {
+	return _Bridge.Contract.InvocationSendNativeToken(&_Bridge.TransactOpts, _to, _amount)
+}
+
+// InvocationSendNativeToken is a paid mutator transaction binding the contract method 0xf56a8e0a.
+//
+// Solidity: function invocationSendNativeToken(address _to, uint256 _amount) returns()
+func (_Bridge *BridgeTransactorSession) InvocationSendNativeToken(_to common.Address, _amount *big.Int) (*types.Transaction, error) {
+	return _Bridge.Contract.InvocationSendNativeToken(&_Bridge.TransactOpts, _to, _amount)
+}
+
 // Pause is a paid mutator transaction binding the contract method 0x8456cb59.
 //
 // Solidity: function pause() returns()
@@ -1042,44 +1084,44 @@ func (_Bridge *BridgeTransactorSession) Pause() (*types.Transaction, error) {
 	return _Bridge.Contract.Pause(&_Bridge.TransactOpts)
 }
 
-// ProcessMessage is a paid mutator transaction binding the contract method 0x2035065e.
+// ProcessMessage is a paid mutator transaction binding the contract method 0x87996f73.
 //
-// Solidity: function processMessage((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bytes _proof) returns(uint8 status_, uint8 reason_)
+// Solidity: function processMessage((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bytes _proof) returns(uint8 status_, uint8 reason_)
 func (_Bridge *BridgeTransactor) ProcessMessage(opts *bind.TransactOpts, _message IBridgeMessage, _proof []byte) (*types.Transaction, error) {
 	return _Bridge.contract.Transact(opts, "processMessage", _message, _proof)
 }
 
-// ProcessMessage is a paid mutator transaction binding the contract method 0x2035065e.
+// ProcessMessage is a paid mutator transaction binding the contract method 0x87996f73.
 //
-// Solidity: function processMessage((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bytes _proof) returns(uint8 status_, uint8 reason_)
+// Solidity: function processMessage((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bytes _proof) returns(uint8 status_, uint8 reason_)
 func (_Bridge *BridgeSession) ProcessMessage(_message IBridgeMessage, _proof []byte) (*types.Transaction, error) {
 	return _Bridge.Contract.ProcessMessage(&_Bridge.TransactOpts, _message, _proof)
 }
 
-// ProcessMessage is a paid mutator transaction binding the contract method 0x2035065e.
+// ProcessMessage is a paid mutator transaction binding the contract method 0x87996f73.
 //
-// Solidity: function processMessage((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bytes _proof) returns(uint8 status_, uint8 reason_)
+// Solidity: function processMessage((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bytes _proof) returns(uint8 status_, uint8 reason_)
 func (_Bridge *BridgeTransactorSession) ProcessMessage(_message IBridgeMessage, _proof []byte) (*types.Transaction, error) {
 	return _Bridge.Contract.ProcessMessage(&_Bridge.TransactOpts, _message, _proof)
 }
 
-// RecallMessage is a paid mutator transaction binding the contract method 0x9efc7a2e.
+// RecallMessage is a paid mutator transaction binding the contract method 0xbc773edd.
 //
-// Solidity: function recallMessage((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bytes _proof) returns()
+// Solidity: function recallMessage((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bytes _proof) returns()
 func (_Bridge *BridgeTransactor) RecallMessage(opts *bind.TransactOpts, _message IBridgeMessage, _proof []byte) (*types.Transaction, error) {
 	return _Bridge.contract.Transact(opts, "recallMessage", _message, _proof)
 }
 
-// RecallMessage is a paid mutator transaction binding the contract method 0x9efc7a2e.
+// RecallMessage is a paid mutator transaction binding the contract method 0xbc773edd.
 //
-// Solidity: function recallMessage((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bytes _proof) returns()
+// Solidity: function recallMessage((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bytes _proof) returns()
 func (_Bridge *BridgeSession) RecallMessage(_message IBridgeMessage, _proof []byte) (*types.Transaction, error) {
 	return _Bridge.Contract.RecallMessage(&_Bridge.TransactOpts, _message, _proof)
 }
 
-// RecallMessage is a paid mutator transaction binding the contract method 0x9efc7a2e.
+// RecallMessage is a paid mutator transaction binding the contract method 0xbc773edd.
 //
-// Solidity: function recallMessage((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bytes _proof) returns()
+// Solidity: function recallMessage((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bytes _proof) returns()
 func (_Bridge *BridgeTransactorSession) RecallMessage(_message IBridgeMessage, _proof []byte) (*types.Transaction, error) {
 	return _Bridge.Contract.RecallMessage(&_Bridge.TransactOpts, _message, _proof)
 }
@@ -1105,23 +1147,23 @@ func (_Bridge *BridgeTransactorSession) RenounceOwnership() (*types.Transaction,
 	return _Bridge.Contract.RenounceOwnership(&_Bridge.TransactOpts)
 }
 
-// RetryMessage is a paid mutator transaction binding the contract method 0x0432873c.
+// RetryMessage is a paid mutator transaction binding the contract method 0x9096118b.
 //
-// Solidity: function retryMessage((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bool _isLastAttempt) returns()
+// Solidity: function retryMessage((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bool _isLastAttempt) returns()
 func (_Bridge *BridgeTransactor) RetryMessage(opts *bind.TransactOpts, _message IBridgeMessage, _isLastAttempt bool) (*types.Transaction, error) {
 	return _Bridge.contract.Transact(opts, "retryMessage", _message, _isLastAttempt)
 }
 
-// RetryMessage is a paid mutator transaction binding the contract method 0x0432873c.
+// RetryMessage is a paid mutator transaction binding the contract method 0x9096118b.
 //
-// Solidity: function retryMessage((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bool _isLastAttempt) returns()
+// Solidity: function retryMessage((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bool _isLastAttempt) returns()
 func (_Bridge *BridgeSession) RetryMessage(_message IBridgeMessage, _isLastAttempt bool) (*types.Transaction, error) {
 	return _Bridge.Contract.RetryMessage(&_Bridge.TransactOpts, _message, _isLastAttempt)
 }
 
-// RetryMessage is a paid mutator transaction binding the contract method 0x0432873c.
+// RetryMessage is a paid mutator transaction binding the contract method 0x9096118b.
 //
-// Solidity: function retryMessage((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bool _isLastAttempt) returns()
+// Solidity: function retryMessage((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message, bool _isLastAttempt) returns()
 func (_Bridge *BridgeTransactorSession) RetryMessage(_message IBridgeMessage, _isLastAttempt bool) (*types.Transaction, error) {
 	return _Bridge.Contract.RetryMessage(&_Bridge.TransactOpts, _message, _isLastAttempt)
 }
@@ -1147,23 +1189,23 @@ func (_Bridge *BridgeTransactorSession) SelfDelegate(_anyToken common.Address) (
 	return _Bridge.Contract.SelfDelegate(&_Bridge.TransactOpts, _anyToken)
 }
 
-// SendMessage is a paid mutator transaction binding the contract method 0x1bdb0037.
+// SendMessage is a paid mutator transaction binding the contract method 0xd5063072.
 //
-// Solidity: function sendMessage((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message) payable returns(bytes32 msgHash_, (uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) message_)
+// Solidity: function sendMessage((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message) payable returns(bytes32 msgHash_, (uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) message_)
 func (_Bridge *BridgeTransactor) SendMessage(opts *bind.TransactOpts, _message IBridgeMessage) (*types.Transaction, error) {
 	return _Bridge.contract.Transact(opts, "sendMessage", _message)
 }
 
-// SendMessage is a paid mutator transaction binding the contract method 0x1bdb0037.
+// SendMessage is a paid mutator transaction binding the contract method 0xd5063072.
 //
-// Solidity: function sendMessage((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message) payable returns(bytes32 msgHash_, (uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) message_)
+// Solidity: function sendMessage((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message) payable returns(bytes32 msgHash_, (uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) message_)
 func (_Bridge *BridgeSession) SendMessage(_message IBridgeMessage) (*types.Transaction, error) {
 	return _Bridge.Contract.SendMessage(&_Bridge.TransactOpts, _message)
 }
 
-// SendMessage is a paid mutator transaction binding the contract method 0x1bdb0037.
+// SendMessage is a paid mutator transaction binding the contract method 0xd5063072.
 //
-// Solidity: function sendMessage((uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message) payable returns(bytes32 msgHash_, (uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) message_)
+// Solidity: function sendMessage((uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) _message) payable returns(bytes32 msgHash_, (uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) message_)
 func (_Bridge *BridgeTransactorSession) SendMessage(_message IBridgeMessage) (*types.Transaction, error) {
 	return _Bridge.Contract.SendMessage(&_Bridge.TransactOpts, _message)
 }
@@ -1740,9 +1782,9 @@ type BridgeMessageProcessed struct {
 	Raw     types.Log // Blockchain specific contextual infos
 }
 
-// FilterMessageProcessed is a free log retrieval operation binding the contract event 0x8580f507761043ecdd2bdca084d6fb0109150b3d9842d854d34e3dea6d69387d.
+// FilterMessageProcessed is a free log retrieval operation binding the contract event 0x2e307b506307d0ae2d218f046a7d3889f9fddf48c0d8672770e6cd922d031629.
 //
-// Solidity: event MessageProcessed(bytes32 indexed msgHash, (uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) message, (uint32,uint32,uint32,bool) stats)
+// Solidity: event MessageProcessed(bytes32 indexed msgHash, (uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) message, (uint32,uint32,uint32,bool) stats)
 func (_Bridge *BridgeFilterer) FilterMessageProcessed(opts *bind.FilterOpts, msgHash [][32]byte) (*BridgeMessageProcessedIterator, error) {
 
 	var msgHashRule []interface{}
@@ -1757,9 +1799,9 @@ func (_Bridge *BridgeFilterer) FilterMessageProcessed(opts *bind.FilterOpts, msg
 	return &BridgeMessageProcessedIterator{contract: _Bridge.contract, event: "MessageProcessed", logs: logs, sub: sub}, nil
 }
 
-// WatchMessageProcessed is a free log subscription operation binding the contract event 0x8580f507761043ecdd2bdca084d6fb0109150b3d9842d854d34e3dea6d69387d.
+// WatchMessageProcessed is a free log subscription operation binding the contract event 0x2e307b506307d0ae2d218f046a7d3889f9fddf48c0d8672770e6cd922d031629.
 //
-// Solidity: event MessageProcessed(bytes32 indexed msgHash, (uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) message, (uint32,uint32,uint32,bool) stats)
+// Solidity: event MessageProcessed(bytes32 indexed msgHash, (uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) message, (uint32,uint32,uint32,bool) stats)
 func (_Bridge *BridgeFilterer) WatchMessageProcessed(opts *bind.WatchOpts, sink chan<- *BridgeMessageProcessed, msgHash [][32]byte) (event.Subscription, error) {
 
 	var msgHashRule []interface{}
@@ -1799,9 +1841,9 @@ func (_Bridge *BridgeFilterer) WatchMessageProcessed(opts *bind.WatchOpts, sink 
 	}), nil
 }
 
-// ParseMessageProcessed is a log parse operation binding the contract event 0x8580f507761043ecdd2bdca084d6fb0109150b3d9842d854d34e3dea6d69387d.
+// ParseMessageProcessed is a log parse operation binding the contract event 0x2e307b506307d0ae2d218f046a7d3889f9fddf48c0d8672770e6cd922d031629.
 //
-// Solidity: event MessageProcessed(bytes32 indexed msgHash, (uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) message, (uint32,uint32,uint32,bool) stats)
+// Solidity: event MessageProcessed(bytes32 indexed msgHash, (uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) message, (uint32,uint32,uint32,bool) stats)
 func (_Bridge *BridgeFilterer) ParseMessageProcessed(log types.Log) (*BridgeMessageProcessed, error) {
 	event := new(BridgeMessageProcessed)
 	if err := _Bridge.contract.UnpackLog(event, "MessageProcessed", log); err != nil {
@@ -1885,9 +1927,9 @@ type BridgeMessageSent struct {
 	Raw     types.Log // Blockchain specific contextual infos
 }
 
-// FilterMessageSent is a free log retrieval operation binding the contract event 0xe33fd33b4f45b95b1c196242240c5b5233129d724b578f95b66ce8d8aae93517.
+// FilterMessageSent is a free log retrieval operation binding the contract event 0x8cd0b2bed16bf670133e995b2dabf36ba8ad5269126a3acdc3729c758303fea0.
 //
-// Solidity: event MessageSent(bytes32 indexed msgHash, (uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) message)
+// Solidity: event MessageSent(bytes32 indexed msgHash, (uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) message)
 func (_Bridge *BridgeFilterer) FilterMessageSent(opts *bind.FilterOpts, msgHash [][32]byte) (*BridgeMessageSentIterator, error) {
 
 	var msgHashRule []interface{}
@@ -1902,9 +1944,9 @@ func (_Bridge *BridgeFilterer) FilterMessageSent(opts *bind.FilterOpts, msgHash 
 	return &BridgeMessageSentIterator{contract: _Bridge.contract, event: "MessageSent", logs: logs, sub: sub}, nil
 }
 
-// WatchMessageSent is a free log subscription operation binding the contract event 0xe33fd33b4f45b95b1c196242240c5b5233129d724b578f95b66ce8d8aae93517.
+// WatchMessageSent is a free log subscription operation binding the contract event 0x8cd0b2bed16bf670133e995b2dabf36ba8ad5269126a3acdc3729c758303fea0.
 //
-// Solidity: event MessageSent(bytes32 indexed msgHash, (uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) message)
+// Solidity: event MessageSent(bytes32 indexed msgHash, (uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) message)
 func (_Bridge *BridgeFilterer) WatchMessageSent(opts *bind.WatchOpts, sink chan<- *BridgeMessageSent, msgHash [][32]byte) (event.Subscription, error) {
 
 	var msgHashRule []interface{}
@@ -1944,9 +1986,9 @@ func (_Bridge *BridgeFilterer) WatchMessageSent(opts *bind.WatchOpts, sink chan<
 	}), nil
 }
 
-// ParseMessageSent is a log parse operation binding the contract event 0xe33fd33b4f45b95b1c196242240c5b5233129d724b578f95b66ce8d8aae93517.
+// ParseMessageSent is a log parse operation binding the contract event 0x8cd0b2bed16bf670133e995b2dabf36ba8ad5269126a3acdc3729c758303fea0.
 //
-// Solidity: event MessageSent(bytes32 indexed msgHash, (uint64,uint64,uint32,address,uint64,address,uint64,address,address,uint256,bytes) message)
+// Solidity: event MessageSent(bytes32 indexed msgHash, (uint64,uint128,uint32,address,uint64,address,uint64,address,address,uint256,bytes) message)
 func (_Bridge *BridgeFilterer) ParseMessageSent(log types.Log) (*BridgeMessageSent, error) {
 	event := new(BridgeMessageSent)
 	if err := _Bridge.contract.UnpackLog(event, "MessageSent", log); err != nil {
