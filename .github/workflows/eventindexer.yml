@@ -57,7 +57,7 @@ jobs:
   push-eventindexer-docker-image:
     if: ${{ github.event_name == 'pull_request' }}
     name: Build and push docker image
-    runs-on: [taiko-runner]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
