@@ -2,7 +2,7 @@ name: Eventindexer
 
 on:
   push:
-    branches: [main]
+    branches: [moonchain-dev]
     paths:
       - "packages/eventindexer/**"
   pull_request:
@@ -83,7 +83,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            us-docker.pkg.dev/evmchain/images/eventindexer
+            us-docker.pkg.dev/mxczkevm/images/event-indexer
           tags: |
             type=ref,event=branch
             type=ref,event=pr
