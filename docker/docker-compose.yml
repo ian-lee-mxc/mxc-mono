@@ -6,11 +6,11 @@ x-logging: &logging
 
 services:
   event-indexer-arb:
-    #    image: us-docker.pkg.dev/mxczkevm/images/event-indexer:moonchain-dev
-    build:
-      context: ../
-      args:
-        PACKAGE: eventindexer
+    image: us-docker.pkg.dev/mxczkevm/images/event-indexer:moonchain-dev
+    #    build:
+    #      context: ../
+    #      args:
+    #        PACKAGE: eventindexer
     restart: unless-stopped
     depends_on:
       - mysql
@@ -29,11 +29,11 @@ services:
       - "/script/start-l1-indexer.sh"
     <<: *logging
   event-indexer-api:
-    #    image: us-docker.pkg.dev/mxczkevm/images/event-indexer:moonchain-dev
-    build:
-      context: ../
-      args:
-        PACKAGE: eventindexer
+    image: us-docker.pkg.dev/mxczkevm/images/event-indexer:moonchain-dev
+    #    build:
+    #      context: ../
+    #      args:
+    #        PACKAGE: eventindexer
     restart: unless-stopped
     pull_policy: always
     depends_on:
