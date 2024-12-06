@@ -21,6 +21,7 @@ services:
     environment:
       DATABASE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       RPC_URL: ${L1_RPC_URL_ARB_WS}
+      HTTP_PORT: ${L1_INDEXER_HTTP_PORT_ARB}
     volumes:
       - ./script:/script
     tty: true
@@ -45,6 +46,7 @@ services:
     environment:
       DATABASE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       RPC_URL: ${L2_RPC_URL_MOONCHAIN_WS}
+      HTTP_PORT: ${L2_INDEXER_HTTP_PORT_MOONCHAIN}
     volumes:
       - ./script:/script
     tty: true
@@ -53,7 +55,7 @@ services:
       - -c
       - "/script/start-indexer.sh"
     <<: *logging
-  event-indexer-arb-api:
+  event-indexer-api-arb:
     image: us-docker.pkg.dev/mxczkevm/images/event-indexer:moonchain-dev
     #    build:
     #      context: ../
@@ -68,7 +70,7 @@ services:
     environment:
       DATABASE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       RPC_URL: ${L1_RPC_URL_ARB_WS}
-      HTTP_PORT: ${L1_API_HTTP_PORT_ARB}
+      HTTP_PORT: ${L1_API_HTTP_PORT}
     volumes:
       - ./script:/script
     entrypoint:
