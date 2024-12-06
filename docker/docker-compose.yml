@@ -16,11 +16,11 @@ services:
       - mysql
     pull_policy: always
     env_file:
-      - event-indexer/eventindexer.env
+      - .env
+      - event-indexer/l1.env
     environment:
-      LAYER: l1
       DATABASE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      RPC_URL: ${L1_RPC_URL}
+      RPC_URL: ${L1_RPC_URL_ARB_WS}
     volumes:
       - ./script:/script
     tty: true
@@ -40,11 +40,11 @@ services:
       - mysql
     pull_policy: always
     env_file:
-      - event-indexer/eventindexer.env
+      - .env
+      - event-indexer/l2.env
     environment:
-      LAYER: l2
       DATABASE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      RPC_URL: ${L2_RPC_URL}
+      RPC_URL: ${L2_RPC_URL_MOONCHAIN_WS}
     volumes:
       - ./script:/script
     tty: true
@@ -53,7 +53,7 @@ services:
       - -c
       - "/script/start-indexer.sh"
     <<: *logging
-  event-indexer-api:
+  event-indexer-arb-api:
     image: us-docker.pkg.dev/mxczkevm/images/event-indexer:moonchain-dev
     #    build:
     #      context: ../
@@ -64,10 +64,11 @@ services:
     depends_on:
       - mysql
     env_file:
-      - event-indexer/eventindexer.env
+      - .env
     environment:
       DATABASE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      RPC_URL: ${L1_RPC_URL}
+      RPC_URL: ${L1_RPC_URL_ARB_WS}
+      HTTP_PORT: ${L1_API_HTTP_PORT_ARB}
     volumes:
       - ./script:/script
     entrypoint:
