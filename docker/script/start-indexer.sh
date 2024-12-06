@@ -10,7 +10,7 @@ exec eventindexer indexer \
   --db.maxIdleConns ${DATABASE_MAX_IDLE_CONNS} \
   --db.maxOpenConns ${DATABASE_MAX_OPEN_CONNS} \
   --db.connMaxLifetime ${DATABASE_CONN_MAX_LIFETIME} \
-  --layer l1 \
+  --layer ${LAYER} \
   --rpcUrl ${RPC_URL} \
   --ethClientTimeout ${ETH_CLIENT_TIMEOUT} \
   --l1TaikoAddress ${L1_TAIKO_ADDRESS} \

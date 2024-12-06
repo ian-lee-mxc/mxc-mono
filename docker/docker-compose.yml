@@ -16,8 +16,9 @@ services:
       - mysql
     pull_policy: always
     env_file:
-      - event-indexer/.l1.arb.env
+      - event-indexer/eventindexer.env
     environment:
+      LAYER: l1
       DATABASE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       RPC_URL: ${L1_RPC_URL}
     volumes:
@@ -26,7 +27,31 @@ services:
     entrypoint:
       - /bin/sh
       - -c
-      - "/script/start-l1-indexer.sh"
+      - "/script/start-indexer.sh"
+    <<: *logging
+  event-indexer-moonchain:
+    image: us-docker.pkg.dev/mxczkevm/images/event-indexer:moonchain-dev
+    #    build:
+    #      context: ../
+    #      args:
+    #        PACKAGE: eventindexer
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    pull_policy: always
+    env_file:
+      - event-indexer/eventindexer.env
+    environment:
+      LAYER: l2
+      DATABASE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      RPC_URL: ${L2_RPC_URL}
+    volumes:
+      - ./script:/script
+    tty: true
+    entrypoint:
+      - /bin/sh
+      - -c
+      - "/script/start-indexer.sh"
     <<: *logging
   event-indexer-api:
     image: us-docker.pkg.dev/mxczkevm/images/event-indexer:moonchain-dev
@@ -39,10 +64,10 @@ services:
     depends_on:
       - mysql
     env_file:
-      - event-indexer/.l1.arb.env
+      - event-indexer/eventindexer.env
     environment:
       DATABASE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      RPC_URL: ${L2_RPC_URL}
+      RPC_URL: ${L1_RPC_URL}
     volumes:
       - ./script:/script
     entrypoint:
