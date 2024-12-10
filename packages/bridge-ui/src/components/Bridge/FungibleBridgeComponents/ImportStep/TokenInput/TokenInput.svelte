@@ -264,17 +264,18 @@
 
   const onAccountChange = async (newAccount: Account, oldAccount?: Account) => {
     log('onAccountChange', newAccount, oldAccount);
-    if (newAccount?.isConnected && newAccount?.address && newAccount?.address !== oldAccount?.address) {
+    
+    if (newAccount?.isConnected && newAccount.address && newAccount.address !== oldAccount?.address) {
       log('resetting input');
       reset();
     } else if (newAccount?.address && newAccount?.isConnected && $selectedToken) {
       log('refreshing user balance', $connectedSourceChain?.name);
-      $tokenBalance = await fetchBalance({
-        userAddress: newAccount?.address,
-        token: $selectedToken,
-        srcChainId: newAccount?.chainId,
-      });
     }
+    $tokenBalance = await fetchBalance({
+      userAddress: newAccount?.address || zeroAddress,
+      token: $selectedToken!,
+      srcChainId: newAccount?.chainId,
+    });
   };
 </script>
 

@@ -37,8 +37,7 @@ export async function recommendProcessingFee({
 
   const maxPriorityFee = await destPublicClient.estimateMaxPriorityFeePerGas();
   log(`maxPriorityFee: ${formatGwei(maxPriorityFee)} gwei`);
-
-  let gasPrice = await destPublicClient.getGasPrice();
+  let gasPrice = (baseFee ? baseFee * 2n : null) || await destPublicClient.getGasPrice();
   log(`gasPrice: ${formatGwei(gasPrice)} gwei`);
 
   if (gasPrice < parseGwei('0.01')) {
