@@ -158,6 +158,6 @@ forge script script/SetDcapParams.s.sol:SetDcapParams \
     --evm-version cancun \
     --ffi \
     -vvvv \
-    --block-gas-limit 100000000 \
+    --block-gas-limit 100000000000 \
     --private-key ${PRIVATE_KEY} \
     --legacy
