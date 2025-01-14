@@ -2,6 +2,7 @@ package proof
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 
 	"github.com/taikoxyz/taiko-mono/packages/relayer"
@@ -13,6 +14,7 @@ import (
 )
 
 type HopParams struct {
+	SrcChainID           *big.Int
 	ChainID              *big.Int
 	SignalServiceAddress common.Address
 	SignalService        relayer.SignalService
@@ -31,18 +33,40 @@ func (p *Prover) EncodedSignalProofWithHops(
 	)
 }
 
+func isArbitrum(chainID int64) bool {
+	if chainID == 421614 || chainID == 42161 {
+		return true
+	}
+	return false
+}
+
 func (p *Prover) abiEncodeSignalProofWithHops(ctx context.Context,
 	hopParams []HopParams,
 ) ([]byte, error) {
 	hopProofs := []encoding.HopProof{}
 
 	for _, hop := range hopParams {
-		block, err := hop.Blocker.BlockByNumber(
-			ctx,
-			new(big.Int).SetUint64(hop.BlockNumber),
-		)
-		if err != nil {
-			return nil, errors.Wrap(err, "p.blockHeader")
+
+		var root common.Hash
+		var blockNumber uint64
+
+		if isArbitrum(hop.SrcChainID.Int64()) {
+			arbBlock, err := p.ArbEthClient.BlockByNumber(ctx, new(big.Int).SetUint64(hop.BlockNumber))
+			if err != nil {
+				return nil, errors.Wrap(err, "p.blockHeader arb")
+			}
+			root = common.Hash(arbBlock.Root())
+			blockNumber = arbBlock.NumberU64()
+		} else {
+			block, err := hop.Blocker.BlockByNumber(
+				ctx,
+				new(big.Int).SetUint64(hop.BlockNumber),
+			)
+			if err != nil {
+				return nil, errors.Wrap(err, fmt.Sprintf("p.blockHeader chainID: %v", hop.ChainID.Uint64()))
+			}
+			blockNumber = block.NumberU64()
+			root = block.Root()
 		}
 
 		ethProof, err := p.getProof(
@@ -57,9 +81,9 @@ func (p *Prover) abiEncodeSignalProofWithHops(ctx context.Context,
 		}
 
 		hopProofs = append(hopProofs, encoding.HopProof{
-			BlockID:      block.NumberU64(),
+			BlockID:      blockNumber,
 			ChainID:      hop.ChainID.Uint64(),
-			RootHash:     block.Root(),
+			RootHash:     root,
 			CacheOption:  encoding.CACHE_NOTHING,
 			AccountProof: ethProof.AccountProof,
 			StorageProof: ethProof.StorageProof[0].Proof,

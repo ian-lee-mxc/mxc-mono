@@ -106,7 +106,7 @@ func (i *Indexer) handleMessageSentEvent(
 		return nil
 	}
 
-	if i.minFeeToIndex != 0 && event.Message.Fee < i.minFeeToIndex {
+	if i.minFeeToIndex != 0 && event.Message.Fee.Cmp(big.NewInt(0).SetUint64(i.minFeeToIndex)) < 0 {
 		slog.Warn("Fee is less than minFeeToIndex, not adding to queue",
 			"fee", event.Message.Fee,
 			"minFeeToIndex", i.minFeeToIndex,

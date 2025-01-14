@@ -113,7 +113,7 @@ func (p *Processor) processMessage(
 
 	// we never want to process messages below a certain fee, if set.
 	// return a nil error, and we will successfully acknowledge this.
-	if p.minFeeToProcess != 0 && msgBody.Event.Message.Fee < p.minFeeToProcess {
+	if p.minFeeToProcess != 0 && msgBody.Event.Message.Fee.Cmp(big.NewInt(0).SetUint64(p.minFeeToProcess)) < 0 {
 		slog.Warn("minFeeToProcess not met",
 			"minFeeToProcess", p.minFeeToProcess,
 			"fee", msgBody.Event.Message.Fee,
@@ -128,7 +128,6 @@ func (p *Processor) processMessage(
 	if err != nil {
 		return false, msgBody.TimesRetried, errors.Wrap(err, "p.eventStatusFromMsgHash")
 	}
-
 	if !canProcessMessage(
 		ctx,
 		eventStatus,
@@ -138,7 +137,6 @@ func (p *Processor) processMessage(
 	) {
 		return false, msgBody.TimesRetried, nil
 	}
-
 	if err := p.waitForConfirmations(ctx, msgBody.Event.Raw.TxHash, msgBody.Event.Raw.BlockNumber); err != nil {
 		return false, msgBody.TimesRetried, err
 	}
@@ -206,7 +204,6 @@ func (p *Processor) processMessage(
 	if err != nil {
 		return false, msgBody.TimesRetried, err
 	}
-
 	messageStatus, err := p.destBridge.MessageStatus(&bind.CallOpts{
 		Context: ctx,
 	}, msgBody.Event.MsgHash)
@@ -314,6 +311,7 @@ func (p *Processor) generateEncodedSignalProof(ctx context.Context,
 		}
 
 		hops = append(hops, proof.HopParams{
+			SrcChainID:           p.srcChainId,
 			ChainID:              p.destChainId,
 			SignalServiceAddress: p.srcSignalServiceAddress,
 			Blocker:              p.srcEthClient,
@@ -326,6 +324,7 @@ func (p *Processor) generateEncodedSignalProof(ctx context.Context,
 		// otherwise, we should just create the first hop in the array, we will append
 		// the rest of the hops after.
 		hops = append(hops, proof.HopParams{
+			SrcChainID:           p.srcChainId,
 			ChainID:              p.destChainId,
 			SignalServiceAddress: p.srcSignalServiceAddress,
 			Blocker:              p.srcEthClient,
@@ -427,7 +426,12 @@ func (p *Processor) sendProcessMessageCall(
 		return nil, errors.New("message not received")
 	}
 
-	baseFee, err := p.getBaseFee(ctx)
+	var baseFee *big.Int
+	if p.destArbEthClient != nil {
+		baseFee, err = p.getArbBaseFee(ctx)
+	} else {
+		baseFee, err = p.getBaseFee(ctx)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -441,7 +445,6 @@ func (p *Processor) sendProcessMessageCall(
 	if err != nil {
 		return nil, err
 	}
-
 	// mul by 1.05 for padding
 	gasLimit := uint64(float64(event.Message.GasLimit) * 1.05)
 
@@ -521,7 +524,6 @@ func (p *Processor) sendProcessMessageCall(
 		To:       &p.cfg.DestBridgeAddress,
 		GasLimit: gasLimit,
 	}
-
 	receipt, err := p.txmgr.Send(ctx, candidate)
 	if err != nil {
 		slog.Warn("Failed to send ProcessMessage transaction", "error", err.Error())
@@ -666,4 +668,13 @@ func (p *Processor) getBaseFee(ctx context.Context) (*big.Int, error) {
 	}
 
 	return baseFee, nil
+}
+
+func (p *Processor) getArbBaseFee(ctx context.Context) (*big.Int, error) {
+	blk, err := p.destArbEthClient.BlockByNumber(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return blk.BaseFee(), nil
 }

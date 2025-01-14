@@ -2,6 +2,7 @@ package proof
 
 import (
 	"context"
+	arbEthClient "github.com/mxczkevm/go-ethereum-arb/ethclient"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -19,8 +20,9 @@ type blocker interface {
 	BlockByNumber(ctx context.Context, number *big.Int) (*types.Block, error)
 }
 type Prover struct {
-	blocker     blocker
-	cacheOption int
+	blocker      blocker
+	ArbEthClient *arbEthClient.Client
+	cacheOption  int
 }
 
 func New(blocker blocker, cacheOption int) (*Prover, error) {
