@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/setup-go@v5
         with:
-          go-version: 1.21.0
+          go-version: 1.23.0
       - uses: actions/checkout@v4
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
@@ -41,7 +41,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.21.0"
+          go-version: "1.23.0"
 
       - name: relayer - Unit Tests
         working-directory: ./packages/relayer
@@ -55,8 +55,7 @@ jobs:
 
   push-relayer-docker-image:
     name: Build and push docker image
-    runs-on: [taiko-runner]
-
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4

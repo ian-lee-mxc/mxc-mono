@@ -90,6 +90,7 @@ type Processor struct {
 
 	srcEthClient     ethClient
 	destEthClient    ethClient
+	//CHANGE(MOONCHAIN): relay on arbitrum client
 	destArbEthClient *arbEthClient.Client
 
 	srcCaller relayer.Caller
