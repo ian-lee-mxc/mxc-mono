@@ -90,7 +90,7 @@ export class BridgeProver {
 
         const hopClient = getPublicClient(config, { chainId: Number(currentHop.chainId) });
         if (!hopClient) throw new Error('Could not get public client');
-
+        console.log("hopClient",hopClient, currentHop, currentHop.chainId, latestBlockNumber, currentHop)
         const block = await hopClient.getBlock({ blockNumber: latestBlockNumber });
         if (block.hash === null || block.number === null) {
           throw new BlockNotFoundError({ blockHash: block.hash, blockNumber: block.number });

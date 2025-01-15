@@ -22,6 +22,7 @@ import { config } from '$libs/wagmi';
 import { Bridge } from './Bridge';
 import { calculateMessageDataSize } from './calculateMessageDataSize';
 import type { ApproveArgs, BridgeTransferOp, ERC20BridgeArgs, RequireAllowanceArgs } from './types';
+import {chainIdToChain, chains} from "$libs/chain";
 
 const log = getLogger('ERC20Bridge');
 
@@ -224,15 +225,18 @@ export class ERC20Bridge extends Bridge {
       if (requireAllowance)
         throw new InsufficientAllowanceError(`Insufficient allowance for the amount ${amount}`);
     }
-    let value = 0n
-    if (isNativeMXC) {
-      value = args.amount
-      args.amount = 0n
-    }
+
 
     const { tokenVaultContract, sendERC20Args } = await ERC20Bridge._prepareTransaction(args);
     const { fee } = sendERC20Args;
 
+    let value = 0n
+    if (isNativeMXC) {
+      value = args.amount
+      if (chainIdToChain(args.destChainId).name.toLowerCase().includes("arbitrum")) {
+        sendERC20Args.gasLimit += 5000000;
+      }
+    }
     try {
       const { request } = await simulateContract(config, {
         address: tokenVaultContract.address,
