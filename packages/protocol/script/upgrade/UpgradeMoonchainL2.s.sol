@@ -8,8 +8,8 @@ import "./UpgradeScript.s.sol";
 import { TaikoL2 } from "../../contracts/L2/TaikoL2.sol";
 import "../../test/DeployCapability.sol";
 import { SignalService } from "../../contracts/signal/SignalService.sol";
-import { TransparentUpgradeableProxy } from
-    "../../lib/openzeppelin-contracts/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import { ITransparentUpgradeableProxy } from
+    "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "../../contracts/bridge/Bridge.sol";
 import "../../contracts/tokenvault/ERC20Vault.sol";
 import "../../contracts/tokenvault/ERC721Vault.sol";
@@ -38,6 +38,7 @@ contract UpgradeMoonchainL2 is DeployCapability {
     bool isMainnet = vm.envBool("IS_MAINNET");
 
     address public constant GOLDEN_TOUCH_ADDRESS = 0x0000777735367b36bC9B61C50022d9D0700dB4Ec;
+    uint256 public ethMxcPrice = 500_000;
 
     function run() external {
         require(adminPrivateKey != 0, "invalid priv key");
@@ -139,9 +140,25 @@ contract UpgradeMoonchainL2 is DeployCapability {
             registerTo: sharedAddressManagerProxyAddr
         });
 
+        deployProxy({
+            name: "ethmxc_price_aggregator",
+            impl: address(new EthMxcPriceAggregator()),
+            data: abi.encodeCall(EthMxcPriceAggregator.init, (int256(ethMxcPrice))),
+            registerTo: address(sharedAddressManager)
+        });
+
         console2.log("------------------------------------------");
         console2.log(
             "Warning - you need to register *all* counterparty vaults to enable multi-hop bridging:"
+        );
+        console2.log(
+            "sharedAddressManager.setAddress(remoteChainId, \"signal_service\", address(remoteSignalService))"
+        );
+        console2.log(
+            "sharedAddressManager.setAddress(remoteChainId, \"taiko_token\", address(remoteTaikoToken))"
+        );
+        console2.log(
+            "sharedAddressManager.setAddress(remoteChainId, \"bridge\", address(remoteBridge))"
         );
         console2.log(
             "sharedAddressManager.setAddress(remoteChainId, \"erc20_vault\", address(remoteERC20Vault))"
@@ -171,7 +188,7 @@ contract UpgradeMoonchainL2 is DeployCapability {
     function upgradeProxy(address payable proxy, address newImpl) public {
         vm.stopBroadcast();
         vm.startBroadcast(adminPrivateKey);
-        TransparentUpgradeableProxy(proxy).upgradeTo(newImpl);
+        ITransparentUpgradeableProxy(proxy).upgradeTo(newImpl);
         vm.stopBroadcast();
         vm.startBroadcast(ownerPrivateKey);
     }
@@ -185,7 +202,7 @@ contract UpgradeMoonchainL2 is DeployCapability {
     {
         vm.stopBroadcast();
         vm.startBroadcast(adminPrivateKey);
-        TransparentUpgradeableProxy(proxy).upgradeToAndCall(newImpl, data);
+        ITransparentUpgradeableProxy(proxy).upgradeToAndCall(newImpl, data);
         vm.stopBroadcast();
         vm.startBroadcast(ownerPrivateKey);
     }

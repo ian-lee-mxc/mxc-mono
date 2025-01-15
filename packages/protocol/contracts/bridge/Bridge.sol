@@ -311,7 +311,12 @@ contract Bridge is EssentialContract, IBridge {
         if (_unableToInvokeMessageCall(_message, signalService)) {
             // Handle special addresses and message.data encoded function calldata that don't
             // require or cannot proceed with actual invocation and mark message as DONE
-            refundAmount = _message.value;
+            if (LibNetwork.isMoonchainMainnetOrTestnet(_message.srcChainId)) {
+                refundAmount = 0;
+            } else {
+                refundAmount = _message.value;
+            }
+
             status_ = Status.DONE;
             reason_ = StatusReason.INVOCATION_PROHIBITED;
         } else {
@@ -326,31 +331,17 @@ contract Bridge is EssentialContract, IBridge {
             }
         }
 
-        uint256 _ADD_GAS_LIMIT = 0;
-        if (LibNetwork.isArbitrumMainnetOrTestnet(block.chainid)) {
-            _ADD_GAS_LIMIT + 1_000_000;
-        }
         if (_message.fee != 0) {
             // if on moonchain, we need to convert the fee from eth to mxc
+            uint256 _ethPrice = uint256(
+                IAggregatorInterface(resolve(LibStrings.B_ETHMXC_PRICE_AGGREGATOR, false))
+                    .latestAnswer()
+            );
             uint256 messageFee = _message.fee;
-
-            if (LibNetwork.isMoonchainMainnetOrTestnet(block.chainid) && _message.fee > 0) {
-                uint256 _ethPrice = uint256(
-                    IAggregatorInterface(resolve(LibStrings.B_ETHMXC_PRICE_AGGREGATOR, false))
-                        .latestAnswer()
-                );
-                if (_ethPrice == 0) _ethPrice = 500_000; // default eth/mxc price 500000
+            if (LibNetwork.isMoonchainMainnetOrTestnet(block.chainid)) {
                 messageFee = messageFee * _ethPrice;
-
                 // if message srcChain is Moonchain, we need to convert the fee from mxc to eth
-            } else if (
-                LibNetwork.isMoonchainMainnetOrTestnet(_message.srcChainId) && _message.fee > 0
-            ) {
-                uint256 _ethPrice = uint256(
-                    IAggregatorInterface(resolve(LibStrings.B_ETHMXC_PRICE_AGGREGATOR, false))
-                        .latestAnswer()
-                );
-                if (_ethPrice == 0) _ethPrice = 500_000; // default eth/mxc price 500000
+            } else if (LibNetwork.isMoonchainMainnetOrTestnet(_message.srcChainId)) {
                 messageFee = messageFee / _ethPrice;
                 if (messageFee == 0) {
                     messageFee = 1;
@@ -372,9 +363,6 @@ contract Bridge is EssentialContract, IBridge {
                     // gas per bytes (vs. checking each and every byte if zero or non-zero)
 
                     uint256 __GAS_OVERHEAD = GAS_OVERHEAD;
-                    if (LibNetwork.isArbitrumMainnetOrTestnet(block.chainid)) {
-                        __GAS_OVERHEAD += 5_000_000;
-                    }
                     stats.gasUsedInFeeCalc = uint32(
                         __GAS_OVERHEAD + gasStart + _messageCalldataCost(_message.data.length)
                             - gasleft()
@@ -387,12 +375,20 @@ contract Bridge is EssentialContract, IBridge {
                         (baseFee >= maxFee ? maxFee : (maxFee + baseFee) >> 1).min(messageFee);
 
                     refundAmount -= fee;
-                    msg.sender.sendEtherAndVerify(fee, _SEND_ETHER_GAS_LIMIT + _ADD_GAS_LIMIT);
+                    msg.sender.sendEtherAndVerify(
+                        fee,
+                        _SEND_ETHER_GAS_LIMIT
+                            + (LibNetwork.isArbitrumMainnetOrTestnet(block.chainid) ? 1_000_000 : 0)
+                    );
                 }
             }
         }
 
-        _message.destOwner.sendEtherAndVerify(refundAmount, _SEND_ETHER_GAS_LIMIT + _ADD_GAS_LIMIT);
+        _message.destOwner.sendEtherAndVerify(
+            refundAmount,
+            _SEND_ETHER_GAS_LIMIT
+                + (LibNetwork.isArbitrumMainnetOrTestnet(block.chainid) ? 1_000_000 : 0)
+        );
 
         _updateMessageStatus(msgHash, status_);
         emit MessageProcessed(msgHash, _message, stats);
@@ -759,7 +755,7 @@ contract Bridge is EssentialContract, IBridge {
         // CHANGE(MOONCHAIN): if the message processing on Arbitrum, the minGas need to scale up
         // more higher enough
         uint256 minGasRequired = getMessageMinGasLimit(_message.data.length);
-        if (LibNetwork.isArbitrumMainnetOrTestnet(block.chainid)) {
+        if (LibNetwork.isArbitrumMainnetOrTestnet(_message.destChainId)) {
             minGasRequired += 5_000_000;
         }
         unchecked {
