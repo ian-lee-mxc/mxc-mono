@@ -1,6 +1,6 @@
 [![Relayer](https://codecov.io/gh/taikoxyz/taiko-mono/branch/main/graph/badge.svg?token=E468X2PTJC&flag=relayer)](https://codecov.io/gh/taikoxyz/taiko-mono)
 
-# Relayer moonchain
+# Relayer Moonchain
 
 A relayer for the Bridge to watch and sync event between Layer 1 and Taiko Layer 2.
 

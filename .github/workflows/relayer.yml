@@ -80,7 +80,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            us-docker.pkg.dev/evmchain/images/relayer
+            us-docker.pkg.dev/mxczkevm/images/relayer
           tags: |
             type=ref,event=branch
             type=ref,event=pr
