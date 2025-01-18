@@ -1,6 +1,6 @@
 [![Relayer](https://codecov.io/gh/taikoxyz/taiko-mono/branch/main/graph/badge.svg?token=E468X2PTJC&flag=relayer)](https://codecov.io/gh/taikoxyz/taiko-mono)
 
-# Indexer
+# Indexer Moonchain
 
 Catches events, stores them in the database to be queried via API.
 
