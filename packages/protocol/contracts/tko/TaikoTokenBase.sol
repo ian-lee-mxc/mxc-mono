@@ -30,7 +30,7 @@ abstract contract TaikoTokenBase is TaikoTokenBase0, ERC20VotesUpgradeable {
         return "mode=timestamp";
     }
 
-    function symbol() public pure override returns (string memory) {
+    function symbol() public pure virtual override returns (string memory) {
         return "TAIKO";
     }
 }

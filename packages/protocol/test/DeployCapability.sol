@@ -14,6 +14,10 @@ import "../contracts/common/AddressManager.sol";
 abstract contract DeployCapability is Script {
     error ADDRESS_NULL();
 
+    function getDeploymentJsonPath() public pure virtual returns (string memory) {
+        return "/deployments/deploy_l1.json";
+    }
+
     function deployProxy(
         string memory name,
         address impl,
@@ -40,7 +44,7 @@ abstract contract DeployCapability is Script {
 
         vm.writeJson(
             vm.serializeAddress("deployment", name, proxy),
-            string.concat(vm.projectRoot(), "/deployments/deploy_l1.json")
+            string.concat(vm.projectRoot(), getDeploymentJsonPath())
         );
     }
 

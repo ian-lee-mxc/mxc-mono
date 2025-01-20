@@ -425,7 +425,7 @@ contract ERC20Vault is BaseVault {
                     symbol: "MXC",
                     name: "MXC Token"
                 });
-                balanceChange_ = msg.sender.balance;
+                balanceChange_ = _op.amount;
                 if (msg.value - _op.fee != _op.amount) revert VAULT_INVALID_AMOUNT();
             } else {
                 // If it's a canonical token

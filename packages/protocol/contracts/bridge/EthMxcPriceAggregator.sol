@@ -9,10 +9,6 @@ import "../common/ControllableUpgradeable.sol";
 contract EthMxcPriceAggregator is UUPSUpgradeable, ControllableUpgradeable, IAggregatorInterface {
     int256 public value;
 
-    constructor(int256 _value) {
-        value = _value;
-    }
-
     function init(int256 _value) public initializer {
         __Controllable_init();
         value = _value;

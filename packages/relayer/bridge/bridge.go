@@ -221,7 +221,7 @@ func (b *Bridge) submitBridgeTx(ctx context.Context) error {
 		DestOwner:   b.addr,
 		To:          b.addr,
 		Value:       b.bridgeMessageValue,
-		Fee:         processingFee.Uint64(),
+		Fee:         processingFee,
 		GasLimit:    140000,
 		Data:        []byte{},
 	}

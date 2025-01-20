@@ -3,6 +3,7 @@ package processor
 import (
 	"context"
 	"log/slog"
+	"math/big"
 
 	"github.com/pkg/errors"
 	"github.com/taikoxyz/taiko-mono/packages/relayer"
@@ -18,14 +19,14 @@ var (
 func (p *Processor) isProfitable(
 	ctx context.Context,
 	id int,
-	fee uint64,
+	fee *big.Int,
 	gasLimit uint64,
 	destChainBaseFee uint64,
 	gasTipCap uint64,
 ) (bool, error) {
 	var shouldProcess bool = false
 
-	if fee == 0 || gasLimit == 0 {
+	if fee.Cmp(big.NewInt(0)) == 0 || gasLimit == 0 {
 		slog.Info("unprofitable: no gasLimit or processingFee",
 			"processingFee", fee,
 			"gasLimit", gasLimit,
@@ -37,7 +38,7 @@ func (p *Processor) isProfitable(
 	// if processing fee is higher than baseFee * gasLimit,
 	// we should process.
 	estimatedOnchainFee := (destChainBaseFee + gasTipCap) * uint64(gasLimit)
-	if fee > estimatedOnchainFee {
+	if fee.Cmp(big.NewInt(0).SetUint64(estimatedOnchainFee)) > 0 {
 		shouldProcess = true
 	}
 

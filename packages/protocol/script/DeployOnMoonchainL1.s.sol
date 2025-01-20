@@ -28,8 +28,8 @@ import "../test/L1/TestTierProvider.sol";
 import "../test/DeployCapability.sol";
 import "p256-verifier/src/P256Verifier.sol";
 import "risc0-ethereum/contracts/src/groth16/RiscZeroGroth16Verifier.sol";
-import { TransparentUpgradeableProxy } from
-    "lib/openzeppelin-contracts/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import { ITransparentUpgradeableProxy } from
+    "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "../contracts/signal/SignalService.sol";
 import "../contracts/L1/TaikoL1.sol";
 import "../contracts/bridge/Bridge.sol";
@@ -105,7 +105,7 @@ contract DeployOnMoonchainL1 is DeployCapability {
     function upgradeProxy(address payable proxy, address newImpl) public {
         vm.stopBroadcast();
         vm.startBroadcast(vm.envUint("ADMIN_KEY"));
-        TransparentUpgradeableProxy(proxy).upgradeTo(newImpl);
+        ITransparentUpgradeableProxy(proxy).upgradeTo(newImpl);
         vm.stopBroadcast();
         vm.startBroadcast(vm.envUint("PRIVATE_KEY"));
     }
@@ -119,7 +119,7 @@ contract DeployOnMoonchainL1 is DeployCapability {
     {
         vm.stopBroadcast();
         vm.startBroadcast(vm.envUint("ADMIN_KEY"));
-        TransparentUpgradeableProxy(proxy).upgradeToAndCall(newImpl, data);
+        ITransparentUpgradeableProxy(proxy).upgradeToAndCall(newImpl, data);
         vm.stopBroadcast();
         vm.startBroadcast(vm.envUint("PRIVATE_KEY"));
     }
@@ -183,7 +183,7 @@ contract DeployOnMoonchainL1 is DeployCapability {
         // deploy eth mxc price aggregator
         deployProxy({
             name: "ethmxc_price_aggregator",
-            impl: address(new EthMxcPriceAggregator(int256(ethMxcPrice))),
+            impl: address(new EthMxcPriceAggregator()),
             data: abi.encodeCall(EthMxcPriceAggregator.init, (int256(ethMxcPrice))),
             registerTo: address(sharedAddressManager)
         });
@@ -290,15 +290,6 @@ contract DeployOnMoonchainL1 is DeployCapability {
 
         Bridge(payable(brdige)).transferOwnership(owner);
 
-        console2.log("------------------------------------------");
-        console2.log(
-            "Warning - you need to register *all* counterparty bridges to enable multi-hop bridging:"
-        );
-        console2.log(
-            "sharedAddressManager.setAddress(remoteChainId, \"bridge\", address(remoteBridge))"
-        );
-        console2.log("- sharedAddressManager : ", sharedAddressManager);
-
         // Deploy Vaults
         deployProxy({
             name: "erc20_vault",
@@ -324,6 +315,15 @@ contract DeployOnMoonchainL1 is DeployCapability {
         console2.log("------------------------------------------");
         console2.log(
             "Warning - you need to register *all* counterparty vaults to enable multi-hop bridging:"
+        );
+        console2.log(
+            "sharedAddressManager.setAddress(remoteChainId, \"signal_service\", address(remoteSignalService))"
+        );
+        console2.log(
+            "sharedAddressManager.setAddress(remoteChainId, \"taiko_token\", address(remoteTaikoToken))"
+        );
+        console2.log(
+            "sharedAddressManager.setAddress(remoteChainId, \"bridge\", address(remoteBridge))"
         );
         console2.log(
             "sharedAddressManager.setAddress(remoteChainId, \"erc20_vault\", address(remoteERC20Vault))"

@@ -16,6 +16,7 @@ contract GenevaMoonchainL2 is TaikoL2 {
         uint64 _gasExcess
     )
         external
+        onlyOwner
         reinitializer(4)
     {
         __Essential_init(_owner, _addressManager);
@@ -23,6 +24,7 @@ contract GenevaMoonchainL2 is TaikoL2 {
         parentTimestamp = uint64(block.timestamp);
         parentGasExcess = _gasExcess;
         parentGasTarget = 0;
+        lastSyncedBlock = uint64(block.number);
         (publicInputHash,) = _calcPublicInputHash(block.number);
     }
 

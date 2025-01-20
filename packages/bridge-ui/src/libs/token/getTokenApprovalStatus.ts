@@ -37,12 +37,13 @@ export const getTokenApprovalStatus = async (token: Maybe<Token | NFT>): Promise
     allApproved.set(false);
     throw new NoTokenError();
   }
-  if (token.type === TokenType.ETH) {
+  const currentChainId = get(connectedSourceChain)?.id;
+  const tokenAddress = get(selectedToken)?.addresses[currentChainId];
+  if (token.type === TokenType.ETH || tokenAddress === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE') {
     allApproved.set(true);
     log('token is ETH');
     return ApprovalStatus.ETH_NO_APPROVAL_REQUIRED;
   }
-  const currentChainId = get(connectedSourceChain)?.id;
   const destinationChainId = get(destNetwork)?.id;
   if (!currentChainId || !destinationChainId) {
     log('no currentChainId or destinationChainId');
@@ -50,7 +51,6 @@ export const getTokenApprovalStatus = async (token: Maybe<Token | NFT>): Promise
   }
 
   const ownerAddress = get(account)?.address;
-  const tokenAddress = get(selectedToken)?.addresses[currentChainId];
   log('selectedToken', get(selectedToken));
 
   if (!ownerAddress || !tokenAddress) {

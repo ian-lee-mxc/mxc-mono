@@ -1,4 +1,4 @@
-# taiko-client
+# taiko-client moonchain
 
 [![CI](https://github.com/taikoxyz/taiko-mono/actions/workflows/taiko-client-test.yml/badge.svg)](https://github.com/taikoxyz/taiko-mono/actions/workflows/taiko-client-test.yml)
 

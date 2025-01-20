@@ -82,7 +82,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            us-docker.pkg.dev/mxczkevm/images/event-indexer
+            us-docker.pkg.dev/mxczkevm/images/eventindexer
           tags: |
             type=ref,event=branch
             type=ref,event=pr

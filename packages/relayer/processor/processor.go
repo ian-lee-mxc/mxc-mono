@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	arbEthClient "github.com/mxczkevm/go-ethereum-arb/ethclient"
 	"log/slog"
 	"math/big"
 	"os"
@@ -54,6 +55,13 @@ type ethClient interface {
 	SubscribeNewHead(ctx context.Context, ch chan<- *types.Header) (ethereum.Subscription, error)
 	EstimateGas(ctx context.Context, msg ethereum.CallMsg) (uint64, error)
 	BalanceAt(ctx context.Context, account common.Address, blockNumber *big.Int) (*big.Int, error)
+	CodeAt(ctx context.Context, contract common.Address, blockNumber *big.Int) ([]byte, error)
+	CallContract(ctx context.Context, call ethereum.CallMsg, blockNumber *big.Int) ([]byte, error)
+	SendTransaction(ctx context.Context, tx *types.Transaction) error
+	PendingCodeAt(ctx context.Context, account common.Address) ([]byte, error)
+	FilterLogs(ctx context.Context, q ethereum.FilterQuery) ([]types.Log, error)
+	SubscribeFilterLogs(ctx context.Context, q ethereum.FilterQuery, ch chan<- types.Log) (ethereum.Subscription, error)
+	HeaderByNumber(ctx context.Context, number *big.Int) (*types.Header, error)
 }
 
 // hop is a struct which needs to be created based on the config parameters
@@ -80,9 +88,12 @@ type Processor struct {
 
 	hops []hop
 
-	srcEthClient  ethClient
-	destEthClient ethClient
-	srcCaller     relayer.Caller
+	srcEthClient     ethClient
+	destEthClient    ethClient
+	//CHANGE(MOONCHAIN): relay on arbitrum client
+	destArbEthClient *arbEthClient.Client
+
+	srcCaller relayer.Caller
 
 	ecdsaKey *ecdsa.PrivateKey
 
@@ -283,10 +294,22 @@ func InitFromConfig(ctx context.Context, p *Processor, cfg *Config) error {
 	if err != nil {
 		return err
 	}
+	if isArbitrum(destChainID.Int64()) {
+		p.destArbEthClient, err = arbEthClient.Dial(cfg.DestRPCUrl)
+		if err != nil {
+			return err
+		}
+	}
 
 	prover, err := proof.New(srcEthClient, p.cfg.CacheOption)
 	if err != nil {
 		return err
+	}
+	if isArbitrum(srcChainID.Int64()) {
+		prover.ArbEthClient, err = arbEthClient.Dial(cfg.SrcRPCUrl)
+		if err != nil {
+			return err
+		}
 	}
 
 	publicKey := cfg.ProcessorPrivateKey.Public()
@@ -373,6 +396,13 @@ func InitFromConfig(ctx context.Context, p *Processor, cfg *Config) error {
 	slog.Info("minFeeToProcess", "minFeeToProcess", p.minFeeToProcess)
 
 	return nil
+}
+
+func isArbitrum(chainID int64) bool {
+	if chainID == 421614 || chainID == 42161 {
+		return true
+	}
+	return false
 }
 
 func (p *Processor) Name() string {

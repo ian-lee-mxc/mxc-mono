@@ -109,7 +109,7 @@ contract BridgeTest2_processMessage_moonchain is TaikoTest {
 
         address ethMxcPriceAggregator = deployProxy({
             name: "ethmxc_price_aggregator",
-            impl: address(new EthMxcPriceAggregator(int256(ethMxcPrice))),
+            impl: address(new EthMxcPriceAggregator()),
             data: abi.encodeCall(EthMxcPriceAggregator.init, (int256(ethMxcPrice))),
             registerTo: address(addressManager)
         });

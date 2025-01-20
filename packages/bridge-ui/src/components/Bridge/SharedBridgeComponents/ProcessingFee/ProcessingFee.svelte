@@ -10,14 +10,14 @@
   import { InputBox } from '$components/InputBox';
   import { LoadingText } from '$components/LoadingText';
   import { Tooltip } from '$components/Tooltip';
+  import { chains } from '$libs/chain';
   import { closeOnEscapeOrOutsideClick } from '$libs/customActions';
   import { ProcessingFeeMethod } from '$libs/fee';
   import { parseToWei } from '$libs/util/parseToWei';
+  import { connectedSourceChain } from '$stores/network';
 
   import NoneOption from './NoneOption.svelte';
   import RecommendedFee from './RecommendedFee.svelte';
-  import { connectedSourceChain } from '$stores/network';
-  import { chains } from '$libs/chain';
 
   export let small = false;
   export let textOnly = false;
@@ -166,11 +166,11 @@
       <span class="text-secondary-content">{$t('processing_fee.title')}</span>
       <span class=" text-primary-content mt-[4px]">
         {#if $calculatingProcessingFee}
-          <LoadingText mask="0.0017730224073" /> {currentChain?.nativeCurrency.symbol}
+          <LoadingText mask="0.0017730224073" /> {currentChain?.nativeCurrency.symbol || ''}
         {:else if errorCalculatingRecommendedAmount && $processingFeeMethod === ProcessingFeeMethod.RECOMMENDED}
           <FlatAlert type="warning" message={$t('processing_fee.recommended.error')} />
         {:else}
-          {formatEther($processingFee ?? BigInt(0))} {currentChain?.nativeCurrency.symbol} {#if $processingFee !== recommendedAmount}
+          {formatEther($processingFee ?? BigInt(0))} {currentChain?.nativeCurrency.symbol || ''} {#if $processingFee !== recommendedAmount}
             <span class="text-primary-link">| {$t('common.customized')}</span>
           {/if}
         {/if}
@@ -184,7 +184,7 @@
     {:else if errorCalculatingRecommendedAmount && $processingFeeMethod === ProcessingFeeMethod.RECOMMENDED}
       <span class="text-warning-sentiment">{$t('processing_fee.recommended.error')}</span>
     {:else}
-      {formatEther($processingFee ?? BigInt(0))} ETH {#if $processingFee !== recommendedAmount}
+      {formatEther($processingFee ?? BigInt(0))} {currentChain?.nativeCurrency.symbol || ''} {#if $processingFee !== recommendedAmount}
         <span class="text-primary-link">| {$t('common.customized')}</span>
       {/if}
     {/if}
@@ -206,7 +206,7 @@
 
     <span class="body-small-regular text-secondary-content mt-[4px]">
       {#if $calculatingProcessingFee}
-        <LoadingText mask="0.0001" /> ETH
+        <LoadingText mask="0.0001" /> {currentChain?.nativeCurrency.symbol}
       {:else if errorCalculatingRecommendedAmount && $processingFeeMethod === ProcessingFeeMethod.RECOMMENDED}
         <FlatAlert type="warning" message={$t('processing_fee.recommended.error')} />
       {:else}

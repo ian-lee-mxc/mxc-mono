@@ -5,60 +5,57 @@ x-logging: &logging
       max-file: "3"
 
 services:
+  # event indexer
   event-indexer-arb:
-    image: us-docker.pkg.dev/mxczkevm/images/event-indexer:moonchain-dev
-    #    build:
-    #      context: ../
-    #      args:
-    #        PACKAGE: eventindexer
+    image: us-docker.pkg.dev/mxczkevm/images/eventindexer:moonchain-dev
     restart: unless-stopped
     depends_on:
       - mysql
     pull_policy: always
     env_file:
       - .env
-      - event-indexer/l1.env
+      - event-indexer/.arb-l1.env
     environment:
+      DATABASE_NAME: eventindexer
       DATABASE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      RPC_URL: ${L1_RPC_URL_ARB_WS}
+      RPC_URL: ${RPC_URL_WS_ARB}
+      LAYER: l1
     volumes:
       - ./script:/script
     tty: true
     entrypoint:
       - /bin/sh
       - -c
-      - "/script/start-indexer.sh"
+      - "/script/start-eventindexer-indexer.sh"
     <<: *logging
+    profiles:
+      - eventindexer
   event-indexer-moonchain:
-    image: us-docker.pkg.dev/mxczkevm/images/event-indexer:moonchain-dev
-    #    build:
-    #      context: ../
-    #      args:
-    #        PACKAGE: eventindexer
+    image: us-docker.pkg.dev/mxczkevm/images/eventindexer:moonchain-dev
     restart: unless-stopped
     depends_on:
       - mysql
     pull_policy: always
     env_file:
       - .env
-      - event-indexer/l2.env
+      - event-indexer/.moonchain-l2.env
     environment:
+      DATABASE_NAME: eventindexer
       DATABASE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      RPC_URL: ${L2_RPC_URL_MOONCHAIN_WS}
+      RPC_URL: ${RPC_URL_WS_MOONCHAIN}
+      LAYER: l2
     volumes:
       - ./script:/script
     tty: true
     entrypoint:
       - /bin/sh
       - -c
-      - "/script/start-indexer.sh"
+      - "/script/start-eventindexer-indexer.sh"
+    profiles:
+      - eventindexer
     <<: *logging
   event-indexer-api-arb:
-    image: us-docker.pkg.dev/mxczkevm/images/event-indexer:moonchain-dev
-    #    build:
-    #      context: ../
-    #      args:
-    #        PACKAGE: eventindexer
+    image: us-docker.pkg.dev/mxczkevm/images/eventindexer:moonchain-dev
     restart: unless-stopped
     pull_policy: always
     depends_on:
@@ -66,28 +63,212 @@ services:
     env_file:
       - .env
     environment:
+      DATABASE_NAME: eventindexer
       DATABASE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      RPC_URL: ${L1_RPC_URL_ARB_WS}
-      HTTP_PORT: ${L1_API_HTTP_PORT}
+      RPC_URL: ${RPC_URL_WS_ARB}
+      HTTP_PORT: ${EVENTINDEXER_API_HTTP_PORT_ARB}
     ports:
-      - 9001:${L1_API_HTTP_PORT}
+      - 9001:${EVENTINDEXER_API_HTTP_PORT_ARB}
     volumes:
       - ./script:/script
     entrypoint:
       - /bin/sh
       - -c
-      - "/script/start-api.sh"
+      - "/script/start-eventindexer-api.sh"
+    profiles:
+      - eventindexer
     <<: *logging
+  event-indexer-api-moonchain:
+    image: us-docker.pkg.dev/mxczkevm/images/eventindexer:moonchain-dev
+    restart: unless-stopped
+    pull_policy: always
+    depends_on:
+      - mysql
+    env_file:
+      - .env
+    environment:
+      DATABASE_NAME: eventindexer
+      DATABASE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      RPC_URL: ${RPC_URL_WS_ARB}
+      HTTP_PORT: ${EVENTINDEXER_API_HTTP_PORT_MOONCHAIN}
+    ports:
+      - 9002:${EVENTINDEXER_API_HTTP_PORT_MOONCHAIN}
+    volumes:
+      - ./script:/script
+    entrypoint:
+      - /bin/sh
+      - -c
+      - "/script/start-eventindexer-api.sh"
+    profiles:
+      - eventindexer
+    <<: *logging
+  #relayer
+  relayer-api-arb:
+    image: us-docker.pkg.dev/mxczkevm/images/relayer:moonchain-dev
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    pull_policy: always
+    env_file:
+      - .env
+      - ./relayer/.api-arb.env
+    environment:
+      DATABASE_NAME: relayer
+      DATABASE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      HTTP_PORT: ${RELAYER_API_HTTP_PORT_ARB}
+      SRC_RPC_URL: ${RPC_URL_WS_ARB}
+      DEST_RPC_URL: ${RPC_URL_WS_MOONCHAIN}
+    ports:
+      - 4103:${RELAYER_API_HTTP_PORT_ARB}
+    volumes:
+      - ./script:/script
+    tty: true
+    entrypoint:
+      - /bin/sh
+      - -c
+      - "/script/start-relayer-api.sh"
+    <<: *logging
+    profiles:
+      - relayer
+  relayer-api-moonchain:
+    image: us-docker.pkg.dev/mxczkevm/images/relayer:moonchain-dev
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    pull_policy: always
+    env_file:
+      - .env
+      - ./relayer/.api-moonchain.env
+    environment:
+      DATABASE_NAME: relayer
+      DATABASE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      HTTP_PORT: ${RELAYER_API_HTTP_PORT_MOONCHAIN}
+      SRC_RPC_URL: ${RPC_URL_WS_MOONCHAIN}
+      DEST_RPC_URL: ${RPC_URL_WS_ARB}
+    ports:
+      - 4203:${RELAYER_API_HTTP_PORT_MOONCHAIN}
+    volumes:
+      - ./script:/script
+    tty: true
+    entrypoint:
+      - /bin/sh
+      - -c
+      - "/script/start-relayer-api.sh"
+    <<: *logging
+    profiles:
+      - relayer
+  relayer-indexer-arb:
+    image: us-docker.pkg.dev/mxczkevm/images/relayer:moonchain-dev
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    pull_policy: always
+    env_file:
+      - .env
+      - ./relayer/.indexer-arb.env
+    environment:
+      DATABASE_NAME: relayer
+      DATABASE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      SRC_RPC_URL: ${RPC_URL_WS_ARB}
+      DEST_RPC_URL: ${RPC_URL_WS_MOONCHAIN}
+    volumes:
+      - ./script:/script
+    tty: true
+    entrypoint:
+      - /bin/sh
+      - -c
+      - "/script/start-relayer-indexer.sh"
+    <<: *logging
+    profiles:
+      - relayer
+  relayer-indexer-moonchain:
+    image: us-docker.pkg.dev/mxczkevm/images/relayer:moonchain-dev
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    pull_policy: always
+    env_file:
+      - .env
+      - ./relayer/.indexer-moonchain.env
+    environment:
+      DATABASE_NAME: relayer
+      DATABASE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      SRC_RPC_URL: ${RPC_URL_WS_MOONCHAIN}
+      DEST_RPC_URL: ${RPC_URL_WS_ARB}
+    volumes:
+      - ./script:/script
+    tty: true
+    entrypoint:
+      - /bin/sh
+      - -c
+      - "/script/start-relayer-indexer.sh"
+    <<: *logging
+    profiles:
+      - relayer
+  relayer-processor-arb:
+    image: us-docker.pkg.dev/mxczkevm/images/relayer:moonchain-dev
+    restart: unless-stopped
+    depends_on:
+      - mysql
+      - rabbitmq
+    pull_policy: always
+    env_file:
+      - .env
+      - ./relayer/.processor-arb.env
+    environment:
+      DATABASE_NAME: relayer
+      DATABASE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      SRC_RPC_URL: ${RPC_URL_WS_ARB}
+      DEST_RPC_URL: ${RPC_URL_WS_MOONCHAIN}
+    volumes:
+      - ./script:/script
+    tty: true
+    entrypoint:
+      - /bin/sh
+      - -c
+      - "/script/start-relayer-processor.sh"
+    <<: *logging
+    profiles:
+      - relayer
+  relayer-processor-moonchain:
+    image: us-docker.pkg.dev/mxczkevm/images/relayer:moonchain-dev
+    build:
+      context: ../
+      args:
+        PACKAGE: relayer
+    restart: unless-stopped
+    depends_on:
+      - mysql
+      - rabbitmq
+    pull_policy: always
+    env_file:
+      - .env
+      - ./relayer/.processor-moonchain.env
+    environment:
+      DATABASE_NAME: relayer
+      DATABASE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      SRC_RPC_URL: ${RPC_URL_WS_MOONCHAIN}
+      DEST_RPC_URL: ${RPC_URL_WS_ARB}
+    volumes:
+      - ./script:/script
+    tty: true
+    entrypoint:
+      - /bin/sh
+      - -c
+      - "/script/start-relayer-processor.sh"
+    <<: *logging
+    profiles:
+      - relayer
   mysql:
     image: mysql:latest
     container_name: mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: eventindexer
     ports:
       - 33069:3306
     volumes:
       - ./data/mysql/data:/var/lib/mysql
+      - ./initdb:/docker-entrypoint-initdb.d
     command: --character-set-server=utf8mb4
       --collation-server=utf8mb4_general_ci
       --explicit_defaults_for_timestamp=true
@@ -95,3 +276,52 @@ services:
     privileged: true
     restart: always
     <<: *logging
+    profiles:
+      - eventindexer
+      - relayer
+  rabbitmq:
+    image: rabbitmq:3.7.1-management-alpine
+    container_name: "rabbitmq"
+    ports:
+      - 5672:5672
+      - 15672:15672
+      - 15692:15692
+    volumes:
+      - ./data/rabbitmq/data/:/var/lib/rabbitmq/
+      - ./data/rabbitmq/log/:/var/log/rabbitmq/
+    <<: *logging
+    profiles:
+      - relayer
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: always
+    volumes:
+      - ../packages/relayer/docker-compose/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./data/prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/etc/prometheus/console_libraries"
+      - "--web.console.templates=/etc/prometheus/consoles"
+      - "--web.enable-lifecycle"
+    ports:
+      - 9090:9090
+    profiles:
+      - relayer
+  grafana:
+    image: grafana/grafana
+    restart: always
+    environment:
+      GF_INSTALL_PLUGINS: "grafana-clock-panel,grafana-simple-json-datasource"
+    volumes:
+      - ./data/grafana_data:/var/lib/grafana
+      - ../packages/relayer/docker-compose/grafana/provisioning/:/etc/grafana/provisioning/
+    env_file:
+      - ../packages/relayer/docker-compose/grafana/config.monitoring
+    ports:
+      - 3000:3000
+    depends_on:
+      - prometheus
+    profiles:
+      - relayer

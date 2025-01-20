@@ -109,7 +109,7 @@ type SaveEventOpts struct {
 }
 
 type UpdateFeesAndProfitabilityOpts struct {
-	Fee                     uint64
+	Fee                     *big.Int
 	DestChainBaseFee        uint64
 	GasTipCap               uint64
 	GasLimit                uint64

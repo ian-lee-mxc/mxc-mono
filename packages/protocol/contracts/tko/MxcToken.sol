@@ -83,4 +83,8 @@ contract MxcToken is TaikoTokenBase {
     function burn(address from, uint256 amount) public onlyFromOptionalNamed(LibStrings.B_TAIKO) {
         super._burn(from, amount);
     }
+
+    function symbol() public pure override returns (string memory) {
+        return "MXC";
+    }
 }
