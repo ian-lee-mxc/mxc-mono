@@ -1,0 +1,221 @@
+{
+  "tcbInfo": {
+    "version": 2,
+    "issueDate": "2024-12-30T11:53:29Z",
+    "nextUpdate": "2025-01-29T11:53:29Z",
+    "fmspc": "00706a800000",
+    "pceId": "0000",
+    "tcbType": 0,
+    "tcbEvaluationDataNumber": 17,
+    "tcbLevels": [
+      {
+        "tcb": {
+          "sgxtcbcomp01svn": 9,
+          "sgxtcbcomp02svn": 9,
+          "sgxtcbcomp03svn": 0,
+          "sgxtcbcomp04svn": 0,
+          "sgxtcbcomp05svn": 0,
+          "sgxtcbcomp06svn": 0,
+          "sgxtcbcomp07svn": 0,
+          "sgxtcbcomp08svn": 0,
+          "sgxtcbcomp09svn": 0,
+          "sgxtcbcomp10svn": 0,
+          "sgxtcbcomp11svn": 0,
+          "sgxtcbcomp12svn": 0,
+          "sgxtcbcomp13svn": 0,
+          "sgxtcbcomp14svn": 0,
+          "sgxtcbcomp15svn": 0,
+          "sgxtcbcomp16svn": 0,
+          "pcesvn": 13
+        },
+        "tcbDate": "2024-03-13T00:00:00Z",
+        "tcbStatus": "UpToDate"
+      },
+      {
+        "tcb": {
+          "sgxtcbcomp01svn": 8,
+          "sgxtcbcomp02svn": 8,
+          "sgxtcbcomp03svn": 0,
+          "sgxtcbcomp04svn": 0,
+          "sgxtcbcomp05svn": 0,
+          "sgxtcbcomp06svn": 0,
+          "sgxtcbcomp07svn": 0,
+          "sgxtcbcomp08svn": 0,
+          "sgxtcbcomp09svn": 0,
+          "sgxtcbcomp10svn": 0,
+          "sgxtcbcomp11svn": 0,
+          "sgxtcbcomp12svn": 0,
+          "sgxtcbcomp13svn": 0,
+          "sgxtcbcomp14svn": 0,
+          "sgxtcbcomp15svn": 0,
+          "sgxtcbcomp16svn": 0,
+          "pcesvn": 13
+        },
+        "tcbDate": "2023-08-09T00:00:00Z",
+        "tcbStatus": "OutOfDate"
+      },
+      {
+        "tcb": {
+          "sgxtcbcomp01svn": 7,
+          "sgxtcbcomp02svn": 7,
+          "sgxtcbcomp03svn": 0,
+          "sgxtcbcomp04svn": 0,
+          "sgxtcbcomp05svn": 0,
+          "sgxtcbcomp06svn": 0,
+          "sgxtcbcomp07svn": 0,
+          "sgxtcbcomp08svn": 0,
+          "sgxtcbcomp09svn": 0,
+          "sgxtcbcomp10svn": 0,
+          "sgxtcbcomp11svn": 0,
+          "sgxtcbcomp12svn": 0,
+          "sgxtcbcomp13svn": 0,
+          "sgxtcbcomp14svn": 0,
+          "sgxtcbcomp15svn": 0,
+          "sgxtcbcomp16svn": 0,
+          "pcesvn": 13
+        },
+        "tcbDate": "2022-11-09T00:00:00Z",
+        "tcbStatus": "OutOfDate"
+      },
+      {
+        "tcb": {
+          "sgxtcbcomp01svn": 5,
+          "sgxtcbcomp02svn": 5,
+          "sgxtcbcomp03svn": 0,
+          "sgxtcbcomp04svn": 0,
+          "sgxtcbcomp05svn": 0,
+          "sgxtcbcomp06svn": 0,
+          "sgxtcbcomp07svn": 0,
+          "sgxtcbcomp08svn": 0,
+          "sgxtcbcomp09svn": 0,
+          "sgxtcbcomp10svn": 0,
+          "sgxtcbcomp11svn": 0,
+          "sgxtcbcomp12svn": 0,
+          "sgxtcbcomp13svn": 0,
+          "sgxtcbcomp14svn": 0,
+          "sgxtcbcomp15svn": 0,
+          "sgxtcbcomp16svn": 0,
+          "pcesvn": 11
+        },
+        "tcbDate": "2021-11-10T00:00:00Z",
+        "tcbStatus": "OutOfDate"
+      },
+      {
+        "tcb": {
+          "sgxtcbcomp01svn": 4,
+          "sgxtcbcomp02svn": 4,
+          "sgxtcbcomp03svn": 0,
+          "sgxtcbcomp04svn": 0,
+          "sgxtcbcomp05svn": 0,
+          "sgxtcbcomp06svn": 0,
+          "sgxtcbcomp07svn": 0,
+          "sgxtcbcomp08svn": 0,
+          "sgxtcbcomp09svn": 0,
+          "sgxtcbcomp10svn": 0,
+          "sgxtcbcomp11svn": 0,
+          "sgxtcbcomp12svn": 0,
+          "sgxtcbcomp13svn": 0,
+          "sgxtcbcomp14svn": 0,
+          "sgxtcbcomp15svn": 0,
+          "sgxtcbcomp16svn": 0,
+          "pcesvn": 11
+        },
+        "tcbDate": "2021-06-09T00:00:00Z",
+        "tcbStatus": "OutOfDate"
+      },
+      {
+        "tcb": {
+          "sgxtcbcomp01svn": 3,
+          "sgxtcbcomp02svn": 3,
+          "sgxtcbcomp03svn": 0,
+          "sgxtcbcomp04svn": 0,
+          "sgxtcbcomp05svn": 0,
+          "sgxtcbcomp06svn": 0,
+          "sgxtcbcomp07svn": 0,
+          "sgxtcbcomp08svn": 0,
+          "sgxtcbcomp09svn": 0,
+          "sgxtcbcomp10svn": 0,
+          "sgxtcbcomp11svn": 0,
+          "sgxtcbcomp12svn": 0,
+          "sgxtcbcomp13svn": 0,
+          "sgxtcbcomp14svn": 0,
+          "sgxtcbcomp15svn": 0,
+          "sgxtcbcomp16svn": 0,
+          "pcesvn": 10
+        },
+        "tcbDate": "2020-11-11T00:00:00Z",
+        "tcbStatus": "OutOfDate"
+      },
+      {
+        "tcb": {
+          "sgxtcbcomp01svn": 2,
+          "sgxtcbcomp02svn": 2,
+          "sgxtcbcomp03svn": 0,
+          "sgxtcbcomp04svn": 0,
+          "sgxtcbcomp05svn": 0,
+          "sgxtcbcomp06svn": 0,
+          "sgxtcbcomp07svn": 0,
+          "sgxtcbcomp08svn": 0,
+          "sgxtcbcomp09svn": 0,
+          "sgxtcbcomp10svn": 0,
+          "sgxtcbcomp11svn": 0,
+          "sgxtcbcomp12svn": 0,
+          "sgxtcbcomp13svn": 0,
+          "sgxtcbcomp14svn": 0,
+          "sgxtcbcomp15svn": 0,
+          "sgxtcbcomp16svn": 0,
+          "pcesvn": 9
+        },
+        "tcbDate": "2020-06-10T00:00:00Z",
+        "tcbStatus": "OutOfDate"
+      },
+      {
+        "tcb": {
+          "sgxtcbcomp01svn": 1,
+          "sgxtcbcomp02svn": 1,
+          "sgxtcbcomp03svn": 0,
+          "sgxtcbcomp04svn": 0,
+          "sgxtcbcomp05svn": 0,
+          "sgxtcbcomp06svn": 0,
+          "sgxtcbcomp07svn": 0,
+          "sgxtcbcomp08svn": 0,
+          "sgxtcbcomp09svn": 0,
+          "sgxtcbcomp10svn": 0,
+          "sgxtcbcomp11svn": 0,
+          "sgxtcbcomp12svn": 0,
+          "sgxtcbcomp13svn": 0,
+          "sgxtcbcomp14svn": 0,
+          "sgxtcbcomp15svn": 0,
+          "sgxtcbcomp16svn": 0,
+          "pcesvn": 7
+        },
+        "tcbDate": "2019-05-15T00:00:00Z",
+        "tcbStatus": "OutOfDate"
+      },
+      {
+        "tcb": {
+          "sgxtcbcomp01svn": 1,
+          "sgxtcbcomp02svn": 1,
+          "sgxtcbcomp03svn": 0,
+          "sgxtcbcomp04svn": 0,
+          "sgxtcbcomp05svn": 0,
+          "sgxtcbcomp06svn": 0,
+          "sgxtcbcomp07svn": 0,
+          "sgxtcbcomp08svn": 0,
+          "sgxtcbcomp09svn": 0,
+          "sgxtcbcomp10svn": 0,
+          "sgxtcbcomp11svn": 0,
+          "sgxtcbcomp12svn": 0,
+          "sgxtcbcomp13svn": 0,
+          "sgxtcbcomp14svn": 0,
+          "sgxtcbcomp15svn": 0,
+          "sgxtcbcomp16svn": 0,
+          "pcesvn": 6
+        },
+        "tcbDate": "2018-08-15T00:00:00Z",
+        "tcbStatus": "OutOfDate"
+      }
+    ]
+  },
+  "signature": "df2c23d4131d29d2d25bdb651cce4210535f039197bb467365b4f98f01e04d45e273380999422898677fabf60bd8a248afa2e298c7091ab99a1cc98a636c3058"
+}
