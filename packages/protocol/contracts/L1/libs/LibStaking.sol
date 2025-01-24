@@ -56,17 +56,18 @@ library LibStaking {
 
     /// @dev Withdrawal request
     /// @param _stakingState Current TaikoData.StakingState.
-    function stakingRequestWithdrawal(TaikoData.StakingState storage _stakingState) internal {
+    function stakingRequestWithdrawal(
+        TaikoData.StakingState storage _stakingState,
+        bool cancel
+    )
+        internal
+    {
         if (_stakingState.stakingBalances[msg.sender] == 0) revert INSUFFICIENT_BALANCE();
-        _stakingState.withdrawalRequestTime[msg.sender] = uint64(block.timestamp);
-    }
-
-    /// @dev Cancel the withdrawal request
-    /// @param _stakingState Current TaikoData.StakingState.
-    function stakingCancelWithdrawal(TaikoData.StakingState storage _stakingState) internal {
-        if (_stakingState.withdrawalRequestTime[msg.sender] == 0) revert INSUFFICIENT_BALANCE();
-        _stakingState.withdrawalRequestTime[msg.sender] = 0; // Reset the time of the withdrawal
-            // request
+        if (cancel) {
+            _stakingState.withdrawalRequestTime[msg.sender] = 0; // Reset the time of the withdrawal
+        } else {
+            _stakingState.withdrawalRequestTime[msg.sender] = uint64(block.timestamp);
+        }
     }
 
     /// @dev User completes the withdrawal after the lock period
@@ -133,7 +134,7 @@ library LibStaking {
         returns (uint256)
     {
         uint256 elapsedSeconds = block.timestamp - _stakingState.lastDepositRewardTime;
-        uint256 reward = (_mxc(_resolver).totalSupply() / 9.5 / 365 days) * elapsedSeconds; // max
+        uint256 reward = (_mxc(_resolver).totalSupply() * 950 / 100 / 365 days) * elapsedSeconds; // max
             // apr ~= 9.99%
 
         // Limit max reward to 1e5
@@ -188,29 +189,12 @@ library LibStaking {
         emit ClaimReward(msg.sender, reward);
     }
 
-    /// @dev Gets a user's current MXC token bond balance.
-    /// @param _stakingState Current TaikoData.StakingState.
-    /// @param _user The user address to credit.
-    /// @return  The current token balance
-    function stakingBalanceOf(
-        TaikoData.StakingState storage _stakingState,
-        address _user
-    )
-        internal
-        view
-        returns (uint256)
-    {
-        return (_stakingState.stakingBalances[_user]);
-    }
-
     /// @dev Slash a user's bond balance. Dishonest behavior and failure to meet online rate targets
     /// during the period
     /// @param _stakingState Current TaikoData.StakingState.
-    /// @param _resolver Address resolver interface.
     /// @param _user The user address to credit.
     function stakingSlashing(
         TaikoData.StakingState storage _stakingState,
-        IAddressResolver _resolver,
         address _user
     )
         internal

@@ -137,13 +137,8 @@ contract MainnetMoonchainL1 is TaikoL1, RollupAddressCache {
     }
 
     /// @notice Withdrawal request
-    function stakingRequestWithdrawal() external whenStakingBalancesAbove {
-        LibStaking.stakingRequestWithdrawal(stakingState);
-    }
-
-    /// @notice Cancel the withdrawal request
-    function stakingCancelWithdrawal() external whenStakingBalancesAbove {
-        LibStaking.stakingCancelWithdrawal(stakingState);
+    function stakingRequestWithdrawal(bool cancel) external nonReentrant whenStakingBalancesAbove {
+        LibStaking.stakingRequestWithdrawal(stakingState, cancel);
     }
 
     /// @notice User completes the withdrawal after the lock period
@@ -156,12 +151,6 @@ contract MainnetMoonchainL1 is TaikoL1, RollupAddressCache {
         LibStaking.stakingClaimReward(stakingState, this);
     }
 
-    /// @notice Gets the current staking balance of a given address.
-    /// @return The current staking balance.
-    function stakingBalanceOf(address _user) external view returns (uint256) {
-        return LibStaking.stakingBalanceOf(stakingState, _user);
-    }
-
     /// @notice Calculate the debt reward owed to a user
     /// @param _user The user address to credit.
     /// @return The debt reward owed to the user
@@ -169,19 +158,8 @@ contract MainnetMoonchainL1 is TaikoL1, RollupAddressCache {
         return LibStaking.stakingCalculateRewardDebt(stakingState, _user);
     }
 
-    /// @notice Get the current staking state
-    function stakingStates()
-        external
-        view
-        returns (uint256 totalBalance, uint256 totalReward, uint64 lastDepositRewardTime)
-    {
-        return (
-            stakingState.totalBalance, stakingState.totalReward, stakingState.lastDepositRewardTime
-        );
-    }
-
     /// @notice Deposit the reward to the staking pool
-    function stakingDepositReward() public whenNotPaused nonReentrant {
+    function stakingDepositReward() external whenNotPaused nonReentrant {
         LibStaking.stakingDepositReward(stakingState, this);
     }
 
@@ -190,7 +168,18 @@ contract MainnetMoonchainL1 is TaikoL1, RollupAddressCache {
         external
         onlyFromOptionalNamed(LibStrings.B_STAKING_SLASHER)
     {
-        LibStaking.stakingSlashing(stakingState, this, _user);
+        LibStaking.stakingSlashing(stakingState, _user);
+    }
+
+    /// @notice Get the staking state of a user
+    /// @param _user The user address to query.
+    /// @return The staking balance, withdrawal request time, and last claimed time of the user.
+    function stakingUserState(address _user) external view returns (uint256, uint256, uint256) {
+        return (
+            stakingState.stakingBalances[_user],
+            stakingState.withdrawalRequestTime[_user],
+            stakingState.lastClaimedTime[_user]
+        );
     }
 
     function proposeBlockV2(
@@ -208,7 +197,7 @@ contract MainnetMoonchainL1 is TaikoL1, RollupAddressCache {
         TaikoData.Config memory config = getConfig();
         (, meta_) = LibProposing.proposeBlock(state, config, this, _params, _txList);
         if (meta_.id < config.ontakeForkHeight) revert L1_FORK_ERROR();
-        stakingDepositReward();
+        LibStaking.stakingDepositReward(stakingState, this);
     }
 
     /// @inheritdoc ITaikoL1
@@ -229,7 +218,7 @@ contract MainnetMoonchainL1 is TaikoL1, RollupAddressCache {
         for (uint256 i; i < metaArr_.length; ++i) {
             if (metaArr_[i].id < config.ontakeForkHeight) revert L1_FORK_ERROR();
         }
-        stakingDepositReward();
+        LibStaking.stakingDepositReward(stakingState, this);
     }
 
     function _getAddress(uint64 _chainId, bytes32 _name) internal view override returns (address) {

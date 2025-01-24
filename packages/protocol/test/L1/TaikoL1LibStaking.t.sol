@@ -53,7 +53,9 @@ contract TaikoL1LibStakingTest is TaikoL1TestBase {
 
         uint256 totalBalance;
         uint256 totalReward;
-        assertEq(mL1.stakingBalanceOf(Alice), 7_000_000 * 1 ether);
+
+        (uint256 balance,,) = mL1.stakingUserState(Alice);
+        assertEq(balance, 7_000_000 * 1 ether);
         (totalBalance, totalReward,,,,) = mL1.stakingState();
         assertEq(totalBalance, 7_000_000 * 1 ether);
 
@@ -107,7 +109,7 @@ contract TaikoL1LibStakingTest is TaikoL1TestBase {
         vm.expectRevert(LibStaking.WITHDRAWAL_LOCKED.selector);
         mL1.stakingWithdrawal();
 
-        mL1.stakingRequestWithdrawal();
+        mL1.stakingRequestWithdrawal(false);
         vm.warp(block.timestamp + LibStaking.LOCK_PERIOD);
         uint256 beforeBalance = mxcToken.balanceOf(Alice);
         mL1.stakingWithdrawal();
@@ -123,11 +125,12 @@ contract TaikoL1LibStakingTest is TaikoL1TestBase {
         mL1.stake(1_000_000 * 1 ether);
 
         vm.stopPrank();
-        (uint256 totalBalanceBefore,,) = mL1.stakingStates();
+        (uint256 totalBalanceBefore,,,,,) = mL1.stakingState();
         mL1.stakingSlashing(Alice);
 
-        assertEq(mL1.stakingBalanceOf(Alice), 1_000_000 * 1 ether - (1_000_000 * 1 ether / 32));
-        (uint256 totalBalanceAfter,,) = mL1.stakingStates();
+        (uint256 balance,,) = mL1.stakingUserState(Alice);
+        assertEq(balance, 1_000_000 * 1 ether - (1_000_000 * 1 ether / 32));
+        (uint256 totalBalanceAfter,,,,,) = mL1.stakingState();
 
         assertEq(totalBalanceBefore, totalBalanceAfter + (1_000_000 * 1 ether / 32));
     }
