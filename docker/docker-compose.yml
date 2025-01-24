@@ -92,7 +92,7 @@ services:
       RPC_URL: ${RPC_URL_WS_ARB}
       HTTP_PORT: ${EVENTINDEXER_API_HTTP_PORT_MOONCHAIN}
     ports:
-      - 9002:${EVENTINDEXER_API_HTTP_PORT_MOONCHAIN}
+      - 9101:${EVENTINDEXER_API_HTTP_PORT_MOONCHAIN}
     volumes:
       - ./script:/script
     entrypoint:
