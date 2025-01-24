@@ -169,8 +169,28 @@ contract MainnetMoonchainL1 is TaikoL1, RollupAddressCache {
         return LibStaking.stakingCalculateRewardDebt(stakingState, _user);
     }
 
+    /// @notice Get the current staking state
+    function stakingStates()
+        external
+        view
+        returns (uint256 totalBalance, uint256 totalReward, uint64 lastDepositRewardTime)
+    {
+        return (
+            stakingState.totalBalance, stakingState.totalReward, stakingState.lastDepositRewardTime
+        );
+    }
+
+    /// @notice Deposit the reward to the staking pool
     function stakingDepositReward() public whenNotPaused nonReentrant {
         LibStaking.stakingDepositReward(stakingState, this);
+    }
+
+    /// @notice slash a user's staking balance
+    function stakingSlashing(address _user)
+        external
+        onlyFromOptionalNamed(LibStrings.B_STAKING_SLASHER)
+    {
+        LibStaking.stakingSlashing(stakingState, this, _user);
     }
 
     function proposeBlockV2(

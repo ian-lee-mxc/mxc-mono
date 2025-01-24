@@ -96,13 +96,13 @@ contract TaikoL1LibStakingTest is TaikoL1TestBase {
         vm.startPrank(Alice);
         mxcToken.approve(address(mL1), type(uint256).max);
         vm.expectRevert(LibStaking.INSUFFICIENT_DEPOSIT.selector);
-        mL1.stake(5_000_000 * 1 ether);
+        mL1.stake(1_000_000 * 1 ether - 1);
     }
 
     function test_L1_Withdraw() external {
         vm.startPrank(Alice);
         mxcToken.approve(address(mL1), type(uint256).max);
-        mL1.stake(6_000_000 * 1 ether);
+        mL1.stake(1_000_000 * 1 ether);
 
         vm.expectRevert(LibStaking.WITHDRAWAL_LOCKED.selector);
         mL1.stakingWithdrawal();
@@ -111,9 +111,24 @@ contract TaikoL1LibStakingTest is TaikoL1TestBase {
         vm.warp(block.timestamp + LibStaking.LOCK_PERIOD);
         uint256 beforeBalance = mxcToken.balanceOf(Alice);
         mL1.stakingWithdrawal();
-        assertEq(mxcToken.balanceOf(Alice), beforeBalance + 6_000_000 * 1 ether);
+        assertEq(mxcToken.balanceOf(Alice), beforeBalance + 1_000_000 * 1 ether);
 
         vm.expectRevert(LibStaking.INSUFFICIENT_BALANCE.selector);
         mL1.stakingWithdrawal();
+    }
+
+    function test_L1_Slashing() external {
+        vm.startPrank(Alice);
+        mxcToken.approve(address(mL1), type(uint256).max);
+        mL1.stake(1_000_000 * 1 ether);
+
+        vm.stopPrank();
+        (uint256 totalBalanceBefore,,) = mL1.stakingStates();
+        mL1.stakingSlashing(Alice);
+
+        assertEq(mL1.stakingBalanceOf(Alice), 1_000_000 * 1 ether - (1_000_000 * 1 ether / 32));
+        (uint256 totalBalanceAfter,,) = mL1.stakingStates();
+
+        assertEq(totalBalanceBefore, totalBalanceAfter + (1_000_000 * 1 ether / 32));
     }
 }

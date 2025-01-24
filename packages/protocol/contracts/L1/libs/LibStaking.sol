@@ -22,14 +22,17 @@ library LibStaking {
     /// @dev Emitted when user claim reward.
     event ClaimReward(address indexed user, uint256 amount);
 
+    /// @dev Emitted when user slash.
+    event Slash(address indexed user, uint256 amount);
+
     error INSUFFICIENT_DEPOSIT();
     error INSUFFICIENT_BALANCE();
     error WITHDRAWAL_LOCKED();
     error ZERO_VALUE();
 
     uint256 public constant REWARD_BEGIN_TIME = 1_729_689_600;
-    uint256 public constant LOCK_PERIOD = 60 days;
-    uint256 public constant MIN_DEPOSIT = 6_000_000;
+    uint256 public constant LOCK_PERIOD = 30 days;
+    uint256 public constant MIN_DEPOSIT = 1_000_000;
 
     /// @dev Deposits MXC token to be used as bonds.
     /// @param _stakingState Current TaikoData.StakingState.
@@ -130,8 +133,8 @@ library LibStaking {
         returns (uint256)
     {
         uint256 elapsedSeconds = block.timestamp - _stakingState.lastDepositRewardTime;
-        uint256 reward = (_mxc(_resolver).totalSupply() / 16 / 365 days) * elapsedSeconds; // max
-            // apr is 6.06%
+        uint256 reward = (_mxc(_resolver).totalSupply() / 9.5 / 365 days) * elapsedSeconds; // max
+            // apr ~= 9.99%
 
         // Limit max reward to 1e5
         if (reward > 1e5 * 1 ether) {
@@ -198,6 +201,26 @@ library LibStaking {
         returns (uint256)
     {
         return (_stakingState.stakingBalances[_user]);
+    }
+
+    /// @dev Slash a user's bond balance. Dishonest behavior and failure to meet online rate targets
+    /// during the period
+    /// @param _stakingState Current TaikoData.StakingState.
+    /// @param _resolver Address resolver interface.
+    /// @param _user The user address to credit.
+    function stakingSlashing(
+        TaikoData.StakingState storage _stakingState,
+        IAddressResolver _resolver,
+        address _user
+    )
+        internal
+    {
+        uint256 amount = _stakingState.stakingBalances[_user];
+        if (amount == 0) return;
+        uint256 punishAmount = amount / 32;
+        _stakingState.stakingBalances[_user] -= punishAmount;
+        _stakingState.totalBalance -= punishAmount;
+        emit Slash(_user, punishAmount);
     }
 
     function _tko(IAddressResolver _resolver) private view returns (IERC20) {
