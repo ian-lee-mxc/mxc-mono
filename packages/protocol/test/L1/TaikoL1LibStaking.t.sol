@@ -48,8 +48,8 @@ contract TaikoL1LibStakingTest is TaikoL1TestBase {
     function test_L1_StakingAndReward() external {
         vm.startPrank(Alice);
         mxcToken.approve(address(mL1), type(uint256).max);
-        mL1.stake(6_000_000 * 1 ether);
-        mL1.stake(1_000_000 * 1 ether);
+        mL1.stake(Alice,6_000_000 * 1 ether);
+        mL1.stake(Alice,1_000_000 * 1 ether);
 
         uint256 totalBalance;
         uint256 totalReward;
@@ -61,7 +61,7 @@ contract TaikoL1LibStakingTest is TaikoL1TestBase {
 
         vm.startPrank(Bob);
         mxcToken.approve(address(mL1), type(uint256).max);
-        mL1.stake(6_000_000 * 1 ether);
+        mL1.stake(Bob,6_000_000 * 1 ether);
         (totalBalance, totalReward,,,,) = mL1.stakingState();
         assertEq(totalBalance, (7_000_000 + 6_000_000) * 1 ether);
 
@@ -98,13 +98,13 @@ contract TaikoL1LibStakingTest is TaikoL1TestBase {
         vm.startPrank(Alice);
         mxcToken.approve(address(mL1), type(uint256).max);
         vm.expectRevert(LibStaking.INSUFFICIENT_DEPOSIT.selector);
-        mL1.stake(1_000_000 * 1 ether - 1);
+        mL1.stake(Alice,1_000_000 * 1 ether - 1);
     }
 
     function test_L1_Withdraw() external {
         vm.startPrank(Alice);
         mxcToken.approve(address(mL1), type(uint256).max);
-        mL1.stake(1_000_000 * 1 ether);
+        mL1.stake(Alice,1_000_000 * 1 ether);
 
         vm.expectRevert(LibStaking.WITHDRAWAL_LOCKED.selector);
         mL1.stakingWithdrawal();
@@ -122,7 +122,7 @@ contract TaikoL1LibStakingTest is TaikoL1TestBase {
     function test_L1_Slashing() external {
         vm.startPrank(Alice);
         mxcToken.approve(address(mL1), type(uint256).max);
-        mL1.stake(1_000_000 * 1 ether);
+        mL1.stake(Alice,1_000_000 * 1 ether);
 
         vm.stopPrank();
         (uint256 totalBalanceBefore,,,,,) = mL1.stakingState();

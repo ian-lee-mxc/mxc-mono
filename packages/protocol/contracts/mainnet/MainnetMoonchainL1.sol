@@ -131,9 +131,10 @@ contract MainnetMoonchainL1 is TaikoL1, RollupAddressCache {
     }
 
     /// @notice Stake MXC token to be used as bonds.
+    /// @param _user The user address to credit.
     /// @param _amount The amount of token to deposit.
-    function stake(uint256 _amount) external whenNotPaused nonReentrant {
-        LibStaking.stake(stakingState, this, _amount);
+    function stake(address _user, uint256 _amount) external whenNotPaused nonReentrant {
+        LibStaking.stake(stakingState, this, _user, _amount);
     }
 
     /// @notice Withdrawal request

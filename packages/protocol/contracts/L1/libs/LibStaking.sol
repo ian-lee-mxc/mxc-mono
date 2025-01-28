@@ -41,17 +41,18 @@ library LibStaking {
     function stake(
         TaikoData.StakingState storage _stakingState,
         IAddressResolver _resolver,
+        address _user,
         uint256 _amount
     )
         internal
     {
-        uint256 newBalance = _stakingState.stakingBalances[msg.sender] + _amount;
+        uint256 newBalance = _stakingState.stakingBalances[_user] + _amount;
         if (newBalance < MIN_DEPOSIT * 1 ether) revert INSUFFICIENT_DEPOSIT();
         _tko(_resolver).transferFrom(msg.sender, address(this), _amount);
-        _stakingState.stakingBalances[msg.sender] += _amount;
+        _stakingState.stakingBalances[_user] += _amount;
         _stakingState.totalBalance += _amount;
 
-        emit Staking(msg.sender, _amount);
+        emit Staking(_user, _amount);
     }
 
     /// @dev Withdrawal request
