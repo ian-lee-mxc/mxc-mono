@@ -76,11 +76,11 @@ contract MxcToken is TaikoTokenBase {
         return super.delegates(account);
     }
 
-    function mint(address to, uint256 amount) public onlyFromOptionalNamed(LibStrings.B_TAIKO) {
+    function mint(address to, uint256 amount) public onlyFromNamedEither(LibStrings.B_STAKING, LibStrings.B_TAIKO) {
         super._mint(to, amount);
     }
 
-    function burn(address from, uint256 amount) public onlyFromOptionalNamed(LibStrings.B_TAIKO) {
+    function burn(address from, uint256 amount) public onlyFromNamedEither(LibStrings.B_STAKING, LibStrings.B_TAIKO) {
         super._burn(from, amount);
     }
 

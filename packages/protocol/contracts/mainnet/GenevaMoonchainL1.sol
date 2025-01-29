@@ -2,8 +2,8 @@
 pragma solidity ^0.8.24;
 
 import "../L1/TaikoL1.sol";
-import "../L1/libs/LibStaking.sol";
 import "./addrcache/RollupAddressCache.sol";
+import {IL1Staking} from "../team/staking/IL1Staking.sol";
 
 /// @title MainnetTaikoL1
 /// @dev This contract shall be deployed to replace its parent contract on Ethereum for Taiko
@@ -11,15 +11,8 @@ import "./addrcache/RollupAddressCache.sol";
 /// @notice See the documentation in {TaikoL1}.
 /// @custom:security-contact security@taiko.xyz
 contract GenevaMoonchainL1 is TaikoL1, RollupAddressCache {
-    modifier whenStakingBalancesAbove() {
-        if (stakingState.stakingBalances[msg.sender] < LibStaking.MIN_DEPOSIT * 1 ether) {
-            revert LibStaking.INSUFFICIENT_BALANCE();
-        }
-        _;
-    }
 
-    TaikoData.StakingState public stakingState;
-    uint256[50] private __gap;
+    uint256[51] private __gap;
 
     /// @inheritdoc ITaikoL1
     function getConfig() public pure override returns (TaikoData.Config memory) {
@@ -125,58 +118,6 @@ contract GenevaMoonchainL1 is TaikoL1, RollupAddressCache {
         ts.stateRoot = bytes32(uint256(1));
     }
 
-    /// @notice Stake MXC token to be used as bonds.
-    /// @param _user The user address to credit.
-    /// @param _amount The amount of token to deposit.
-    function stake(address _user, uint256 _amount) external whenNotPaused nonReentrant {
-        LibStaking.stake(stakingState, this, _user, _amount);
-    }
-
-    /// @notice Withdrawal request
-    function stakingRequestWithdrawal(bool cancel) external nonReentrant whenStakingBalancesAbove {
-        LibStaking.stakingRequestWithdrawal(stakingState, cancel);
-    }
-
-    /// @notice User completes the withdrawal after the lock period
-    function stakingWithdrawal() external whenNotPaused nonReentrant whenStakingBalancesAbove {
-        LibStaking.stakingWithdrawal(stakingState, this);
-    }
-
-    /// @notice User claims their accumulated interest and transfers it to their wallet.
-    function stakingClaimReward() external whenNotPaused nonReentrant whenStakingBalancesAbove {
-        LibStaking.stakingClaimReward(stakingState, this);
-    }
-
-    /// @notice Calculate the debt reward owed to a user
-    /// @param _user The user address to credit.
-    /// @return The debt reward owed to the user
-    function stakingCalculateRewardDebt(address _user) external view returns (uint256) {
-        return LibStaking.stakingCalculateRewardDebt(stakingState, _user);
-    }
-
-    /// @notice Deposit the reward to the staking pool
-    function stakingDepositReward() external whenNotPaused nonReentrant {
-        LibStaking.stakingDepositReward(stakingState, this);
-    }
-
-    /// @notice slash a user's staking balance
-    function stakingSlashing(address _user)
-        external
-        onlyFromOptionalNamed(LibStrings.B_STAKING_SLASHER)
-    {
-        LibStaking.stakingSlashing(stakingState, _user);
-    }
-
-    /// @notice Get the staking state of a user
-    /// @param _user The user address to query.
-    /// @return The staking balance, withdrawal request time, and last claimed time of the user.
-    function stakingUserState(address _user) external view returns (uint256, uint256, uint256) {
-        return (
-            stakingState.stakingBalances[_user],
-            stakingState.withdrawalRequestTime[_user],
-            stakingState.lastClaimedTime[_user]
-        );
-    }
 
     function proposeBlockV2(
         bytes calldata _params,
@@ -193,7 +134,7 @@ contract GenevaMoonchainL1 is TaikoL1, RollupAddressCache {
         TaikoData.Config memory config = getConfig();
         (, meta_) = LibProposing.proposeBlock(state, config, this, _params, _txList);
         if (meta_.id < config.ontakeForkHeight) revert L1_FORK_ERROR();
-        LibStaking.stakingDepositReward(stakingState, this);
+        IL1Staking(resolve(LibStrings.B_STAKING,false)).stakingDepositReward();
     }
 
     /// @inheritdoc ITaikoL1
@@ -214,7 +155,7 @@ contract GenevaMoonchainL1 is TaikoL1, RollupAddressCache {
         for (uint256 i; i < metaArr_.length; ++i) {
             if (metaArr_[i].id < config.ontakeForkHeight) revert L1_FORK_ERROR();
         }
-        LibStaking.stakingDepositReward(stakingState, this);
+        IL1Staking(resolve(LibStrings.B_STAKING,false)).stakingDepositReward();
     }
 
     function _getAddress(uint64 _chainId, bytes32 _name) internal view override returns (address) {
