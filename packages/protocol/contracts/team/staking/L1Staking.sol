@@ -42,7 +42,7 @@ contract L1Staking is EssentialContract, IL1Staking {
     event Withdrawal(address indexed user, uint256 amount);
 
     /// @dev Emitted when user claim reward.
-    event ClaimReward(address indexed user, uint256 amount);
+    event ClaimReward(address indexed user, uint256 amount, uint256 epoch);
 
     /// @dev Emitted when user slash.
     event Slash(address indexed user, uint256 amount);
@@ -74,11 +74,13 @@ contract L1Staking is EssentialContract, IL1Staking {
     function stake(
         address _user,
         uint256 _amount
-    ) whenNotPaused nonReentrant
+    )
+    whenNotPaused nonReentrant
     external
     {
         uint256 newBalance = stakingState.stakingBalances[_user] + _amount;
         if (newBalance < MIN_DEPOSIT) revert INSUFFICIENT_DEPOSIT();
+        _stakingClaimReward(_user);
         _mxc().transferFrom(msg.sender, address(this), _amount);
         stakingState.stakingBalances[_user] += _amount;
         stakingState.totalBalance += _amount;
@@ -180,22 +182,22 @@ contract L1Staking is EssentialContract, IL1Staking {
     /// @dev User claims their accumulated interest and transfers it to their wallet.
     function stakingClaimReward()
     external
+    whenNotPaused nonReentrant
     {
         _stakingClaimReward(msg.sender);
     }
 
     function _stakingClaimReward(address _user) internal
-    whenNotPaused nonReentrant
     {
         uint256 currentEpoch = getCurrentEpoch();
         if (stakingState.lastClaimedEpoch[_user] >= currentEpoch) revert REWARD_ALREADY_CLAIMED();
 
         uint256 reward = stakingCalculateRewardDebt(_user); // Calculate the interest owed to the user
-        if (reward == 0) revert ZERO_VALUE();
+        if (reward == 0) return;
 
         stakingState.lastClaimedEpoch[_user] = currentEpoch;
         _mxc().transfer(_user, reward);
-        emit ClaimReward(_user, reward);
+        emit ClaimReward(_user, reward, currentEpoch);
 
     }
 
