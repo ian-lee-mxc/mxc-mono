@@ -91,6 +91,12 @@ var (
 		Category: proposerCategory,
 		EnvVars:  []string{"TX_POOL_LOCALS_ONLY"},
 	}
+	TxPoolBlockAddresses = &cli.StringSliceFlag{
+		Name:     "txPool.blockAddresses",
+		Usage:    "Comma separated accounts to treat as locals (priority inclusion)",
+		Category: proposerCategory,
+		EnvVars:  []string{"TX_POOL_BLOCK_ADDRESSES"},
+	}
 	MaxProposedTxListsPerEpoch = &cli.Uint64Flag{
 		Name:     "txPool.maxTxListsPerEpoch",
 		Usage:    "Maximum number of transaction lists which will be proposed inside one proposing epoch",
@@ -125,6 +131,7 @@ var ProposerFlags = MergeFlags(CommonFlags, []cli.Flag{
 	ProposeInterval,
 	TxPoolLocals,
 	TxPoolLocalsOnly,
+	TxPoolBlockAddresses,
 	ExtraData,
 	MinGasUsed,
 	MinTxListBytes,

@@ -258,6 +258,33 @@ func (p *Proposer) fetchPoolContent(filterPoolContent bool) ([]types.Transaction
 		txLists = localTxsLists
 	}
 
+	if len(p.blockAddresses) > 0 {
+		var (
+			filteredTransactions []types.Transactions
+			signer               = types.LatestSignerForChainID(p.rpc.L2.ChainID)
+		)
+		for _, txs := range txLists {
+			var filtered types.Transactions
+			for _, tx := range txs {
+				sender, err := types.Sender(signer, tx)
+				if err != nil {
+					return nil, err
+				}
+
+				for _, blockAddress := range p.blockAddresses {
+					if sender != blockAddress {
+						filtered = append(filtered, tx)
+					}
+				}
+			}
+
+			if filtered.Len() != 0 {
+				filteredTransactions = append(filteredTransactions, filtered)
+			}
+		}
+		txLists = filteredTransactions
+	}
+
 	log.Info("Transactions lists count", "count", len(txLists))
 
 	return txLists, nil

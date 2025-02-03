@@ -27,6 +27,7 @@ type Config struct {
 	ExtraData                  string
 	ProposeInterval            time.Duration
 	LocalAddresses             []common.Address
+	blockAddresses             []common.Address
 	LocalAddressesOnly         bool
 	MinGasUsed                 uint64
 	MinTxListBytes             uint64
@@ -68,6 +69,15 @@ func NewConfigFromCliContext(c *cli.Context) (*Config, error) {
 			localAddresses = append(localAddresses, common.HexToAddress(account))
 		}
 	}
+	var blockAddresses []common.Address
+	if c.IsSet(flags.TxPoolBlockAddresses.Name) {
+		for _, account := range strings.Split(c.String(flags.TxPoolBlockAddresses.Name), ",") {
+			if trimmed := strings.TrimSpace(account); !common.IsHexAddress(trimmed) {
+				return nil, fmt.Errorf("invalid account in --txpool.blockAddresses: %s", trimmed)
+			}
+			blockAddresses = append(blockAddresses, common.HexToAddress(account))
+		}
+	}
 
 	minTip, err := utils.GWeiToWei(c.Float64(flags.MinTip.Name))
 	if err != nil {
@@ -94,6 +104,7 @@ func NewConfigFromCliContext(c *cli.Context) (*Config, error) {
 		LocalAddressesOnly:         c.Bool(flags.TxPoolLocalsOnly.Name),
 		MinGasUsed:                 c.Uint64(flags.MinGasUsed.Name),
 		MinTxListBytes:             c.Uint64(flags.MinTxListBytes.Name),
+		blockAddresses:             blockAddresses,
 		MinTip:                     minTip.Uint64(),
 		MinProposingInternal:       c.Duration(flags.MinProposingInternal.Name),
 		MaxProposedTxListsPerEpoch: c.Uint64(flags.MaxProposedTxListsPerEpoch.Name),
