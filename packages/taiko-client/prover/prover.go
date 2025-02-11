@@ -153,11 +153,17 @@ func InitFromConfig(
 	if txMgr != nil {
 		p.txmgr = txMgr
 	} else {
-		if p.txmgr, err = txmgr.NewSimpleTxManager(
+		conf, err := txmgr.NewConfig(*cfg.TxmgrConfigs, log.Root())
+		if err != nil {
+			return err
+		}
+		// Set the estimator with fixed blobFee issue
+		conf.GasPriceEstimatorFn = DefaultGasPriceEstimatorFn
+		if p.txmgr, err = txmgr.NewSimpleTxManagerFromConfig(
 			"prover",
 			log.Root(),
 			&metrics.TxMgrMetrics,
-			*cfg.TxmgrConfigs,
+			conf,
 		); err != nil {
 			return err
 		}
