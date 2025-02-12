@@ -53,7 +53,7 @@ var (
 		Value:    10 * time.Minute,
 		EnvVars:  []string{"RAIKO_REQUEST_TIMEOUT"},
 	}
-	StartingBlockID = &cli.Uint64Flag{
+	StartingBlockID = &cli.Int64Flag{
 		Name:     "prover.startingBlockID",
 		Usage:    "If set, prover will start proving blocks from the block with this ID",
 		Category: proverCategory,

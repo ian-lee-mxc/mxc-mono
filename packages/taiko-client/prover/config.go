@@ -74,7 +74,8 @@ func NewConfigFromCliContext(c *cli.Context) (*Config, error) {
 
 	var startingBlockID *big.Int
 	if c.IsSet(flags.StartingBlockID.Name) {
-		startingBlockID = new(big.Int).SetUint64(c.Uint64(flags.StartingBlockID.Name))
+		//		startingBlockID = new(big.Int).SetUint64(c.Uint64(flags.StartingBlockID.Name))
+		startingBlockID = new(big.Int).SetInt64(c.Int64(flags.StartingBlockID.Name))
 	}
 
 	var allowance = common.Big0

@@ -184,6 +184,16 @@ func (p *Prover) initL1Current(startingBlockID *big.Int) error {
 		}
 
 		startingBlockID = new(big.Int).SetUint64(stateVars.B.LastVerifiedBlockId)
+	} else if startingBlockID.Cmp(big.NewInt(0)) < 0 {
+		var blocKNumber, err = p.rpc.L2.BlockNumber(p.ctx)
+		if err != nil {
+			return err
+		}
+		var l2BlocKNumber = new(big.Int).SetUint64(blocKNumber)
+		startingBlockID = new(big.Int).Add(l2BlocKNumber, startingBlockID)
+		if startingBlockID.Cmp(big.NewInt(0)) < 0 {
+			startingBlockID = big.NewInt(0)
+		}
 	}
 
 	log.Info("Init L1Current cursor", "startingBlockID", startingBlockID)
