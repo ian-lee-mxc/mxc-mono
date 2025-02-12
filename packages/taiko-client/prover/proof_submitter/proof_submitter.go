@@ -27,8 +27,8 @@ import (
 var (
 	_                              Submitter = (*ProofSubmitter)(nil)
 	submissionDelayRandomBumpRange float64   = 20
-	proofPollingInterval                     = 10 * time.Second
-	ProofTimeout                             = 3 * time.Hour
+	proofPollingInterval                     = 20 * time.Second
+	ProofTimeout                             = 15 * time.Minute // Shorten to 15m, tuned for Moonchain Prover Manager
 )
 
 // ProofSubmitter is responsible requesting proofs for the given L2
@@ -172,7 +172,7 @@ func (s *ProofSubmitter) RequestProof(ctx context.Context, meta metadata.TaikoBl
 			)
 			if err != nil {
 				// If request proof has timed out in retry, let's cancel the proof generating and skip
-				if errors.Is(err, proofProducer.ErrProofInProgress) && time.Since(startTime) >= ProofTimeout {
+				if time.Since(startTime) >= ProofTimeout {
 					log.Error("Request proof has timed out, start to cancel", "blockID", opts.BlockID)
 					if cancelErr := s.proofProducer.RequestCancel(ctx, opts); cancelErr != nil {
 						log.Error("Failed to request cancellation of proof", "err", cancelErr)
