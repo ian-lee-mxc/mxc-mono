@@ -2,6 +2,7 @@ package prover
 
 import (
 	"context"
+	"encoding/binary"
 	"fmt"
 	"math/big"
 	"strings"
@@ -457,12 +458,32 @@ func (p *Prover) submitProofOp(proofWithHeader *proofProducer.ProofWithHeader) e
 
 	if err := submitter.SubmitProof(p.ctx, proofWithHeader); err != nil {
 		if strings.Contains(err.Error(), vm.ErrExecutionReverted.Error()) {
-			log.Error(
-				"Proof submission reverted",
-				"blockID", proofWithHeader.BlockID,
-				"minTier", proofWithHeader.Meta.GetMinTier(),
-				"error", err,
-			)
+			if proofWithHeader.Tier == encoding.TierSgxID {
+				sgxInstanceId := -1
+				if len(proofWithHeader.Proof) > 4 {
+					sgxInstanceId = int(binary.BigEndian.Uint32(proofWithHeader.Proof[0:4]))
+				}
+				// Try to extract the reverted reason from the joined errors.
+				revertedReason := err
+				if uw, ok := err.(interface{ Unwrap() []error }); ok {
+					errList := uw.Unwrap()
+					revertedReason = errList[0]
+				}
+				log.Error(
+					"SGX Proof submission reverted",
+					"blockID", proofWithHeader.BlockID,
+					"minTier", proofWithHeader.Meta.GetMinTier(),
+					"reason", revertedReason,
+					"id", sgxInstanceId,
+				)
+			} else {
+				log.Error(
+					"Proof submission reverted",
+					"blockID", proofWithHeader.BlockID,
+					"minTier", proofWithHeader.Meta.GetMinTier(),
+					"error", err,
+				)
+			}
 			return nil
 		}
 		log.Error(
