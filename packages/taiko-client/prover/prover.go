@@ -26,6 +26,7 @@ import (
 	"github.com/taikoxyz/taiko-mono/packages/taiko-client/pkg/rpc"
 	handler "github.com/taikoxyz/taiko-mono/packages/taiko-client/prover/event_handler"
 	guardianProverHeartbeater "github.com/taikoxyz/taiko-mono/packages/taiko-client/prover/guardian_prover_heartbeater"
+	"github.com/taikoxyz/taiko-mono/packages/taiko-client/prover/moonchain"
 	proofProducer "github.com/taikoxyz/taiko-mono/packages/taiko-client/prover/proof_producer"
 	proofSubmitter "github.com/taikoxyz/taiko-mono/packages/taiko-client/prover/proof_submitter"
 	"github.com/taikoxyz/taiko-mono/packages/taiko-client/prover/proof_submitter/transaction"
@@ -72,6 +73,9 @@ type Prover struct {
 	// Transactions manager
 	txmgr        *txmgr.SimpleTxManager
 	privateTxmgr *txmgr.SimpleTxManager
+
+	// Moonchain Prover Manager
+	proverManager moonchain.ProverManager
 
 	ctx context.Context
 	wg  sync.WaitGroup
@@ -190,6 +194,14 @@ func InitFromConfig(
 	// Proof submitters
 	if err := p.initProofSubmitters(txBuilder, tiers); err != nil {
 		return err
+	}
+
+	// Init for Moonchain
+	if p.cfg.Moonchain {
+		log.Info("Init for Moonchain", "flag", p.cfg.Moonchain)
+		if err := p.initMoonchain(); err != nil {
+			return err
+		}
 	}
 
 	// Proof contester
@@ -459,9 +471,9 @@ func (p *Prover) submitProofOp(proofWithHeader *proofProducer.ProofWithHeader) e
 	if err := submitter.SubmitProof(p.ctx, proofWithHeader); err != nil {
 		if strings.Contains(err.Error(), vm.ErrExecutionReverted.Error()) {
 			if proofWithHeader.Tier == encoding.TierSgxID {
-				sgxInstanceId := -1
+				sgxInstanceId := int64(-1)
 				if len(proofWithHeader.Proof) > 4 {
-					sgxInstanceId = int(binary.BigEndian.Uint32(proofWithHeader.Proof[0:4]))
+					sgxInstanceId = int64(binary.BigEndian.Uint32(proofWithHeader.Proof[0:4]))
 				}
 				// Try to extract the reverted reason from the joined errors.
 				revertedReason := err
@@ -473,9 +485,21 @@ func (p *Prover) submitProofOp(proofWithHeader *proofProducer.ProofWithHeader) e
 					"SGX Proof submission reverted",
 					"blockID", proofWithHeader.BlockID,
 					"minTier", proofWithHeader.Meta.GetMinTier(),
-					"reason", revertedReason,
+					"reason", revertedReason.Error(),
 					"id", sgxInstanceId,
 				)
+				if p.cfg.Moonchain {
+					// Send failure report to Moonchain Prover Manager
+					if err := p.proverManager.SubmitFailure(
+						p.ctx, proofWithHeader.BlockID,
+						sgxInstanceId,
+						moonchain.ErrorSgxSubmitProofReverted,
+						revertedReason.Error(),
+					); err != nil {
+						// Error message already shows. Do nothing here.
+					}
+				}
+
 			} else {
 				log.Error(
 					"Proof submission reverted",

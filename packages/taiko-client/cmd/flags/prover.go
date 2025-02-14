@@ -195,6 +195,14 @@ var (
 		Category: proverCategory,
 		EnvVars:  []string{"PROVER_BLOCK_CONFIRMATIONS"},
 	}
+	// Special flags for testing.
+	Moonchain = &cli.BoolFlag{
+		Name:     "prover.moonchain",
+		Usage:    "Do special handling for Moonchain",
+		Value:    false,
+		Category: proverCategory,
+		EnvVars:  []string{"PROVER_MOONCHAIN"},
+	}
 )
 
 // ProverFlags All prover flags.
@@ -227,4 +235,5 @@ var ProverFlags = MergeFlags(CommonFlags, []cli.Flag{
 	BlockConfirmations,
 	RaikoRequestTimeout,
 	RaikoZKVMHostEndpoint,
+	Moonchain,
 }, TxmgrFlags)
