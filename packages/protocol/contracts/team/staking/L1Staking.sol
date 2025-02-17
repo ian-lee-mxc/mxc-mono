@@ -130,6 +130,7 @@ contract L1Staking is EssentialContract, IL1Staking {
     /// @dev System deposits reward to all users based on their stake.
     function stakingDepositReward()
     external
+    onlyFromNamed(LibStrings.B_TAIKO)
     whenNotPaused nonReentrant
     {
         // Update last reward timestamp
@@ -146,7 +147,7 @@ contract L1Staking is EssentialContract, IL1Staking {
         _mxc().mint(address(this), _rewardAmount);
         stakingState.totalReward += _rewardAmount;
         stakingState.lastDepositRewardTime = uint64(block.timestamp);
-        emit DepositReward(address(this), _rewardAmount);
+        emit DepositReward(msg.sender, _rewardAmount);
     }
 
     /// @dev Calculate the debt reward owed to a user

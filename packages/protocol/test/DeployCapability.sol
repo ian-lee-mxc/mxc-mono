@@ -14,7 +14,7 @@ import "../contracts/common/AddressManager.sol";
 abstract contract DeployCapability is Script {
     error ADDRESS_NULL();
 
-    function getDeploymentJsonPath() public pure virtual returns (string memory) {
+    function getDeploymentJsonPath() public view virtual returns (string memory) {
         return "/deployments/deploy_l1.json";
     }
 

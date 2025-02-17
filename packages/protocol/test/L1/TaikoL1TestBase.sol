@@ -126,11 +126,12 @@ abstract contract TaikoL1TestBase is TaikoTest {
         uint256 msgValue = 2 ether;
 
         TaikoData.HookCall[] memory hookcalls = new TaikoData.HookCall[](0);
-        vm.prank(proposer, proposer);
+        vm.startPrank(proposer, proposer);
         (meta, ethDeposits) = L1.proposeBlock{ value: msgValue }(
             abi.encode(TaikoData.BlockParams(address(0), address(0), 0, 0, hookcalls, "")),
             new bytes(txListSize)
         );
+        vm.stopPrank();
     }
 
     function proveBlock(

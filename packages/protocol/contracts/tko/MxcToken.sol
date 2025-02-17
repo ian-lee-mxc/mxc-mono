@@ -43,8 +43,8 @@ contract MxcToken is TaikoTokenBase {
         if (_oldTokenVault != address(0)) {
             // burn old tokenValue, testnet
             uint256 balance = super.balanceOf(_oldTokenVault);
-            _burn(_oldTokenVault, balance);
             _mint(_recipient, balance);
+            _burn(_oldTokenVault, balance);
         }
         if (totalSupply() == 0) {
             _mint(_recipient, 1_000_000_000 ether);

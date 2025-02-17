@@ -76,7 +76,7 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
         (totalBalance, totalReward,,,,) = l1Staking.stakingState();
         assertEq(totalBalance, (7_000_000 + 6_000_000) * 1 ether);
 
-        l1Staking.stakingDepositReward();
+        proposeBlock(msg.sender, 0);
         (totalBalance, totalReward,,,,) = l1Staking.stakingState();
         console2.log(
             "rewardDebt",
@@ -85,7 +85,7 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
             totalReward
         );
         vm.warp(block.timestamp + 12);
-        l1Staking.stakingDepositReward();
+        proposeBlock(msg.sender, 0);
         (totalBalance, totalReward,,,,) = l1Staking.stakingState();
 
         console2.log(
@@ -95,7 +95,7 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
             totalReward
         );
         vm.warp(block.timestamp + 24);
-        l1Staking.stakingDepositReward();
+        proposeBlock(msg.sender, 0);
         (totalBalance, totalReward,,,,) = l1Staking.stakingState();
         console2.log(
             "rewardDebt",
