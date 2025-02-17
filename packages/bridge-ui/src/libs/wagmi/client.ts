@@ -1,5 +1,5 @@
 import { injected, walletConnect } from '@wagmi/connectors';
-import { createConfig, getPublicClient, http, reconnect } from '@wagmi/core';
+import { createConfig, createStorage, getPublicClient, http, reconnect } from '@wagmi/core';
 import type { Chain } from 'viem';
 
 import { PUBLIC_WALLETCONNECT_PROJECT_ID } from '$env/static/public';
@@ -27,6 +27,7 @@ export const config = createConfig({
   chains: [chains[0], ...chains.slice(1)],
   connectors: [walletConnect({ projectId, showQrModal: false }), injected()],
   transports: createTransports(chains),
+  storage: createStorage({ storage: window.localStorage }),
 });
 
 reconnect(config);
