@@ -599,6 +599,7 @@ func (c *Client) CheckL1Reorg(ctx context.Context, blockID *big.Int) (*ReorgChec
 			return result, nil
 		}
 		if blockID.Uint64() <= ontakeForkHeight+1 {
+			result.IsReorged = false
 			return result, nil
 		}
 
