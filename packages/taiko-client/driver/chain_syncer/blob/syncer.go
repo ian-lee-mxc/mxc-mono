@@ -542,7 +542,7 @@ func (s *Syncer) checkLastVerifiedBlockMismatch(ctx context.Context) (*rpc.Reorg
 	if err != nil {
 		return nil, err
 	}
-	if s.state.GetL2Head().Number.Uint64() < stateVars.B.LastVerifiedBlockId || s.state.GetL2Head().Number.Uint64() <= s.state.OnTakeForkHeight.Uint64() {
+	if s.state.GetL2Head().Number.Uint64() < stateVars.B.LastVerifiedBlockId || s.state.GetL2Head().Number.Uint64() <= s.state.OnTakeForkHeight.Uint64()+1 {
 		return reorgCheckResult, nil
 	}
 
@@ -550,6 +550,11 @@ func (s *Syncer) checkLastVerifiedBlockMismatch(ctx context.Context) (*rpc.Reorg
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch genesis L1 header: %w", err)
 	}
+
+	if stateVars.B.LastVerifiedBlockId <= s.state.OnTakeForkHeight.Uint64()+1 {
+		return reorgCheckResult, nil
+	}
+
 	reorgCheckResult, err = s.retrievePastBlock(ctx, stateVars.B.LastVerifiedBlockId, 0, genesisL1Header)
 	if err != nil {
 		return nil, err
@@ -672,6 +677,7 @@ func (s *Syncer) checkReorg(
 	}
 
 	if reorgCheckResult == nil {
+		log.Warn("testing checkL1Reorg", "blockId", blockID, "sub1", new(big.Int).Sub(blockID, common.Big1))
 		// 2. Parent block
 		reorgCheckResult, err = s.rpc.CheckL1Reorg(
 			ctx,

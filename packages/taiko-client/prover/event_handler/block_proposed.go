@@ -10,8 +10,6 @@ import (
 	"github.com/cenkalti/backoff/v4"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/params"
-
 	"github.com/taikoxyz/taiko-mono/packages/taiko-client/bindings/encoding"
 	"github.com/taikoxyz/taiko-mono/packages/taiko-client/bindings/metadata"
 	"github.com/taikoxyz/taiko-mono/packages/taiko-client/internal/metrics"
@@ -175,13 +173,8 @@ func (h *BlockProposedEventHandler) checkL1Reorg(
 	meta metadata.TaikoBlockMetaData,
 ) error {
 	// Skip before ontake blocks
-	if meta.GetBlockID().Uint64() < encoding.GetProtocolConfig(h.rpc.L2.ChainID.Uint64()).OntakeForkHeight {
+	if meta.GetBlockID().Uint64() < encoding.GetProtocolConfig(h.rpc.L2.ChainID.Uint64()).OntakeForkHeight+1 {
 		return nil
-	}
-	if h.rpc.L2.ChainID.Uint64() == params.MoonchainGenevaNetworkID.Uint64() {
-		if meta.GetBlockID().Uint64() < uint64(715157) {
-			return nil
-		}
 	}
 	// Check whether the L2 EE's anchored L1 info, to see if the L1 chain has been reorged.
 	reorgCheckResult, err := h.rpc.CheckL1Reorg(
