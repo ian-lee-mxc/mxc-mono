@@ -71,7 +71,7 @@ func NewConfigFromCliContext(c *cli.Context) (*Config, error) {
 	}
 	var blockAddresses []common.Address
 	if c.IsSet(flags.TxPoolBlockAddresses.Name) {
-		for _, account := range strings.Split(c.String(flags.TxPoolBlockAddresses.Name), ",") {
+		for _, account := range c.StringSlice(flags.TxPoolBlockAddresses.Name) {
 			if trimmed := strings.TrimSpace(account); !common.IsHexAddress(trimmed) {
 				return nil, fmt.Errorf("invalid account in --txpool.blockAddresses: %s", trimmed)
 			}

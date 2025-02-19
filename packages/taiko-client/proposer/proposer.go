@@ -270,11 +270,14 @@ func (p *Proposer) fetchPoolContent(filterPoolContent bool) ([]types.Transaction
 				if err != nil {
 					return nil, err
 				}
-
+				blocked := false
 				for _, blockAddress := range p.blockAddresses {
-					if sender != blockAddress {
-						filtered = append(filtered, tx)
+					if sender == blockAddress {
+						blocked = true
 					}
+				}
+				if !blocked {
+					filtered = append(filtered, tx)
 				}
 			}
 

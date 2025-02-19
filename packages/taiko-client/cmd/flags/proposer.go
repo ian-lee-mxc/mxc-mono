@@ -93,7 +93,7 @@ var (
 	}
 	TxPoolBlockAddresses = &cli.StringSliceFlag{
 		Name:     "txPool.blockAddresses",
-		Usage:    "Comma separated accounts to treat as locals (priority inclusion)",
+		Usage:    "Comma separated accounts to block from proposing locals",
 		Category: proposerCategory,
 		EnvVars:  []string{"TX_POOL_BLOCK_ADDRESSES"},
 	}
