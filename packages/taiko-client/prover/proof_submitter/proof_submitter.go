@@ -6,12 +6,14 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"strings"
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/ethereum-optimism/optimism/op-service/txmgr"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/log"
 
 	"github.com/taikoxyz/taiko-mono/packages/taiko-client/bindings"
@@ -27,8 +29,8 @@ import (
 var (
 	_                              Submitter = (*ProofSubmitter)(nil)
 	submissionDelayRandomBumpRange float64   = 20
-	proofPollingInterval                     = 10 * time.Second
-	ProofTimeout                             = 3 * time.Hour
+	proofPollingInterval                     = 20 * time.Second
+	ProofTimeout                             = 15 * time.Minute // Shorten to 15m, tuned for Moonchain Prover Manager
 )
 
 // ProofSubmitter is responsible requesting proofs for the given L2
@@ -172,7 +174,7 @@ func (s *ProofSubmitter) RequestProof(ctx context.Context, meta metadata.TaikoBl
 			)
 			if err != nil {
 				// If request proof has timed out in retry, let's cancel the proof generating and skip
-				if errors.Is(err, proofProducer.ErrProofInProgress) && time.Since(startTime) >= ProofTimeout {
+				if time.Since(startTime) >= ProofTimeout {
 					log.Error("Request proof has timed out, start to cancel", "blockID", opts.BlockID)
 					if cancelErr := s.proofProducer.RequestCancel(ctx, opts); cancelErr != nil {
 						log.Error("Failed to request cancellation of proof", "err", cancelErr)
@@ -286,8 +288,14 @@ func (s *ProofSubmitter) SubmitProof(
 			proofWithHeader.Tier,
 		),
 	); err != nil {
-		if err.Error() == transaction.ErrUnretryableSubmission.Error() {
-			return nil
+		if strings.Contains(err.Error(), transaction.ErrUnretryableSubmission.Error()) {
+			if uw, ok := err.(interface{ Unwrap() []error }); ok {
+				errList := uw.Unwrap()
+				errList = append(errList, vm.ErrExecutionReverted)
+				return errors.Join(errList...)
+			} else {
+				return errors.Join(vm.ErrExecutionReverted, err)
+			}
 		}
 		metrics.ProverSubmissionErrorCounter.Add(1)
 		return err

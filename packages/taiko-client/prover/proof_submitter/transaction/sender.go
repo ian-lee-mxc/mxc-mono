@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/big"
 	"strings"
@@ -87,16 +88,17 @@ func (s *Sender) Send(
 	}
 
 	if receipt.Status != types.ReceiptStatusSuccessful {
+		var receiptError = encoding.TryParsingCustomErrorFromReceipt(ctx, s.rpc.L1, txMgr.From(), receipt)
 		log.Error(
-			"Failed to submit proof",
+			"❌ Failed to submit proof",
 			"blockID", proofWithHeader.BlockID,
 			"tier", proofWithHeader.Tier,
 			"txHash", receipt.TxHash,
 			"isPrivateMempool", isPrivate,
-			"error", encoding.TryParsingCustomErrorFromReceipt(ctx, s.rpc.L1, txMgr.From(), receipt),
+			"error", receiptError,
 		)
 		metrics.ProverSubmissionRevertedCounter.Add(1)
-		return ErrUnretryableSubmission
+		return errors.Join(receiptError, ErrUnretryableSubmission)
 	}
 
 	log.Info(

@@ -60,6 +60,7 @@ type Config struct {
 	BlockConfirmations                      uint64
 	TxmgrConfigs                            *txmgr.CLIConfig
 	PrivateTxmgrConfigs                     *txmgr.CLIConfig
+	Moonchain                               bool
 }
 
 // NewConfigFromCliContext creates a new config instance from command line flags.
@@ -74,7 +75,8 @@ func NewConfigFromCliContext(c *cli.Context) (*Config, error) {
 
 	var startingBlockID *big.Int
 	if c.IsSet(flags.StartingBlockID.Name) {
-		startingBlockID = new(big.Int).SetUint64(c.Uint64(flags.StartingBlockID.Name))
+		//		startingBlockID = new(big.Int).SetUint64(c.Uint64(flags.StartingBlockID.Name))
+		startingBlockID = new(big.Int).SetInt64(c.Int64(flags.StartingBlockID.Name))
 	}
 
 	var allowance = common.Big0
@@ -183,5 +185,6 @@ func NewConfigFromCliContext(c *cli.Context) (*Config, error) {
 			l1ProverPrivKey,
 			c,
 		),
+		Moonchain: c.Bool(flags.Moonchain.Name),
 	}, nil
 }
