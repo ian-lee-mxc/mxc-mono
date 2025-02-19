@@ -41,7 +41,7 @@ contract MainnetMoonchainL1 is TaikoL1, RollupAddressCache {
                 minGasExcess: 1_340_000_000, // correspond to 0.008847185 gwei basefee
                 maxGasIssuancePerBlock: 600_000_000 // two minutes
              }),
-            ontakeForkHeight: 575_547
+            ontakeForkHeight: 755_879
         });
     }
 
@@ -60,10 +60,9 @@ contract MainnetMoonchainL1 is TaikoL1, RollupAddressCache {
         external
         reinitializer(2)
     {
+        //TODO:  hot fix
         require(
-            StorageSlot.getAddressSlot(
-                bytes32(0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103)
-            ).value == msg.sender
+            msg.sender == address(0xaEab056F5B6138f9c2Ff4936437f0CC992863AE8)
         );
         __Essential_init(_owner, _rollupAddressManager);
         doMigrate(_genesisBlockHash, _l2LatestHeight);
