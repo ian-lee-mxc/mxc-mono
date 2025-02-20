@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/binary"
 	"fmt"
+	"github.com/taikoxyz/taiko-mono/packages/taiko-client/internal/utils"
 	"math/big"
 	"strings"
 	"sync"
@@ -163,7 +164,7 @@ func InitFromConfig(
 			return err
 		}
 		// Set the estimator with fixed blobFee issue
-		conf.GasPriceEstimatorFn = DefaultGasPriceEstimatorFn
+		conf.GasPriceEstimatorFn = utils.DefaultGasPriceEstimatorFn
 		if p.txmgr, err = txmgr.NewSimpleTxManagerFromConfig(
 			"prover",
 			log.Root(),
