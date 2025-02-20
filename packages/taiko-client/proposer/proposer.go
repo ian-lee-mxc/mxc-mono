@@ -87,12 +87,18 @@ func (p *Proposer) InitFromConfig(
 
 	log.Info("Protocol configs", "configs", p.protocolConfigs)
 
+	// Set the estimator with fixed blobFee issue
 	if txMgr == nil {
-		if txMgr, err = txmgr.NewSimpleTxManager(
+		conf, err := txmgr.NewConfig(*cfg.TxmgrConfigs, log.Root())
+		if err != nil {
+			return err
+		}
+		conf.GasPriceEstimatorFn = utils.DefaultGasPriceEstimatorFn
+		if txMgr, err = txmgr.NewSimpleTxManagerFromConfig(
 			"proposer",
 			log.Root(),
 			&metrics.TxMgrMetrics,
-			*cfg.TxmgrConfigs,
+			conf,
 		); err != nil {
 			return err
 		}

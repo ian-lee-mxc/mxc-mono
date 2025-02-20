@@ -1,4 +1,4 @@
-package prover
+package utils
 
 import (
 	"context"
