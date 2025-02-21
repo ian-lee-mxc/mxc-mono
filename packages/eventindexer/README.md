@@ -2,6 +2,7 @@
 
 # Indexer Moonchain
 
+
 Catches events, stores them in the database to be queried via API.
 
 ## Running the app
