@@ -3,7 +3,6 @@ x-logging: &logging
     options:
       max-size: 10m
       max-file: "3"
-
 services:
   # event indexer
   event-indexer-arb:
@@ -31,7 +30,7 @@ services:
     profiles:
       - eventindexer
   event-indexer-moonchain:
-    image: us-docker.pkg.dev/mxczkevm/images/eventindexer:moonchain-dev
+    image: us-docker.pkg.dev/mxczkevm/images/eventindexer:moonchain-mainnet
     restart: unless-stopped
     depends_on:
       - mysql
