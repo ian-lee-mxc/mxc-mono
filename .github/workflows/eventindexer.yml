@@ -2,7 +2,7 @@ name: Eventindexer
 
 on:
   push:
-    branches: [moonchain-dev]
+    branches: [moonchain-dev, moonchain-mainnet]
     paths:
       - "packages/eventindexer/**"
   pull_request:
