@@ -254,7 +254,7 @@ contract L1Staking is EssentialContract, IL1Staking {
     returns (uint256)
     {
         uint256 elapsedSeconds = block.timestamp - stakingState.lastDepositRewardTime;
-        uint256 reward = (_mxc().totalSupply() * 950 / 100 / 365 days) * elapsedSeconds; // max
+        uint256 reward = (_mxc().totalSupply() * 950 / 10000 / 365 days) * elapsedSeconds; // max
         // apr ~= 9.99%
 
         // Limit max reward to 1e5
