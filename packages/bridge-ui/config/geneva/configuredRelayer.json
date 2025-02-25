@@ -1,0 +1,8 @@
+{
+  "configuredRelayer": [
+    {
+      "chainIds": [421614, 5167004],
+      "url": "https://geneva-services.moonchain.com/relayer-api-arb"
+    }
+  ]
+}

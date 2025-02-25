@@ -1,0 +1,12 @@
+{
+  "configuredEventIndexer": [
+    {
+      "chainIds": [42161, 18686],
+      "url": "https://services.moonchain.com/eventindexer-api-arb"
+    },
+    {
+      "chainIds": [18686, 42161],
+      "url": "https://services.moonchain.com/eventindexer-api-moonchain"
+    }
+  ]
+}

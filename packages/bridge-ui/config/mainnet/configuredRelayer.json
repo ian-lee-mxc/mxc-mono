@@ -1,0 +1,8 @@
+{
+  "configuredRelayer": [
+    {
+      "chainIds": [42161, 18686],
+      "url": "https://services.moonchain.com/relayer-api-arb"
+    }
+  ]
+}

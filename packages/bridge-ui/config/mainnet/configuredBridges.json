@@ -1,0 +1,36 @@
+{
+  "configuredBridges": [
+    {
+      "source": "0xa4b1",
+      "destination": "0x48fe",
+      "addresses": {
+        "bridgeAddress": "0x4C3924E619E2eE83cFD565c1432cb621ca8af7A0",
+        "erc20VaultAddress": "0x3160284BC2F4d7F5b170C70a0Ee0bC5333c7F39e",
+        "erc721VaultAddress": "0x844C4871Fe509C7C1fe26673458533DEB96025f8",
+        "erc1155VaultAddress": "0xD6F6B23Cd1bfD48ce2ce8b82e527280aa4b53b14",
+        "crossChainSyncAddress": "0xB31EBab3Ac38B9B021CCe679B4059b790413Fa4E",
+        "signalServiceAddress": "0xB31EBab3Ac38B9B021CCe679B4059b790413Fa4E",
+        "quotaManagerAddress": "",
+        "hops": [
+
+        ]
+      }
+    },
+    {
+      "source": "0x48fe",
+      "destination": "0xa4b1",
+      "addresses": {
+        "bridgeAddress": "0x1000777700000000000000000000000000000003",
+        "erc20VaultAddress": "0x68DfDe49A92c9f5C69FE64f62FA8239E931779bd",
+        "erc721VaultAddress": "0x523d07eF972991d47E58C1BD4A257E5000Ac684A",
+        "erc1155VaultAddress": "0xAC3B2C56c7e98b320b19774aC26a95CAea9cb72d",
+        "crossChainSyncAddress": "0x1000777700000000000000000000000000000007",
+        "signalServiceAddress": "0x1000777700000000000000000000000000000007",
+        "quotaManagerAddress": "",
+        "hops": [
+
+        ]
+      }
+    }
+  ]
+}

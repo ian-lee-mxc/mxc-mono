@@ -1,0 +1,13 @@
+[
+  {
+    "name": "Moonchain Token",
+    "addresses": {
+      "421614": "0x8cfc40cfe94ef106ceec7d0c97e4f02af99954a4",
+      "5167004": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
+    },
+    "symbol": "MXC",
+    "decimals": 18,
+    "type": "ERC20",
+    "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/3628.png"
+  }
+]

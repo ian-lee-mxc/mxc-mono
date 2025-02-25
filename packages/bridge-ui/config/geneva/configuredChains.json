@@ -1,0 +1,54 @@
+{
+  "configuredChains": [{
+      "421614": {
+        "name": "Arbitrum Sepolia",
+        "type": "L2",
+        "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png",
+        "rpcUrls": {
+          "default": {
+            "http": [
+              "https://sepolia-rollup.arbitrum.io/rpc"
+            ]
+          }
+        },
+        "nativeCurrency": {
+          "name": "Ethereum",
+          "symbol": "ETH",
+          "decimals": 18
+        },
+        "blockExplorers": {
+          "default": {
+            "name": "Arbiscan",
+            "url": "https://sepolia.arbiscan.io/"
+          }
+        }
+      }
+    },
+    {
+      "5167004": {
+        "name": "Moonchain Geneva Testnet",
+        "type": "L3",
+        "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/3628.png",
+        "rpcUrls": {
+          "default": {
+            "http": [
+              "https://geneva-rpc.moonchain.com"
+            ]
+          }
+        },
+        "nativeCurrency": {
+          "name": "MXC Token",
+          "symbol": "MXC",
+          "decimals": 18
+        },
+        "blockExplorers": {
+          "default": {
+            "name": "Moonchain Explorer",
+            "url": "https://geneva-explorer.moonchain.com"
+          }
+        }
+      }
+    }
+  ]
+}
+

@@ -1,0 +1,54 @@
+{
+  "configuredChains": [{
+      "42161": {
+        "name": "Arbitrum",
+        "type": "L2",
+        "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png",
+        "rpcUrls": {
+          "default": {
+            "http": [
+              "https://arb1.arbitrum.io/rpc"
+            ]
+          }
+        },
+        "nativeCurrency": {
+          "name": "Ethereum",
+          "symbol": "ETH",
+          "decimals": 18
+        },
+        "blockExplorers": {
+          "default": {
+            "name": "Arbiscan",
+            "url": "https://arbiscan.io/"
+          }
+        }
+      }
+    },
+    {
+      "18686": {
+        "name": "Moonchain",
+        "type": "L3",
+        "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/3628.png",
+        "rpcUrls": {
+          "default": {
+            "http": [
+              "https://rpc.mxc.com"
+            ]
+          }
+        },
+        "nativeCurrency": {
+          "name": "MXC Token",
+          "symbol": "MXC",
+          "decimals": 18
+        },
+        "blockExplorers": {
+          "default": {
+            "name": "Moonchain Explorer",
+            "url": "https://explorer.moonchain.com"
+          }
+        }
+      }
+    }
+  ]
+}
+
