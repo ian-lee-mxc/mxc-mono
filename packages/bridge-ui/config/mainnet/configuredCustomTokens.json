@@ -9,5 +9,38 @@
     "decimals": 18,
     "type": "ERC20",
     "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/3628.png"
+  },
+  {
+    "name": "Tether USD",
+    "addresses": {
+      "42161": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+      "18686": "0x30B7FB8CC9749029bc81d8fB3B4e9E0a529A7b44"
+    },
+    "symbol": "USDT",
+    "decimals": 18,
+    "type": "ERC20",
+    "logoURI": "https://arbiscan.io/token/images/tether_32.png"
+  },
+  {
+    "name": "USD Coin",
+    "addresses": {
+      "42161": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+      "18686": "0x7c55B4842d13C5fbA418e8f65BF5BE3E47A4ac2d"
+    },
+    "symbol": "USDC",
+    "decimals": 18,
+    "type": "ERC20",
+    "logoURI": "https://arbiscan.io/token/images/centre-usdc_28.png"
+  },
+  {
+    "name": "Dai Stablecoin",
+    "addresses": {
+      "42161": "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
+      "18686": "0xac790d98Ec71e713880488adBe23F441aebBa846"
+    },
+    "symbol": "DAI",
+    "decimals": 18,
+    "type": "ERC20",
+    "logoURI": "https://arbiscan.io/token/images/MCDDai_32.png"
   }
 ]
