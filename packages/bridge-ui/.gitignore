@@ -14,6 +14,8 @@ vite.config.ts.timestamp-*
 /config/*
 !/config/sample/
 !/config/schemas/
+!/config/geneva/
+!/config/mainnet/
 
 src/generated/
 .vercel

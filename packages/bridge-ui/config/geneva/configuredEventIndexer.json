@@ -1,0 +1,12 @@
+{
+  "configuredEventIndexer": [
+    {
+      "chainIds": [421614, 5167004],
+      "url": "https://geneva-services.moonchain.com/eventindexer-api-arb"
+    },
+    {
+      "chainIds": [5167004, 421614],
+      "url": "https://geneva-services.moonchain.com/eventindexer-api-moonchain"
+    }
+  ]
+}
