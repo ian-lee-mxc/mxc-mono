@@ -231,11 +231,11 @@ export class ERC20Bridge extends Bridge {
     const { fee } = sendERC20Args;
 
     let value = 0n
+    if (chainIdToChain(args.destChainId).name.toLowerCase().includes("arbitrum")) {
+      sendERC20Args.gasLimit += 5000000;
+    }
     if (isNativeMXC) {
       value = args.amount
-      if (chainIdToChain(args.destChainId).name.toLowerCase().includes("arbitrum")) {
-        sendERC20Args.gasLimit += 5000000;
-      }
     }
     try {
       const { request } = await simulateContract(config, {
