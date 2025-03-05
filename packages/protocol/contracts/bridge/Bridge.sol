@@ -120,18 +120,6 @@ contract Bridge is EssentialContract, IBridge {
         __reserved3 = 0;
     }
 
-    function forkInit(address _owner, address _sharedAddressManager) external reinitializer(3) {
-        require(
-            StorageSlot.getAddressSlot(
-                bytes32(0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103)
-            ).value == msg.sender
-        );
-        __Essential_init(_owner, _sharedAddressManager);
-        // reset some previously used slots for future reuse
-        __reserved1 = 0;
-        __reserved2 = 0;
-        __reserved3 = 0;
-    }
 
     /// @notice Delegates a given token's voting power to the bridge itself.
     /// @param _anyToken Any token that supports delegation.

@@ -29,7 +29,8 @@ contract L1Staking is EssentialContract, IL1Staking {
         uint64 rewardBeginEpoch;
         uint64 __reserved2;
         uint64 __reserved3;
-        uint256[40] __gap;
+        mapping(uint256 => uint256) epochReward;
+        uint256[39] __gap;
     }
 
     /// @dev Emitted when user staking mxc token.
@@ -80,11 +81,13 @@ contract L1Staking is EssentialContract, IL1Staking {
     {
         uint256 newBalance = stakingState.stakingBalances[_user] + _amount;
         if (newBalance < MIN_DEPOSIT) revert INSUFFICIENT_DEPOSIT();
-        _stakingClaimReward(_user);
         _mxc().transferFrom(msg.sender, address(this), _amount);
+        if(stakingState.stakingBalances[_user] > 0) {
+            _stakingClaimReward(_user);
+        }
         stakingState.stakingBalances[_user] += _amount;
         stakingState.totalBalance += _amount;
-
+        stakingState.lastClaimedEpoch[_user] = getCurrentEpoch() - 1;
         emit Staking(_user, _amount);
     }
 
@@ -92,9 +95,10 @@ contract L1Staking is EssentialContract, IL1Staking {
     function stakingRequestWithdrawal(
         bool cancel
     )
-    external
+    external nonReentrant
     {
         if (stakingState.stakingBalances[msg.sender] == 0) revert INSUFFICIENT_BALANCE();
+        _stakingClaimReward(msg.sender);
         if (cancel) {
             stakingState.withdrawalRequestEpoch[msg.sender] = 0; // Reset the time of the withdrawal
         } else {
@@ -146,6 +150,7 @@ contract L1Staking is EssentialContract, IL1Staking {
         if (_rewardAmount == 0) return;
         _mxc().mint(address(this), _rewardAmount);
         stakingState.totalReward += _rewardAmount;
+        stakingState.epochReward[getCurrentEpoch()] += _rewardAmount;
         stakingState.lastDepositRewardTime = uint64(block.timestamp);
         emit DepositReward(msg.sender, _rewardAmount);
     }
@@ -160,24 +165,31 @@ contract L1Staking is EssentialContract, IL1Staking {
     view
     returns (uint256)
     {
+        if (stakingState.stakingBalances[user] == 0) return 0;
+
         uint256 lastClaimedEpoch = stakingState.lastClaimedEpoch[user];
-        if(lastClaimedEpoch == 0) {
-            lastClaimedEpoch = stakingState.rewardBeginEpoch;
-        }
         uint256 currentEpoch = getCurrentEpoch();
 
-        if (lastClaimedEpoch >= currentEpoch) return 0; // Reward already claimed for this epoch
+        if (lastClaimedEpoch >= currentEpoch - 1) return 0; // Reward already claimed for prev epoch
 
-        uint256 timeElapsed = (currentEpoch - lastClaimedEpoch) * EPOCH_DURATION;
-        // Calculate the time elapsed since the last claim
-        if (timeElapsed == 0 || stakingState.stakingBalances[user] == 0) return 0;
+        uint256 debtReward = 0;
 
         // Calculate the reward based on the user's staked amount, total supply, and elapsed time
         uint256 share = stakingState.stakingBalances[user] * 1e5 / stakingState.totalBalance;
-        return (
-            (stakingState.totalReward * share) * timeElapsed
-            / ((currentEpoch - stakingState.rewardBeginEpoch) * EPOCH_DURATION) / 1e5
-        );
+
+        if(currentEpoch - lastClaimedEpoch > 24) {
+            lastClaimedEpoch = currentEpoch - 24;
+        }
+
+        while (lastClaimedEpoch < currentEpoch - 1) {
+            uint256 epochReward = stakingState.epochReward[lastClaimedEpoch + 1];
+            if (epochReward > 0) {
+                debtReward += (epochReward * share) / 1e5;
+            }
+            lastClaimedEpoch++;
+        }
+
+        return debtReward;
     }
 
     /// @dev User claims their accumulated interest and transfers it to their wallet.
@@ -191,14 +203,11 @@ contract L1Staking is EssentialContract, IL1Staking {
     function _stakingClaimReward(address _user) internal
     {
         uint256 currentEpoch = getCurrentEpoch();
-        if (stakingState.lastClaimedEpoch[_user] >= currentEpoch) revert REWARD_ALREADY_CLAIMED();
-
         uint256 reward = stakingCalculateRewardDebt(_user); // Calculate the interest owed to the user
+        stakingState.lastClaimedEpoch[_user] = currentEpoch - 1;
         if (reward == 0) return;
-
-        stakingState.lastClaimedEpoch[_user] = currentEpoch;
         _mxc().transfer(_user, reward);
-        emit ClaimReward(_user, reward, currentEpoch);
+        emit ClaimReward(_user, reward, currentEpoch - 1);
 
     }
 
@@ -215,7 +224,6 @@ contract L1Staking is EssentialContract, IL1Staking {
         if (amount == 0) return;
         uint256 punishAmount = amount * _rate / 100;
         stakingState.stakingBalances[_user] -= punishAmount;
-        stakingState.totalBalance -= punishAmount;
         emit Slash(_user, punishAmount);
     }
 

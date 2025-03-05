@@ -134,6 +134,26 @@ abstract contract TaikoL1TestBase is TaikoTest {
         vm.stopPrank();
     }
 
+        function proposeBlockV2(
+        address proposer,
+        uint24 txListSize
+    )
+        internal
+        returns (TaikoData.BlockMetadataV2 memory meta)
+    {
+        // For the test not to fail, set the message.value to the highest, the
+        // rest will be returned
+        // anyways
+
+        vm.startPrank(proposer, proposer);
+        meta = L1.proposeBlockV2(
+            abi.encode(TaikoData.BlockParamsV2(address(0), bytes32(0), 0, 0, 0, 0, 0)),
+            new bytes(txListSize)
+        );
+        vm.stopPrank();
+    }
+
+
     function proveBlock(
         address prover,
         TaikoData.BlockMetadata memory meta,
