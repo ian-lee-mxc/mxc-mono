@@ -12,6 +12,14 @@ contract Verifier {
     }
 }
 
+contract TestTaikoL1 is GenevaMoonchainL1 {
+    function getConfig() public pure override returns (TaikoData.Config memory) {
+        TaikoData.Config memory config = super.getConfig();
+        config.ontakeForkHeight = 0;
+        return config;
+    }
+}
+
 contract TaikoL1StakingTest is TaikoL1TestBase {
     MxcToken public mxcToken;
     GenevaMoonchainL1 public mL1;
@@ -21,7 +29,6 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
         vm.warp(1_730_132_788);
         mine(100_000_000);
         super.setUp();
-        mL1.initMigrate(msg.sender, address(addressManager), bytes32(uint256(1)), mL1.getConfig().ontakeForkHeight, false);
         tko = TaikoToken(
             deployProxy({
                 name: "taiko_token",
@@ -51,7 +58,7 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
     function deployTaikoL1() internal override returns (TaikoL1 taikoL1) {
         taikoL1 = TaikoL1(
             payable(
-                deployProxy({ name: "taiko", impl: address(new GenevaMoonchainL1()), data: "" })
+                deployProxy({ name: "taiko", impl: address(new TestTaikoL1()), data: "" })
             )
         );
         mL1 = GenevaMoonchainL1(address(taikoL1));
@@ -111,6 +118,43 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
         mxcToken.approve(address(l1Staking), type(uint256).max);
         vm.expectRevert(L1Staking.INSUFFICIENT_DEPOSIT.selector);
         l1Staking.stake(Alice,1_000_000 * 1 ether - 1);
+    }
+
+    function test_L1_StakingDepositReward() external {
+        vm.startPrank(Alice);
+        mxcToken.approve(address(l1Staking), type(uint256).max);
+        l1Staking.stakingDepositReward(100_000 * 1 ether);
+        l1Staking.stake(Alice,1_000_000 * 1 ether);
+        (uint256 totalBalance, uint256 totalReward,,,,) = l1Staking.stakingState();
+        assertEq(totalBalance, 1_000_000 * 1 ether);
+        assertEq(totalReward, 100_000 * 1 ether);
+        assertEq(l1Staking.getEpochReward(l1Staking.getCurrentEpoch()), 100_000 * 1 ether);
+
+        vm.warp(block.timestamp + 7 days);
+        assertEq(l1Staking.stakingCalculateRewardDebt(Alice), 100_000 * 1 ether);
+    }
+
+    function test_L1_StakingClaimReward() external {
+        vm.startPrank(Alice);
+        mxcToken.approve(address(l1Staking), type(uint256).max);
+        l1Staking.stakingDepositReward(100_000 * 1 ether);
+        l1Staking.stake(Alice,1_000_000 * 1 ether);
+        vm.warp(block.timestamp + 7 days);
+        uint256 balanceBefore = mxcToken.balanceOf(Alice);
+        l1Staking.stakingClaimReward();
+        assertEq(mxcToken.balanceOf(Alice) - balanceBefore, 100_000 * 1 ether);
+    }
+
+    function test_L1_StakingClaimRewardForUser() external {
+        vm.startPrank(Alice);
+        mxcToken.approve(address(l1Staking), type(uint256).max);
+        l1Staking.stakingDepositReward(100_000 * 1 ether);
+        l1Staking.stake(Alice,1_000_000 * 1 ether);
+        vm.warp(block.timestamp + 7 days);
+        uint256 balanceBefore = mxcToken.balanceOf(Alice);
+        vm.startPrank(Bob);
+        l1Staking.stakingClaimReward(Alice);
+        assertEq(mxcToken.balanceOf(Alice) - balanceBefore, 1_00_000 * 1 ether);
     }
 
     function test_L1_Withdraw() external {
@@ -174,13 +218,13 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
         stakers[3] = address(0x4);
         stakers[4] = address(0x5);
         stakers[5] = address(0x6);
-    
+
         console2.log("totalSupply",mxcToken.totalSupply());
         // 给新账户转账
         for(uint i = 2; i < stakers.length; i++) {
             mxcToken.transfer(stakers[i], 10_000_000 * 1 ether);
         }
-        
+
         // 生成区块并等待一段时间来累积奖励
         vm.warp(block.timestamp + 30 days);
         proposeBlockV2(msg.sender, 0);
@@ -191,7 +235,7 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
         proposeBlockV2(msg.sender, 0);
         vm.warp(block.timestamp + 7 days);
         proposeBlockV2(msg.sender, 0);
-    
+
         // 测试场景1: 单个质押者
         vm.startPrank(stakers[0]);
         mxcToken.approve(address(l1Staking), type(uint256).max);
@@ -200,32 +244,32 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
         vm.warp(block.timestamp + 7 days);
         proposeBlockV2(msg.sender, 0);
 
-        
+
         uint256 reward1 = l1Staking.stakingCalculateRewardDebt(stakers[0]);
         console2.log("Single staker reward after :", reward1);
 
-    
+
         // 测试场景2: 三个质押者，不同质押金额
         vm.startPrank(stakers[1]);
         mxcToken.approve(address(l1Staking), type(uint256).max);
         l1Staking.stake(stakers[1], 3_000_000 * 1 ether);
-    
+
         vm.startPrank(stakers[2]);
         mxcToken.approve(address(l1Staking), type(uint256).max);
         l1Staking.stake(stakers[2], 2_000_000 * 1 ether);
-    
+
         vm.warp(block.timestamp + 7 days);
         proposeBlockV2(msg.sender, 0);
-    
+
         uint256 reward2_1 = l1Staking.stakingCalculateRewardDebt(stakers[0]);
         uint256 reward2_2 = l1Staking.stakingCalculateRewardDebt(stakers[1]);
         uint256 reward2_3 = l1Staking.stakingCalculateRewardDebt(stakers[2]);
-    
+
         console2.log("Three stakers rewards after 7days:");
         console2.log("Staker1 (5M staked):", reward2_1);
         console2.log("Staker2 (3M staked):", reward2_2);
         console2.log("Staker3 (2M staked):", reward2_3);
-    
+
         // 6 staker
         for(uint i = 3; i < stakers.length; i++) {
             vm.startPrank(stakers[i]);
@@ -234,7 +278,7 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
         }
         vm.warp(block.timestamp + 7 days);
         proposeBlockV2(msg.sender, 0);
-    
+
         uint totalClaimedAmount;
         uint totalReward;
         for(uint epoch = 0 ; epoch < 100; epoch++) {
@@ -261,7 +305,7 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
             console2.log("Total rewards:", totalReward);
             console2.log("Total claimedAmount:", totalClaimedAmount);
             assertGt(totalReward, 0);
-            assertGt(totalReward, totalClaimedAmount); 
+            assertGt(totalReward, totalClaimedAmount);
         }
     }
 }
