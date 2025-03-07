@@ -83,7 +83,7 @@ contract L1Staking is EssentialContract, IL1Staking {
         if (newBalance < MIN_DEPOSIT) revert INSUFFICIENT_DEPOSIT();
         _mxc().transferFrom(msg.sender, address(this), _amount);
         if(stakingState.stakingBalances[_user] > 0) {
-            _stakingClaimReward(_user, 2);
+            _stakingClaimReward(_user, 1);
         }
         stakingState.stakingBalances[_user] += _amount;
         stakingState.totalBalance += _amount;
