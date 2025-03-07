@@ -210,22 +210,21 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
     }
 
     function test_L1_StakingRewardDistribution() external {
-        // 设置初始账户余额
         address[] memory stakers = new address[](6);
-        stakers[0] = Alice;   // 已有1000万
-        stakers[1] = Bob;     // 已有1000万
+        stakers[0] = Alice;
+        stakers[1] = Bob;
         stakers[2] = address(0x3);
         stakers[3] = address(0x4);
         stakers[4] = address(0x5);
         stakers[5] = address(0x6);
 
         console2.log("totalSupply",mxcToken.totalSupply());
-        // 给新账户转账
+        // transfer to new stakers
         for(uint i = 2; i < stakers.length; i++) {
             mxcToken.transfer(stakers[i], 10_000_000 * 1 ether);
         }
 
-        // 生成区块并等待一段时间来累积奖励
+        // proposer block and Waiting to mint reward
         vm.warp(block.timestamp + 30 days);
         proposeBlockV2(msg.sender, 0);
         vm.warp(block.timestamp + 7 days);
@@ -236,7 +235,7 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
         vm.warp(block.timestamp + 7 days);
         proposeBlockV2(msg.sender, 0);
 
-        // 测试场景1: 单个质押者
+        // test case 1: signal user staking
         vm.startPrank(stakers[0]);
         mxcToken.approve(address(l1Staking), type(uint256).max);
         l1Staking.stake(stakers[0], 5_000_000 * 1 ether);
@@ -249,7 +248,7 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
         console2.log("Single staker reward after :", reward1);
 
 
-        // 测试场景2: 三个质押者，不同质押金额
+        // test case 2: three user stake with different amount
         vm.startPrank(stakers[1]);
         mxcToken.approve(address(l1Staking), type(uint256).max);
         l1Staking.stake(stakers[1], 3_000_000 * 1 ether);
