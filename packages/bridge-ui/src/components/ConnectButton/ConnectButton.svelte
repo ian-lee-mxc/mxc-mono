@@ -33,8 +33,8 @@
 
   $: balance = $ethBalance || 0n;
 
-  $: currentChain = chains.find(chain => chain.id === currentChainId)
-  
+  $: currentChain = chains.find((chain) => chain.id === currentChainId);
+
   onMount(async () => {
     unsubscribeWeb3Modal = web3modal.subscribeState(onWeb3Modal);
     await refreshUserBalance();

@@ -274,7 +274,7 @@
   $: timeoutIcon = `exclamation-circle` as IconType;
 
   onMount(() => (bridgingStatus = BridgingStatus.PENDING));
-  console.log("testing",$connectedSourceChain)
+  console.log('testing', $connectedSourceChain);
 </script>
 
 <div class="mt-[30px]">
@@ -288,7 +288,7 @@
           <!-- eslint-disable-next-line svelte/no-at-html-tags -->
           <span class="">{@html statusDescription}</span>
         </div>
-      {:else if !$allApproved && !approving && !checking && ($selectedToken?.symbol !== $connectedSourceChain?.nativeCurrency.symbol)}
+      {:else if !$allApproved && !approving && !checking && $selectedToken?.symbol !== $connectedSourceChain?.nativeCurrency.symbol}
         <Icon type={approveIcon} size={160} />
         <div id="text" class="f-col my-[30px] text-center">
           <h1 class="mb-[16px]">{$t('bridge.step.confirm.approve.title')}</h1>
@@ -306,7 +306,7 @@
           <h1 class="mb-[16px]">{$t('bridge.step.confirm.processing')}</h1>
           <span>{$t('bridge.step.confirm.approve.pending')}</span>
         </div>
-      {:else if $allApproved && !approving && !bridging }
+      {:else if $allApproved && !approving && !bridging}
         <Icon type={bridgeIcon} size={160} />
         <div id="text" class="f-col my-[30px] text-center">
           <h1 class="mb-[16px]">{$t('bridge.step.confirm.approved.title')}</h1>

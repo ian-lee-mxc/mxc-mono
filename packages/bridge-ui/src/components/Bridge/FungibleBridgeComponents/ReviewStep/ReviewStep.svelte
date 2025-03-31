@@ -39,17 +39,16 @@
 
   $: currentChainId = $connectedSourceChain?.id;
 
-  $: currentChain = chains.find(chain => chain.id === currentChainId)
+  $: currentChain = chains.find((chain) => chain.id === currentChainId);
 
   $: currencySymbol = currentChain?.nativeCurrency.symbol || '';
-
 
   // $: unsupportedStableCoin =
   //   $selectedToken !== null && !isSupported($selectedToken as Token) && isStablecoin($selectedToken as Token);
 
   $: wrappedAssetWarning = $t('bridge.alerts.wrapped_eth', {
     values: {
-      'currency': $selectedToken?.symbol,
+      currency: $selectedToken?.symbol,
     },
   });
 
@@ -133,7 +132,13 @@ Recipient & Processing Fee
 
 <div class="h-sep" />
 {#if !hasEnoughFundsToContinue}
-  <Alert type="error">{$t('bridge.alerts.not_enough_funds', {values: {"currency": currencySymbol, 'amount': currencySymbol === 'ETH' ? claimConfig.minimumEthToClaim : claimConfig.minimumMxcToClaim}})}</Alert>
+  <Alert type="error"
+    >{$t('bridge.alerts.not_enough_funds', {
+      values: {
+        currency: currencySymbol,
+        amount: currencySymbol === 'ETH' ? claimConfig.minimumEthToClaim : claimConfig.minimumMxcToClaim,
+      },
+    })}</Alert>
 {/if}
 {#if wrapped}
   <!-- eslint-disable-next-line svelte/no-at-html-tags -->

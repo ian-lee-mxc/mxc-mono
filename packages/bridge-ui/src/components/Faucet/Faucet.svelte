@@ -34,7 +34,7 @@
 
   $: currentChainId = $connectedSourceChain?.id;
 
-  $: currentChain = chains.find(chain => chain.id === currentChainId)
+  $: currentChain = chains.find((chain) => chain.id === currentChainId);
 
   $: currencySymbol = currentChain?.nativeCurrency.symbol || '';
 

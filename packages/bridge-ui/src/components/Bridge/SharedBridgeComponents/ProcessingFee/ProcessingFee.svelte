@@ -41,9 +41,8 @@
   let tempprocessingFee = $processingFee;
 
   $: currentChainId = $connectedSourceChain?.id;
-  $: currentChain = chains.find(chain => chain.id === currentChainId)
+  $: currentChain = chains.find((chain) => chain.id === currentChainId);
   $: currencySymbol = currentChain?.nativeCurrency.symbol || '';
-
 
   // Public API
   export function resetProcessingFee() {
@@ -172,7 +171,9 @@
         {:else if errorCalculatingRecommendedAmount && $processingFeeMethod === ProcessingFeeMethod.RECOMMENDED}
           <FlatAlert type="warning" message={$t('processing_fee.recommended.error')} />
         {:else}
-          {formatEther($processingFee ?? BigInt(0))} {currencySymbol} {#if $processingFee !== recommendedAmount}
+          {formatEther($processingFee ?? BigInt(0))}
+          {currencySymbol}
+          {#if $processingFee !== recommendedAmount}
             <span class="text-primary-link">| {$t('common.customized')}</span>
           {/if}
         {/if}
@@ -186,7 +187,9 @@
     {:else if errorCalculatingRecommendedAmount && $processingFeeMethod === ProcessingFeeMethod.RECOMMENDED}
       <span class="text-warning-sentiment">{$t('processing_fee.recommended.error')}</span>
     {:else}
-      {formatEther($processingFee ?? BigInt(0))} {currencySymbol} {#if $processingFee !== recommendedAmount}
+      {formatEther($processingFee ?? BigInt(0))}
+      {currencySymbol}
+      {#if $processingFee !== recommendedAmount}
         <span class="text-primary-link">| {$t('common.customized')}</span>
       {/if}
     {/if}
@@ -212,7 +215,9 @@
       {:else if errorCalculatingRecommendedAmount && $processingFeeMethod === ProcessingFeeMethod.RECOMMENDED}
         <FlatAlert type="warning" message={$t('processing_fee.recommended.error')} />
       {:else}
-        {formatEther($processingFee ?? BigInt(0))} {currencySymbol} {#if $processingFee !== recommendedAmount}
+        {formatEther($processingFee ?? BigInt(0))}
+        {currencySymbol}
+        {#if $processingFee !== recommendedAmount}
           <span class="text-primary-link">| {$t('common.customized')}</span>
         {/if}
       {/if}
@@ -267,7 +272,7 @@
                     {$t('processing_fee.none.label')}
                   </label>
                   <span class="body-small-regular text-secondary-content">
-                    {$t('processing_fee.none.text',{"values": {"currency": currencySymbol === 'ETH' ? 'MXC' : 'ETH'}})}
+                    {$t('processing_fee.none.text', { values: { currency: currencySymbol === 'ETH' ? 'MXC' : 'ETH' } })}
                   </span>
                 </div>
                 <input
@@ -281,11 +286,13 @@
               </div>
 
               {#if !hasEnoughEth}
-                <FlatAlert type="error" message={$t('processing_fee.none.warning', {
-                  values: {
-                    "currency": currencySymbol === 'ETH' ? 'MXC' : 'ETH',
-                  }},
-                )} />
+                <FlatAlert
+                  type="error"
+                  message={$t('processing_fee.none.warning', {
+                    values: {
+                      currency: currencySymbol === 'ETH' ? 'MXC' : 'ETH',
+                    },
+                  })} />
               {:else if tempProcessingFeeMethod === ProcessingFeeMethod.NONE}
                 <div class="my-5">
                   <Alert type="warning">
@@ -327,7 +334,8 @@
                   class="w-full input-box p-6 pr-16 title-subsection-bold placeholder:text-tertiary-content"
                   on:input={inputProcessFee}
                   bind:this={inputBox} />
-                <span class="absolute right-6 uppercase body-bold text-secondary-content">{currencySymbol === 'ETH' ? 'MXC': 'ETH'}</span>
+                <span class="absolute right-6 uppercase body-bold text-secondary-content"
+                  >{currencySymbol === 'ETH' ? 'MXC' : 'ETH'}</span>
               {/if}
             </div>
 

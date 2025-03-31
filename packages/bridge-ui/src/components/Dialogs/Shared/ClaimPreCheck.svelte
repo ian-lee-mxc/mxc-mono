@@ -87,7 +87,7 @@
   $: successFullPreChecks = correctChain && hasEnoughEth && hasEnoughQuota;
 
   $: currentChainId = $connectedSourceChain?.id;
-  $: currentChain = chains.find(chain => chain.id === currentChainId)
+  $: currentChain = chains.find((chain) => chain.id === currentChainId);
   $: currencySymbol = currentChain?.nativeCurrency.symbol || '';
 
   $: if (!checkingPrerequisites && successFullPreChecks && $account && !onlyDestOwnerCanClaimWarning) {
@@ -172,12 +172,14 @@
             <span class="text-secondary-content">{$t('transactions.claim.steps.pre_check.funds_check')}</span>
             <Tooltip>
               <h2>{$t('transactions.claim.steps.pre_check.tooltip.funds.title')}</h2>
-              <span>{$t('transactions.claim.steps.pre_check.tooltip.funds.description', {
-                values: {
-                  amount: currencySymbol === 'ETH' ? claimConfig.minimumEthToClaim : claimConfig.minimumMxcToClaim,
-                  symbol: currencySymbol,
-                }
-              })} </span>
+              <span
+                >{$t('transactions.claim.steps.pre_check.tooltip.funds.description', {
+                  values: {
+                    amount: currencySymbol === 'ETH' ? claimConfig.minimumEthToClaim : claimConfig.minimumMxcToClaim,
+                    symbol: currencySymbol,
+                  },
+                })}
+              </span>
             </Tooltip>
           </div>
           {#if checkingPrerequisites}

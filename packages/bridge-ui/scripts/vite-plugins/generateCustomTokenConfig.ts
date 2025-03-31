@@ -18,7 +18,6 @@ const logger = new PluginLogger(pluginName);
 
 const skip = process.env.SKIP_ENV_VALIDATION === 'true';
 
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const outputPath = path.join(__dirname, '../../src/generated/customTokenConfig.ts');

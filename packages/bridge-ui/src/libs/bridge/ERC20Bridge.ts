@@ -22,7 +22,7 @@ import { config } from '$libs/wagmi';
 import { Bridge } from './Bridge';
 import { calculateMessageDataSize } from './calculateMessageDataSize';
 import type { ApproveArgs, BridgeTransferOp, ERC20BridgeArgs, RequireAllowanceArgs } from './types';
-import {chainIdToChain, chains} from "$libs/chain";
+import { chainIdToChain, chains } from '$libs/chain';
 
 const log = getLogger('ERC20Bridge');
 
@@ -213,7 +213,7 @@ export class ERC20Bridge extends Bridge {
 
     if (!wallet || !wallet.account || !wallet.chain) throw new Error('Wallet is not connected');
 
-    const isNativeMXC = args.token === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+    const isNativeMXC = args.token === '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
     if (!isNativeMXC) {
       const requireAllowance = await this.requireAllowance({
         amount,
@@ -222,20 +222,18 @@ export class ERC20Bridge extends Bridge {
         spenderAddress: tokenVaultAddress,
       });
 
-      if (requireAllowance)
-        throw new InsufficientAllowanceError(`Insufficient allowance for the amount ${amount}`);
+      if (requireAllowance) throw new InsufficientAllowanceError(`Insufficient allowance for the amount ${amount}`);
     }
-
 
     const { tokenVaultContract, sendERC20Args } = await ERC20Bridge._prepareTransaction(args);
     const { fee } = sendERC20Args;
 
-    let value = 0n
-    if (chainIdToChain(args.destChainId).name.toLowerCase().includes("arbitrum")) {
+    let value = 0n;
+    if (chainIdToChain(args.destChainId).name.toLowerCase().includes('arbitrum')) {
       sendERC20Args.gasLimit += 5000000;
     }
     if (isNativeMXC) {
-      value = args.amount
+      value = args.amount;
     }
     try {
       const { request } = await simulateContract(config, {
