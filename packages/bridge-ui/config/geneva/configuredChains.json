@@ -1,14 +1,13 @@
 {
-  "configuredChains": [{
+  "configuredChains": [
+    {
       "421614": {
         "name": "Arbitrum Sepolia",
         "type": "L2",
         "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png",
         "rpcUrls": {
           "default": {
-            "http": [
-              "https://sepolia-rollup.arbitrum.io/rpc"
-            ]
+            "http": ["https://sepolia-rollup.arbitrum.io/rpc"]
           }
         },
         "nativeCurrency": {
@@ -31,9 +30,7 @@
         "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/3628.png",
         "rpcUrls": {
           "default": {
-            "http": [
-              "https://geneva-rpc.moonchain.com"
-            ]
+            "http": ["https://geneva-rpc.moonchain.com"]
           }
         },
         "nativeCurrency": {
@@ -51,4 +48,3 @@
     }
   ]
 }
-

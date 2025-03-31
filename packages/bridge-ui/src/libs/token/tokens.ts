@@ -18,7 +18,7 @@ import { type Token, TokenAttributeKey, TokenType } from './types';
 // };
 
 export const testERC20Tokens: Token[] = customToken.filter((token) => token.type === TokenType.ERC20);
-export const ETHToken: Token = testERC20Tokens[0]
+export const ETHToken: Token = testERC20Tokens[0];
 
 export const testNFT: Token[] = customToken.filter(
   (token) => token.type === TokenType.ERC721 || token.type === TokenType.ERC1155,

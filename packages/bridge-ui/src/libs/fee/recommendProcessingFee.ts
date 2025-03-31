@@ -3,6 +3,7 @@ import { formatGwei, parseGwei } from 'viem';
 
 import { gasLimitConfig } from '$config';
 import { PUBLIC_FEE_MULTIPLIER } from '$env/static/public';
+import { chainIdToChain } from '$libs/chain';
 import { NoCanonicalInfoFoundError } from '$libs/error';
 import { type NFT, type Token, TokenType } from '$libs/token';
 import { getTokenAddresses } from '$libs/token/getTokenAddresses';
@@ -37,7 +38,7 @@ export async function recommendProcessingFee({
 
   const maxPriorityFee = await destPublicClient.estimateMaxPriorityFeePerGas();
   log(`maxPriorityFee: ${formatGwei(maxPriorityFee)} gwei`);
-  let gasPrice = (baseFee ? baseFee * 2n : null) || await destPublicClient.getGasPrice();
+  let gasPrice = (baseFee ? baseFee * 2n : null) || (await destPublicClient.getGasPrice());
   log(`gasPrice: ${formatGwei(gasPrice)} gwei`);
 
   if (gasPrice < parseGwei('0.01')) {
@@ -106,6 +107,12 @@ export async function recommendProcessingFee({
   } else {
     feeMultiplicator = 2;
     log(`gasPrice ${formatGwei(gasPrice)} is more than 0.1 gwei, setting feeMultiplicator to 2`);
+  }
+
+  // fianlly to multiply fee by 500000 for MXC chain
+  if (chainIdToChain(srcChainId).nativeCurrency.symbol === 'MXC') {
+    feeMultiplicator = 500000;
+    log(`feeMultiplicator is set to 500000 for MXC chain`);
   }
 
   const fee = estimatedMsgGaslimit * Number(gasPrice) * feeMultiplicator;

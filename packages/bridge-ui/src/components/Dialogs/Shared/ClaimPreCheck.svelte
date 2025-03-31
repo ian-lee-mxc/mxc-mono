@@ -12,7 +12,7 @@
   import { claimConfig } from '$config';
   import { type BridgeTransaction } from '$libs/bridge';
   import { checkEnoughBridgeQuotaForClaim } from '$libs/bridge/checkBridgeQuota';
-  import { getChainName, isL2Chain } from '$libs/chain';
+  import { chains, getChainName, isL2Chain } from '$libs/chain';
   import { shortenAddress } from '$libs/util/shortenAddress';
   import { config } from '$libs/wagmi';
   import { account } from '$stores/account';
@@ -85,6 +85,10 @@
   $: correctChain = Number(tx.destChainId) === $connectedSourceChain?.id;
 
   $: successFullPreChecks = correctChain && hasEnoughEth && hasEnoughQuota;
+
+  $: currentChainId = $connectedSourceChain?.id;
+  $: currentChain = chains.find((chain) => chain.id === currentChainId);
+  $: currencySymbol = currentChain?.nativeCurrency.symbol || '';
 
   $: if (!checkingPrerequisites && successFullPreChecks && $account && !onlyDestOwnerCanClaimWarning) {
     hideContinueButton = false;
@@ -168,7 +172,14 @@
             <span class="text-secondary-content">{$t('transactions.claim.steps.pre_check.funds_check')}</span>
             <Tooltip>
               <h2>{$t('transactions.claim.steps.pre_check.tooltip.funds.title')}</h2>
-              <span>{$t('transactions.claim.steps.pre_check.tooltip.funds.description')} </span>
+              <span
+                >{$t('transactions.claim.steps.pre_check.tooltip.funds.description', {
+                  values: {
+                    amount: currencySymbol === 'ETH' ? claimConfig.minimumEthToClaim : claimConfig.minimumMxcToClaim,
+                    symbol: currencySymbol,
+                  },
+                })}
+              </span>
             </Tooltip>
           </div>
           {#if checkingPrerequisites}

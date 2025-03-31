@@ -22,9 +22,7 @@ const args = process.argv.slice(2);
 const isLocal = args.includes('--local');
 const isDev = args.includes('--dev');
 const isProd = args.includes('--prod');
-const isA7 = args.includes('--a7');
-const isA6 = args.includes('--a6');
-const isA5 = args.includes('--a5');
+const isGeneva = args.includes('--geneva');
 const isMainnet = args.includes('--mainnet');
 
 // Determine the environment
@@ -39,12 +37,8 @@ if (isDev) {
 
 // Determine the version
 let version = '';
-if (isA6) {
-  version = 'a6';
-} else if (isA5) {
-  version = 'a5';
-} else if (isA7) {
-  version = 'a7';
+if (isGeneva) {
+  version = 'geneva';
 } else if (isMainnet) {
   version = 'mainnet';
 }
