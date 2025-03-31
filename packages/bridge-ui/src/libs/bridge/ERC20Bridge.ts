@@ -6,6 +6,7 @@ import { bridgeAbi, erc20Abi, erc20VaultAbi } from '$abi';
 import { routingContractsMap } from '$bridgeConfig';
 import { destOwnerAddress, gasLimitZero } from '$components/Bridge/state';
 import { gasLimitConfig } from '$config';
+import { chainIdToChain } from '$libs/chain';
 import {
   ApproveError,
   BridgePausedError,
@@ -22,7 +23,6 @@ import { config } from '$libs/wagmi';
 import { Bridge } from './Bridge';
 import { calculateMessageDataSize } from './calculateMessageDataSize';
 import type { ApproveArgs, BridgeTransferOp, ERC20BridgeArgs, RequireAllowanceArgs } from './types';
-import { chainIdToChain, chains } from '$libs/chain';
 
 const log = getLogger('ERC20Bridge');
 

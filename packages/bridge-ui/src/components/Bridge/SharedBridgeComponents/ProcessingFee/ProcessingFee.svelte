@@ -2,7 +2,6 @@
   import { tick } from 'svelte';
   import { t } from 'svelte-i18n';
   import { formatEther } from 'viem';
-  import { claimConfig } from '$config';
 
   import Alert from '$components/Alert/Alert.svelte';
   import FlatAlert from '$components/Alert/FlatAlert.svelte';
@@ -11,6 +10,7 @@
   import { InputBox } from '$components/InputBox';
   import { LoadingText } from '$components/LoadingText';
   import { Tooltip } from '$components/Tooltip';
+  import { claimConfig } from '$config';
   import { chains } from '$libs/chain';
   import { closeOnEscapeOrOutsideClick } from '$libs/customActions';
   import { ProcessingFeeMethod } from '$libs/fee';

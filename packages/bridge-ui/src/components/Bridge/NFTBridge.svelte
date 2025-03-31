@@ -10,7 +10,7 @@
   import { Step, Stepper } from '$components/Stepper';
   import { hasBridge } from '$libs/bridge/bridges';
   import { BridgePausedError } from '$libs/error';
-  import { ETHToken, testERC20Tokens } from '$libs/token';
+  import { testERC20Tokens } from '$libs/token';
   import { isBridgePaused } from '$libs/util/checkForPausedContracts';
   import { type Account, account } from '$stores/account';
 

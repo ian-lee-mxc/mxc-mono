@@ -14,6 +14,7 @@
     processingFee,
     selectedToken,
   } from '$components/Bridge/state';
+  import { claimConfig } from '$config';
   import { PUBLIC_SLOW_L1_BRIDGING_WARNING } from '$env/static/public';
   import { chains, LayerType } from '$libs/chain';
   import { isWrapped, type Token, TokenType } from '$libs/token';
@@ -21,7 +22,6 @@
   import { account } from '$stores/account';
   import { ethBalance } from '$stores/balance';
   import { connectedSourceChain } from '$stores/network';
-  import { claimConfig } from '$config';
 
   export let hasEnoughEth: boolean = false;
   export let needsManualReviewConfirmation = false;

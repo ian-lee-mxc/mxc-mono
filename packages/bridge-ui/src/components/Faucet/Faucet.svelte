@@ -12,6 +12,8 @@
   import { successToast, warningToast } from '$components/NotificationToast';
   import { errorToast, infoToast } from '$components/NotificationToast/NotificationToast.svelte';
   import { TokenDropdown } from '$components/TokenDropdown';
+  import { claimConfig } from '$config';
+  import { chains } from '$libs/chain';
   import { web3modal } from '$libs/connect';
   import { InsufficientBalanceError, MintError, TokenMintedError } from '$libs/error';
   import { getAlternateNetwork } from '$libs/network';
@@ -19,8 +21,6 @@
   import { config } from '$libs/wagmi';
   import { account, connectedSourceChain, pendingTransactions } from '$stores';
   import { switchingNetwork } from '$stores/network';
-  import { chains } from '$libs/chain';
-  import { claimConfig } from '$config';
 
   let minting = false;
   let checkingMintable = false;

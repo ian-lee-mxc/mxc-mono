@@ -10,9 +10,7 @@
         "erc1155VaultAddress": "0xD6F6B23Cd1bfD48ce2ce8b82e527280aa4b53b14",
         "crossChainSyncAddress": "0xB31EBab3Ac38B9B021CCe679B4059b790413Fa4E",
         "signalServiceAddress": "0xB31EBab3Ac38B9B021CCe679B4059b790413Fa4E",
-        "hops": [
-
-        ]
+        "hops": []
       }
     },
     {
@@ -25,9 +23,7 @@
         "erc1155VaultAddress": "0xAC3B2C56c7e98b320b19774aC26a95CAea9cb72d",
         "crossChainSyncAddress": "0x1000777700000000000000000000000000000007",
         "signalServiceAddress": "0x1000777700000000000000000000000000000007",
-        "hops": [
-
-        ]
+        "hops": []
       }
     }
   ]

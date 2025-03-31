@@ -274,7 +274,6 @@
   $: timeoutIcon = `exclamation-circle` as IconType;
 
   onMount(() => (bridgingStatus = BridgingStatus.PENDING));
-  console.log('testing', $connectedSourceChain);
 </script>
 
 <div class="mt-[30px]">
