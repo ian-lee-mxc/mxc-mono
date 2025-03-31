@@ -15,7 +15,7 @@
     selectedToken,
   } from '$components/Bridge/state';
   import { PUBLIC_SLOW_L1_BRIDGING_WARNING } from '$env/static/public';
-  import { LayerType } from '$libs/chain';
+  import { chains, LayerType } from '$libs/chain';
   import { isWrapped, type Token, TokenType } from '$libs/token';
   import { isToken } from '$libs/token/isToken';
   import { account } from '$stores/account';
@@ -36,10 +36,21 @@
 
   $: wrapped = $selectedToken !== null && isWrapped($selectedToken as Token);
 
+  $: currentChainId = $connectedSourceChain?.id;
+
+  $: currentChain = chains.find(chain => chain.id === currentChainId)
+
+  $: currencySymbol = currentChain?.nativeCurrency.symbol || '';
+
+
   // $: unsupportedStableCoin =
   //   $selectedToken !== null && !isSupported($selectedToken as Token) && isStablecoin($selectedToken as Token);
 
-  $: wrappedAssetWarning = $t('bridge.alerts.wrapped_eth');
+  $: wrappedAssetWarning = $t('bridge.alerts.wrapped_eth', {
+    values: {
+      'currency': $selectedToken?.symbol,
+    },
+  });
 
   $: if (wrapped) {
     needsManualReviewConfirmation = true;
@@ -121,7 +132,7 @@ Recipient & Processing Fee
 
 <div class="h-sep" />
 {#if !hasEnoughFundsToContinue}
-  <Alert type="error">{$t('bridge.alerts.not_enough_funds')}</Alert>
+  <Alert type="error">{$t('bridge.alerts.not_enough_funds', {values: {"currency": currencySymbol, 'amount': currencySymbol === 'ETH' ? claimConfig.minimumEthToClaim : claimConfig.minimumMxcToClaim}})}</Alert>
 {/if}
 {#if wrapped}
   <!-- eslint-disable-next-line svelte/no-at-html-tags -->

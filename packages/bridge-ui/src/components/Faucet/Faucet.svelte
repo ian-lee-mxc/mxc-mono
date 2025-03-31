@@ -19,6 +19,8 @@
   import { config } from '$libs/wagmi';
   import { account, connectedSourceChain, pendingTransactions } from '$stores';
   import { switchingNetwork } from '$stores/network';
+  import { chains } from '$libs/chain';
+  import { claimConfig } from '$config';
 
   let minting = false;
   let checkingMintable = false;
@@ -29,6 +31,12 @@
   let mintableTokens: Token[] = [];
 
   const onlyMintable: boolean = true;
+
+  $: currentChainId = $connectedSourceChain?.id;
+
+  $: currentChain = chains.find(chain => chain.id === currentChainId)
+
+  $: currencySymbol = currentChain?.nativeCurrency.symbol || '';
 
   async function mintToken() {
     // During loading state we make sure the user cannot use this function
@@ -105,7 +113,12 @@
       console.error(err);
       switch (true) {
         case err instanceof InsufficientBalanceError:
-          reasonNotMintable = $t('faucet.warning.insufficient_balance');
+          reasonNotMintable = $t('faucet.warning.insufficient_balance', {
+            values: {
+              currency: currencySymbol,
+              amount: currencySymbol === 'ETH' ? claimConfig.minimumEthToClaim : claimConfig.minimumMxcToClaim,
+            },
+          });
           break;
         case err instanceof TokenMintedError:
           reasonNotMintable = $t('faucet.warning.token_minted');
