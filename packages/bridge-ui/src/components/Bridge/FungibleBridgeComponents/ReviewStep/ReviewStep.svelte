@@ -21,6 +21,7 @@
   import { account } from '$stores/account';
   import { ethBalance } from '$stores/balance';
   import { connectedSourceChain } from '$stores/network';
+  import { claimConfig } from '$config';
 
   export let hasEnoughEth: boolean = false;
   export let needsManualReviewConfirmation = false;
