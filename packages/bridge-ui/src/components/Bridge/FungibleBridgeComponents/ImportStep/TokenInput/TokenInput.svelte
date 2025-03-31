@@ -264,7 +264,7 @@
 
   const onAccountChange = async (newAccount: Account, oldAccount?: Account) => {
     log('onAccountChange', newAccount, oldAccount);
-    
+
     if (newAccount?.isConnected && newAccount.address && newAccount.address !== oldAccount?.address) {
       log('resetting input');
       reset();

@@ -4,7 +4,7 @@
 </script>
 
 <svelte:head>
-  <title> | Relayer</title>
+  <title>| Relayer</title>
 </svelte:head>
 <Page>
   <Relayer />

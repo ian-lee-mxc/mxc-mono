@@ -12,6 +12,8 @@
   import { successToast, warningToast } from '$components/NotificationToast';
   import { errorToast, infoToast } from '$components/NotificationToast/NotificationToast.svelte';
   import { TokenDropdown } from '$components/TokenDropdown';
+  import { claimConfig } from '$config';
+  import { chains } from '$libs/chain';
   import { web3modal } from '$libs/connect';
   import { InsufficientBalanceError, MintError, TokenMintedError } from '$libs/error';
   import { getAlternateNetwork } from '$libs/network';
@@ -29,6 +31,12 @@
   let mintableTokens: Token[] = [];
 
   const onlyMintable: boolean = true;
+
+  $: currentChainId = $connectedSourceChain?.id;
+
+  $: currentChain = chains.find((chain) => chain.id === currentChainId);
+
+  $: currencySymbol = currentChain?.nativeCurrency.symbol || '';
 
   async function mintToken() {
     // During loading state we make sure the user cannot use this function
@@ -105,7 +113,12 @@
       console.error(err);
       switch (true) {
         case err instanceof InsufficientBalanceError:
-          reasonNotMintable = $t('faucet.warning.insufficient_balance');
+          reasonNotMintable = $t('faucet.warning.insufficient_balance', {
+            values: {
+              currency: currencySymbol,
+              amount: currencySymbol === 'ETH' ? claimConfig.minimumEthToClaim : claimConfig.minimumMxcToClaim,
+            },
+          });
           break;
         case err instanceof TokenMintedError:
           reasonNotMintable = $t('faucet.warning.token_minted');

@@ -28,7 +28,8 @@ export const bridgeTransactionPoller = {
 };
 
 export const claimConfig = {
-  minimumEthToClaim: 0.0015, // 1M gas * 1.5 gwei (lowest gasPrice)
+  minimumEthToClaim: 0.0006, // 6M gas * 0.1 gwei (lowest gasPrice)
+  minimumMxcToClaim: 10,
 };
 
 export const transactionConfig = {

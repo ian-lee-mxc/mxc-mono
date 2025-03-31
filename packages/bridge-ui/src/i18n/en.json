@@ -39,10 +39,10 @@
       "nft_scan_again": "Scan again"
     },
     "alerts": {
-      "not_enough_funds": "You do not have enough ETH to cover the processing fee and transaction fee. Please add more ETH to your wallet (>= 0.0015 ETH).",
+      "not_enough_funds": "You do not have enough {currency} to cover the processing fee and transaction fee. Please add more {currency} to your wallet (>= {amount} {currency}).",
       "slow_bridging": "Please note: Bridging to L1 will take around 24hrs!",
       "smart_contract_wallet": "It seems you are using a smart contract wallet. Please double check that the recipient matches your wallet on the destination or change it accordingly.",
-      "wrapped_eth": "You are bridging wrapped ETH. Please be aware that un-wrapping will only work on the original chain of the token, <span class=\"font-bold\">NOT</span> on the destination."
+      "wrapped_eth": "You are bridging wrapped {currency}. Please be aware that un-wrapping will only work on the original chain of the token, <span class=\"font-bold\">NOT</span> on the destination."
     },
     "button": {
       "approve": "Approve",
@@ -306,7 +306,7 @@
     },
     "title": "Faucet",
     "warning": {
-      "insufficient_balance": "You don't have enough ETH to complete the transaction. Please add more ETH to your wallet (>= 0.0015 ETH)",
+      "insufficient_balance": "You don't have enough {currency} to complete the transaction. Please add more {currency} to your wallet (>= {amount} {currency})",
       "no_connected": "Please connect your wallet to mint tokens.",
       "not_mintable": "This token is not mintable on this network. Please switch to the correct network.",
       "token_minted": "You have already minted this token.",
@@ -420,8 +420,8 @@
     "none": {
       "alert": "Setting the processing fee to 'None' will require manual claiming.  No relayer will claim for you.",
       "label": "None",
-      "text": "Use ETH to manually claim your bridged token later",
-      "warning": "Insufficient ETH to cover the gas fees for claiming."
+      "text": "Use {currency} to manually claim your bridged token later",
+      "warning": "Insufficient {currency} to cover the gas fees for claiming."
     },
     "recommended": {
       "calculating": "Calculating",
@@ -531,7 +531,7 @@
               "title": "What is \"Connected to the correct chain\"?"
             },
             "funds": {
-              "description": "In order to claim the transaction yourself, you need enough funds on the destination chain (>= 0.0015 ETH). If you've kept the default processing fee, the relayer will likely claim for you soon.",
+              "description": "In order to claim the transaction yourself, you need enough funds on the destination chain (>= {amount} {currency}). If you've kept the default processing fee, the relayer will likely claim for you soon.",
               "title": "What is \"Sufficient funds to claim\"?"
             },
             "processing_fee": {
