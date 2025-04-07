@@ -15,7 +15,7 @@ contract GenevaMoonchainL1 is TaikoL1, RollupAddressCache {
     uint256[51] private __gap;
 
     /// @inheritdoc ITaikoL1
-    function getConfig() public pure override returns (TaikoData.Config memory) {
+    function getConfig() public pure override virtual returns (TaikoData.Config memory) {
         // All hard-coded configurations:
         // - treasury: the actual TaikoL2 address.
         // - anchorGasLimit: 250_000 (based on internal devnet, its ~220_000

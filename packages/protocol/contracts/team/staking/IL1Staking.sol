@@ -13,7 +13,7 @@ interface IL1Staking {
     function stakingDepositReward(uint256 amount) external;
     function pauseUserReward(address user,uint256 epochAmount) external;
     function stakingSlashing(address user,uint256 rate) external;
-    function getEpochReward() external view returns (uint256);
+    function getEpochReward(uint256 epoch) external view returns (uint256);
     function getCurrentEpoch() external view returns (uint256);
     function stakingUserState(address user) external view returns (uint256 balance,uint256 lastClaimedEpoch,uint256 withdrawalRequestEpoch);
 }
