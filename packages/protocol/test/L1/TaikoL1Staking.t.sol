@@ -141,7 +141,8 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
         l1Staking.stake(Alice,1_000_000 * 1 ether);
         vm.warp(block.timestamp + 7 days);
         uint256 balanceBefore = mxcToken.balanceOf(Alice);
-        l1Staking.stakingClaimReward();
+        uint256 amount = l1Staking.stakingClaimReward(Alice);
+        assertEq(amount, 1_00_000 * 1 ether);
         assertEq(mxcToken.balanceOf(Alice) - balanceBefore, 100_000 * 1 ether);
     }
 
@@ -151,10 +152,13 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
         l1Staking.stakingDepositReward(100_000 * 1 ether);
         l1Staking.stake(Alice,1_000_000 * 1 ether);
         vm.warp(block.timestamp + 7 days);
-        uint256 balanceBefore = mxcToken.balanceOf(Alice);
+        uint256 balanceBeforeAlice = mxcToken.balanceOf(Alice);
+        uint256 balanceBeforeBob = mxcToken.balanceOf(Bob);
         vm.startPrank(Bob);
-        l1Staking.stakingClaimReward(Alice);
-        assertEq(mxcToken.balanceOf(Alice) - balanceBefore, 1_00_000 * 1 ether);
+        uint256 amount = l1Staking.stakingClaimReward(Alice);
+        assertEq(amount, 1_00_000 * 1 ether);
+        assertEq(mxcToken.balanceOf(Alice), balanceBeforeAlice);
+        assertEq(mxcToken.balanceOf(Bob), balanceBeforeBob + 1_00_000 * 1 ether);
     }
 
     function test_L1_Withdraw() external {
@@ -163,16 +167,17 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
         l1Staking.stake(Alice,1_000_000 * 1 ether);
 
         vm.expectRevert(L1Staking.WITHDRAWAL_LOCKED.selector);
-        l1Staking.stakingWithdrawal();
+        l1Staking.stakingWithdrawal(Alice);
 
-        l1Staking.stakingRequestWithdrawal(false);
+        l1Staking.stakingRequestWithdrawal(Alice,false);
         vm.warp(block.timestamp + l1Staking.WITHDRAWAL_LOCK_EPOCH() * 7 days);
         uint256 beforeBalance = mxcToken.balanceOf(Alice);
-        l1Staking.stakingWithdrawal();
+        l1Staking.stakingClaimReward(Alice);
+        l1Staking.stakingWithdrawal(Alice);
         assertEq(mxcToken.balanceOf(Alice), beforeBalance + 1_000_000 * 1 ether);
 
         vm.expectRevert(L1Staking.INSUFFICIENT_BALANCE.selector);
-        l1Staking.stakingWithdrawal();
+        l1Staking.stakingWithdrawal(Alice);
     }
 
     function test_L1_Slashing() external {
@@ -196,6 +201,7 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
         proposeBlockV2(msg.sender, 0);
         vm.warp(block.timestamp + 1000);
         proposeBlockV2(msg.sender, 0);
+        vm.startPrank(Alice);
         mxcToken.approve(address(l1Staking), type(uint256).max);
         l1Staking.stake(Alice, 5_000_000 * 1 ether);
 
@@ -296,7 +302,7 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
                 // uint256 reward = l1Staking.stakingCalculateRewardDebt(stakers[i]);
                 // console2.log(string.concat("Staker", vm.toString(i + 1)), ":", reward);
                 vm.prank(stakers[i]);
-                l1Staking.stakingClaimReward();
+                l1Staking.stakingClaimReward(stakers[i]);
                 totalClaimedAmount += mxcToken.balanceOf(stakers[i]) - beforeBalance;
             }
             // verify total

@@ -42,5 +42,5 @@ library LibStrings {
     //CHANGE(MOONCHAIN): Added to support Moonchain
     bytes32 internal constant B_ETHMXC_PRICE_AGGREGATOR = bytes32("ethmxc_price_aggregator");
     bytes32 internal constant B_STAKING = bytes32("staking");
-    bytes32 internal constant B_STAKING_SLASHER = bytes32("staking_slasher");
+    bytes32 internal constant B_ZKCENTER = bytes32("zkcenter");
 }
