@@ -99,7 +99,7 @@ contract UpgradeMoonchainL2 is DeployCapability {
         upgradeProxyAndCall(
             bridgeProxyAddr,
             address(new Bridge()),
-            abi.encodeCall(Bridge.forkInit, (owner, sharedAddressManagerProxyAddr))
+            abi.encodeCall(Bridge.init, (owner, sharedAddressManagerProxyAddr))
         );
         register(sharedAddressManagerProxyAddr, "bridge", bridgeProxyAddr);
 

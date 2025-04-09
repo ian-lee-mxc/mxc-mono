@@ -43,7 +43,7 @@ contract L1Staking is EssentialContract, IL1Staking {
     event Withdrawal(address indexed user, uint256 amount);
 
     /// @dev Emitted when user claim reward.
-    event ClaimReward(address indexed user, uint256 amount, uint256 lastClaimedEpoch, uint256 claimedBy);
+    event ClaimReward(address indexed user, uint256 amount, uint256 lastClaimedEpoch);
 
     /// @dev Emitted when user slash.
     event Slash(address indexed user, uint256 amount);
@@ -52,6 +52,7 @@ contract L1Staking is EssentialContract, IL1Staking {
     error INSUFFICIENT_BALANCE();
     error WITHDRAWAL_LOCKED();
     error REWARD_ALREADY_CLAIMED();
+    error REWARD_NOT_CLAIM();
 
     uint256 public constant MIN_DEPOSIT = 1_000_000 ether;
     uint256 public constant WITHDRAWAL_LOCK_EPOCH = 2;
@@ -76,15 +77,14 @@ contract L1Staking is EssentialContract, IL1Staking {
         address _user,
         uint256 _amount
     )
-    whenNotPaused nonReentrant
     external
+    whenNotPaused nonReentrant
+    onlyFromOptionalNamed(LibStrings.B_ZKCENTER)
     {
         uint256 newBalance = stakingState.stakingBalances[_user] + _amount;
         if (newBalance < MIN_DEPOSIT) revert INSUFFICIENT_DEPOSIT();
-        _mxc().transferFrom(msg.sender, address(this), _amount);
-        if(stakingState.stakingBalances[_user] > 0) {
-            _stakingClaimReward(_user, 1);
-        }
+        if (!_isClaimed(_user)) revert REWARD_NOT_CLAIM();
+        _mxc().transferFrom(_user, address(this), _amount);
         stakingState.stakingBalances[_user] += _amount;
         stakingState.totalBalance += _amount;
         stakingState.lastClaimedEpoch[_user] = getCurrentEpoch() - 1;
@@ -92,43 +92,48 @@ contract L1Staking is EssentialContract, IL1Staking {
     }
 
     /// @dev Withdrawal request
+    /// @param _user The user address who request the withdraw
     function stakingRequestWithdrawal(
+        address _user,
         bool cancel
     )
     external nonReentrant
+    onlyFromOptionalNamed(LibStrings.B_ZKCENTER)
     {
-        if (stakingState.stakingBalances[msg.sender] == 0) revert INSUFFICIENT_BALANCE();
-        _stakingClaimReward(msg.sender, 2);
+        if (stakingState.stakingBalances[_user] == 0) revert INSUFFICIENT_BALANCE();
         if (cancel) {
-            stakingState.withdrawalRequestEpoch[msg.sender] = 0; // Reset the time of the withdrawal
+            stakingState.withdrawalRequestEpoch[_user] = 0; // Reset the time of the withdrawal
         } else {
-            stakingState.withdrawalRequestEpoch[msg.sender] = getCurrentEpoch();
+            stakingState.withdrawalRequestEpoch[_user] = getCurrentEpoch();
         }
     }
 
     /// @dev User completes the withdrawal after the lock period
-    function stakingWithdrawal()
+    /// @param _user The user address for the withdraw
+    function stakingWithdrawal(address _user)
     external whenNotPaused nonReentrant
+    onlyFromOptionalNamed(LibStrings.B_ZKCENTER)
     {
-        uint256 amount = stakingState.stakingBalances[msg.sender]; // Get the user's staked balance
+        uint256 amount = stakingState.stakingBalances[_user]; // Get the user's staked balance
 
         if (amount == 0) revert INSUFFICIENT_BALANCE();
+        if (!_isClaimed(_user)) revert REWARD_NOT_CLAIM();
 
         if (
-            stakingState.withdrawalRequestEpoch[msg.sender] == 0
-            || getCurrentEpoch() < stakingState.withdrawalRequestEpoch[msg.sender] + WITHDRAWAL_LOCK_EPOCH
+            stakingState.withdrawalRequestEpoch[_user] == 0
+            || getCurrentEpoch() < stakingState.withdrawalRequestEpoch[_user] + WITHDRAWAL_LOCK_EPOCH
         ) {
             revert WITHDRAWAL_LOCKED();
         }
 
         // reset state
-        stakingState.stakingBalances[msg.sender] = 0;
+        stakingState.stakingBalances[_user] = 0;
         stakingState.totalBalance -= amount;
-        stakingState.lastClaimedEpoch[msg.sender] = 0;
-        stakingState.withdrawalRequestEpoch[msg.sender] = 0;
+        stakingState.lastClaimedEpoch[_user] = 0;
+        stakingState.withdrawalRequestEpoch[_user] = 0;
         // Transfer the staked tokens to the user
-        _mxc().transfer(msg.sender, amount);
-        emit Withdrawal(msg.sender, amount);
+        _mxc().transfer(_user, amount);
+        emit Withdrawal(_user, amount);
     }
 
     /// @dev System deposits reward to all users based on their stake.
@@ -208,33 +213,29 @@ contract L1Staking is EssentialContract, IL1Staking {
         return debtReward;
     }
 
-    /// @dev User claims their accumulated interest and transfers it to their wallet.
-    function stakingClaimReward()
-    external
-    whenNotPaused nonReentrant
-    {
-        _stakingClaimReward(msg.sender, 0);
+    /// @dev Check user already claimed
+    function _isClaimed(address user) internal view returns (bool) {
+        if (stakingState.stakingBalances[user] == 0) return true;
+        uint256 lastClaimedEpoch = stakingState.lastClaimedEpoch[user];
+        uint256 currentEpoch = getCurrentEpoch();
+        if (lastClaimedEpoch >= currentEpoch - 1) return true;
+        return false;
     }
 
-    /// @dev Someone else pays the gas and helps collect the rewards for the user.
+    /// @dev ZkCenter claim the reward from a user, then distribute it
     /// @param _user The user address to credit.
     function stakingClaimReward(address _user)
     external
-    whenNotPaused nonReentrant {
-        _stakingClaimReward(_user, 3);
-    }
-
-    /// @dev User claims their accumulated interest and transfers it to their wallet.
-    /// @param _user The user address to credit.
-    /// @param claimedBy 0 user, 1 stake, 2 withdraw, 3. agent, 4. slash
-    function _stakingClaimReward(address _user, uint256 claimedBy) internal
-    {
+    whenNotPaused nonReentrant
+    onlyFromOptionalNamed(LibStrings.B_ZKCENTER)
+    returns (uint256) {
         uint256 currentEpoch = getCurrentEpoch();
         uint256 reward = stakingCalculateRewardDebt(_user); // Calculate the interest owed to the user
         stakingState.lastClaimedEpoch[_user] = currentEpoch - 1;
-        if (reward == 0) return;
-        _mxc().transfer(_user, reward);
-        emit ClaimReward(_user, reward, currentEpoch - 1, claimedBy);
+        if (reward == 0) return 0;
+        _mxc().transfer(msg.sender, reward);
+        emit ClaimReward(msg.sender, reward, currentEpoch - 1);
+        return reward;
     }
 
     /// @dev Slash a user's bond balance. Dishonest behavior and failure to meet online rate targets
@@ -244,13 +245,14 @@ contract L1Staking is EssentialContract, IL1Staking {
     function stakingSlashing(
         address _user,
         uint256 _rate
-    ) external onlyFromOptionalNamed(LibStrings.B_STAKING_SLASHER)
+    ) external onlyFromOptionalNamed(LibStrings.B_ZKCENTER)
     {
         uint256 amount = stakingState.stakingBalances[_user];
         if (amount == 0) return;
-        _stakingClaimReward(_user, 4);
+        if (!_isClaimed(_user)) revert REWARD_NOT_CLAIM();
         uint256 punishAmount = amount * _rate / 100;
         stakingState.stakingBalances[_user] -= punishAmount;
+        stakingState.totalBalance -= punishAmount;
         emit Slash(_user, punishAmount);
     }
 
@@ -260,10 +262,10 @@ contract L1Staking is EssentialContract, IL1Staking {
     function pauseUserReward(
         address _user,
         uint256 _epochAmount
-    ) external onlyFromOptionalNamed(LibStrings.B_STAKING_SLASHER)
+    ) external onlyFromOptionalNamed(LibStrings.B_ZKCENTER)
     {
         uint256 currentEpoch = getCurrentEpoch();
-        _stakingClaimReward(_user, 4);
+        if (!_isClaimed(_user)) revert REWARD_NOT_CLAIM();
         stakingState.lastClaimedEpoch[_user] = currentEpoch + _epochAmount;
     }
 
