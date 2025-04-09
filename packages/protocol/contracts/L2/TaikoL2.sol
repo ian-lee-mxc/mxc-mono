@@ -137,7 +137,7 @@ contract TaikoL2 is EssentialContract {
         onlyGoldenTouch
         nonReentrant
     {
-        //        if (block.number >= ontakeForkHeight()) revert L2_FORK_ERROR();
+        if (block.number >= ontakeForkHeight()) revert L2_FORK_ERROR();
 
         // Verify ancestor hashes
         uint256 parentId = block.number - 1;

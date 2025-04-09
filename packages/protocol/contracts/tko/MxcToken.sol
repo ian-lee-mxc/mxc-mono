@@ -3,8 +3,8 @@ pragma solidity ^0.8.24;
 
 import "./TaikoTokenBase.sol";
 
-/// @title TaikoToken
-/// @notice The TaikoToken (TKO), in the protocol is used for prover collateral
+/// @title MXCToken
+/// @notice The MxcToken (MXC), in the protocol is used for prover collateral
 /// in the form of bonds. It is an ERC20 token with 18 decimal places of precision.
 /// @dev Labeled in AddressResolver as "taiko_token"
 /// @custom:security-contact luanxu@mxc.org
@@ -76,11 +76,23 @@ contract MxcToken is TaikoTokenBase {
         return super.delegates(account);
     }
 
-    function mint(address to, uint256 amount) public onlyFromNamedEither(LibStrings.B_STAKING, LibStrings.B_TAIKO) {
+    function mint(
+        address to,
+        uint256 amount
+    )
+        public
+        onlyFromNamedEither(LibStrings.B_STAKING, LibStrings.B_TAIKO)
+    {
         super._mint(to, amount);
     }
 
-    function burn(address from, uint256 amount) public onlyFromNamedEither(LibStrings.B_STAKING, LibStrings.B_TAIKO) {
+    function burn(
+        address from,
+        uint256 amount
+    )
+        public
+        onlyFromNamedEither(LibStrings.B_STAKING, LibStrings.B_TAIKO)
+    {
         super._burn(from, amount);
     }
 

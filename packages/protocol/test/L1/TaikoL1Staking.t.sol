@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 import "./TaikoL1TestBase.sol";
 import { MxcToken } from "../../contracts/tko/MxcToken.sol";
 import { GenevaMoonchainL1 } from "../../contracts/mainnet/GenevaMoonchainL1.sol";
-import {L1Staking} from "../../contracts/team/staking/L1Staking.sol";
+import { L1Staking } from "../../contracts/team/staking/L1Staking.sol";
 
 contract Verifier {
     fallback(bytes calldata) external returns (bytes memory) {
@@ -43,9 +43,7 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
             deployProxy({
                 name: "staking",
                 impl: address(new L1Staking()),
-                data: abi.encodeCall(
-                    L1Staking.init, (address(this), address(addressManager))
-                ),
+                data: abi.encodeCall(L1Staking.init, (address(this), address(addressManager))),
                 registerTo: address(addressManager)
             })
         );
@@ -57,9 +55,7 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
 
     function deployTaikoL1() internal override returns (TaikoL1 taikoL1) {
         taikoL1 = TaikoL1(
-            payable(
-                deployProxy({ name: "taiko", impl: address(new TestTaikoL1()), data: "" })
-            )
+            payable(deployProxy({ name: "taiko", impl: address(new TestTaikoL1()), data: "" }))
         );
         mL1 = GenevaMoonchainL1(address(taikoL1));
     }
@@ -67,8 +63,8 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
     function test_L1_StakingAndReward() external {
         vm.startPrank(Alice);
         mxcToken.approve(address(l1Staking), type(uint256).max);
-        l1Staking.stake(Alice,6_000_000 * 1 ether);
-        l1Staking.stake(Alice,1_000_000 * 1 ether);
+        l1Staking.stake(Alice, 6_000_000 * 1 ether);
+        l1Staking.stake(Alice, 1_000_000 * 1 ether);
 
         uint256 totalBalance;
         uint256 totalReward;
@@ -80,10 +76,11 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
 
         vm.startPrank(Bob);
         mxcToken.approve(address(l1Staking), type(uint256).max);
-        l1Staking.stake(Bob,6_000_000 * 1 ether);
+        l1Staking.stake(Bob, 6_000_000 * 1 ether);
         (totalBalance, totalReward,,,,) = l1Staking.stakingState();
         assertEq(totalBalance, (7_000_000 + 6_000_000) * 1 ether);
 
+        vm.warp(block.timestamp + 12);
         proposeBlockV2(msg.sender, 0);
         (totalBalance, totalReward,,,,) = l1Staking.stakingState();
         console2.log(
@@ -116,15 +113,16 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
     function test_L1_StakingShouldRevert() external {
         vm.startPrank(Alice);
         mxcToken.approve(address(l1Staking), type(uint256).max);
+        vm.warp(block.timestamp + 1);
         vm.expectRevert(L1Staking.INSUFFICIENT_DEPOSIT.selector);
-        l1Staking.stake(Alice,1_000_000 * 1 ether - 1);
+        l1Staking.stake(Alice, 1_000_000 * 1 ether - 1);
     }
 
     function test_L1_StakingDepositReward() external {
         vm.startPrank(Alice);
         mxcToken.approve(address(l1Staking), type(uint256).max);
         l1Staking.stakingDepositReward(100_000 * 1 ether);
-        l1Staking.stake(Alice,1_000_000 * 1 ether);
+        l1Staking.stake(Alice, 1_000_000 * 1 ether);
         (uint256 totalBalance, uint256 totalReward,,,,) = l1Staking.stakingState();
         assertEq(totalBalance, 1_000_000 * 1 ether);
         assertEq(totalReward, 100_000 * 1 ether);
@@ -138,11 +136,11 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
         vm.startPrank(Alice);
         mxcToken.approve(address(l1Staking), type(uint256).max);
         l1Staking.stakingDepositReward(100_000 * 1 ether);
-        l1Staking.stake(Alice,1_000_000 * 1 ether);
+        l1Staking.stake(Alice, 1_000_000 * 1 ether);
         vm.warp(block.timestamp + 7 days);
         uint256 balanceBefore = mxcToken.balanceOf(Alice);
         uint256 amount = l1Staking.stakingClaimReward(Alice);
-        assertEq(amount, 1_00_000 * 1 ether);
+        assertEq(amount, 100_000 * 1 ether);
         assertEq(mxcToken.balanceOf(Alice) - balanceBefore, 100_000 * 1 ether);
     }
 
@@ -150,26 +148,26 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
         vm.startPrank(Alice);
         mxcToken.approve(address(l1Staking), type(uint256).max);
         l1Staking.stakingDepositReward(100_000 * 1 ether);
-        l1Staking.stake(Alice,1_000_000 * 1 ether);
+        l1Staking.stake(Alice, 1_000_000 * 1 ether);
         vm.warp(block.timestamp + 7 days);
         uint256 balanceBeforeAlice = mxcToken.balanceOf(Alice);
         uint256 balanceBeforeBob = mxcToken.balanceOf(Bob);
         vm.startPrank(Bob);
         uint256 amount = l1Staking.stakingClaimReward(Alice);
-        assertEq(amount, 1_00_000 * 1 ether);
+        assertEq(amount, 100_000 * 1 ether);
         assertEq(mxcToken.balanceOf(Alice), balanceBeforeAlice);
-        assertEq(mxcToken.balanceOf(Bob), balanceBeforeBob + 1_00_000 * 1 ether);
+        assertEq(mxcToken.balanceOf(Bob), balanceBeforeBob + 100_000 * 1 ether);
     }
 
     function test_L1_Withdraw() external {
         vm.startPrank(Alice);
         mxcToken.approve(address(l1Staking), type(uint256).max);
-        l1Staking.stake(Alice,1_000_000 * 1 ether);
+        l1Staking.stake(Alice, 1_000_000 * 1 ether);
 
         vm.expectRevert(L1Staking.WITHDRAWAL_LOCKED.selector);
         l1Staking.stakingWithdrawal(Alice);
 
-        l1Staking.stakingRequestWithdrawal(Alice,false);
+        l1Staking.stakingRequestWithdrawal(Alice, false);
         vm.warp(block.timestamp + l1Staking.WITHDRAWAL_LOCK_EPOCH() * 7 days);
         uint256 beforeBalance = mxcToken.balanceOf(Alice);
         l1Staking.stakingClaimReward(Alice);
@@ -183,7 +181,7 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
     function test_L1_Slashing() external {
         vm.startPrank(Alice);
         mxcToken.approve(address(l1Staking), type(uint256).max);
-        l1Staking.stake(Alice,1_000_000 * 1 ether);
+        l1Staking.stake(Alice, 1_000_000 * 1 ether);
 
         vm.stopPrank();
         (uint256 totalBalanceBefore,,,,,) = l1Staking.stakingState();
@@ -205,12 +203,12 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
         mxcToken.approve(address(l1Staking), type(uint256).max);
         l1Staking.stake(Alice, 5_000_000 * 1 ether);
 
-        (,uint256 totalReward,,,,) = l1Staking.stakingState();
+        (, uint256 totalReward,,,,) = l1Staking.stakingState();
 
         console2.log("Total rewards:", totalReward);
         assertGt(totalReward, 0);
 
-        assertEq(l1Staking.stakingCalculateRewardDebt(Alice),0);
+        assertEq(l1Staking.stakingCalculateRewardDebt(Alice), 0);
         vm.warp(block.timestamp + 7 days);
         assertGt(l1Staking.stakingCalculateRewardDebt(Alice), 0);
     }
@@ -224,9 +222,9 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
         stakers[4] = address(0x5);
         stakers[5] = address(0x6);
 
-        console2.log("totalSupply",mxcToken.totalSupply());
+        console2.log("totalSupply", mxcToken.totalSupply());
         // transfer to new stakers
-        for(uint i = 2; i < stakers.length; i++) {
+        for (uint256 i = 2; i < stakers.length; i++) {
             mxcToken.transfer(stakers[i], 10_000_000 * 1 ether);
         }
 
@@ -249,10 +247,8 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
         vm.warp(block.timestamp + 7 days);
         proposeBlockV2(msg.sender, 0);
 
-
         uint256 reward1 = l1Staking.stakingCalculateRewardDebt(stakers[0]);
         console2.log("Single staker reward after :", reward1);
-
 
         // test case 2: three user stake with different amount
         vm.startPrank(stakers[1]);
@@ -276,7 +272,7 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
         console2.log("Staker3 (2M staked):", reward2_3);
 
         // 6 staker
-        for(uint i = 3; i < stakers.length; i++) {
+        for (uint256 i = 3; i < stakers.length; i++) {
             vm.startPrank(stakers[i]);
             mxcToken.approve(address(l1Staking), type(uint256).max);
             l1Staking.stake(stakers[i], 1_000_000 * 1 ether);
@@ -284,10 +280,10 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
         vm.warp(block.timestamp + 7 days);
         proposeBlockV2(msg.sender, 0);
 
-        uint totalClaimedAmount;
-        uint totalReward;
-        for(uint epoch = 0 ; epoch < 100; epoch++) {
-            if(epoch % 2 == 0) {
+        uint256 totalClaimedAmount;
+        uint256 totalReward;
+        for (uint256 epoch = 0; epoch < 100; epoch++) {
+            if (epoch % 2 == 0) {
                 vm.warp(block.timestamp + 7 days);
                 console2.log("7 days");
             } else {
@@ -297,7 +293,7 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
             proposeBlockV2(msg.sender, 0);
 
             // verify claim again after 1 epoch
-            for(uint i = 0; i < stakers.length; i++) {
+            for (uint256 i = 0; i < stakers.length; i++) {
                 uint256 beforeBalance = mxcToken.balanceOf(stakers[i]);
                 // uint256 reward = l1Staking.stakingCalculateRewardDebt(stakers[i]);
                 // console2.log(string.concat("Staker", vm.toString(i + 1)), ":", reward);
@@ -306,7 +302,7 @@ contract TaikoL1StakingTest is TaikoL1TestBase {
                 totalClaimedAmount += mxcToken.balanceOf(stakers[i]) - beforeBalance;
             }
             // verify total
-            (,totalReward,,,,) = l1Staking.stakingState();
+            (, totalReward,,,,) = l1Staking.stakingState();
             console2.log("Total rewards:", totalReward);
             console2.log("Total claimedAmount:", totalClaimedAmount);
             assertGt(totalReward, 0);

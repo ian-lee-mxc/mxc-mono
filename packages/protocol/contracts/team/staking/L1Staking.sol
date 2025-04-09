@@ -4,14 +4,13 @@ pragma solidity ^0.8.24;
 import "../../tko/IMxcToken.sol";
 import "../../common/IAddressResolver.sol";
 import "../../common/LibStrings.sol";
-import {EssentialContract} from "../../common/EssentialContract.sol";
-import {IL1Staking} from "./IL1Staking.sol";
+import { EssentialContract } from "../../common/EssentialContract.sol";
+import { IL1Staking } from "./IL1Staking.sol";
 
 /// @title L1Staking
 /// @notice A contract that offers helper functions to handle staking.
 /// @custom:security-contact luanxu@mxc.org
 contract L1Staking is EssentialContract, IL1Staking {
-
     modifier whenStakingBalancesAbove() {
         if (stakingState.stakingBalances[msg.sender] < MIN_DEPOSIT) {
             revert INSUFFICIENT_BALANCE();
@@ -21,7 +20,8 @@ contract L1Staking is EssentialContract, IL1Staking {
 
     struct StakingState {
         mapping(address => uint256) stakingBalances;
-        mapping(address => uint256) lastClaimedEpoch; // Track the last epoch when the user claimed rewards
+        mapping(address => uint256) lastClaimedEpoch; // Track the last epoch when the user claimed
+            // rewards
         mapping(address => uint256) withdrawalRequestEpoch;
         uint256 totalBalance;
         uint256 totalReward;
@@ -62,10 +62,7 @@ contract L1Staking is EssentialContract, IL1Staking {
 
     uint256 public constant EPOCH_DURATION = 7 days; // 1 week in seconds
 
-    function init(
-        address _owner,
-        address _rollupAddressManager
-    ) external initializer {
+    function init(address _owner, address _rollupAddressManager) external initializer {
         __Essential_init(_owner, _rollupAddressManager);
         stakingState.rewardBeginEpoch = uint64(getCurrentEpoch());
     }
@@ -77,9 +74,10 @@ contract L1Staking is EssentialContract, IL1Staking {
         address _user,
         uint256 _amount
     )
-    external
-    whenNotPaused nonReentrant
-    onlyFromOptionalNamed(LibStrings.B_ZKCENTER)
+        external
+        whenNotPaused
+        nonReentrant
+        onlyFromOptionalNamed(LibStrings.B_ZKCENTER)
     {
         uint256 newBalance = stakingState.stakingBalances[_user] + _amount;
         if (newBalance < MIN_DEPOSIT) revert INSUFFICIENT_DEPOSIT();
@@ -97,8 +95,9 @@ contract L1Staking is EssentialContract, IL1Staking {
         address _user,
         bool cancel
     )
-    external nonReentrant
-    onlyFromOptionalNamed(LibStrings.B_ZKCENTER)
+        external
+        nonReentrant
+        onlyFromOptionalNamed(LibStrings.B_ZKCENTER)
     {
         if (stakingState.stakingBalances[_user] == 0) revert INSUFFICIENT_BALANCE();
         if (cancel) {
@@ -111,8 +110,10 @@ contract L1Staking is EssentialContract, IL1Staking {
     /// @dev User completes the withdrawal after the lock period
     /// @param _user The user address for the withdraw
     function stakingWithdrawal(address _user)
-    external whenNotPaused nonReentrant
-    onlyFromOptionalNamed(LibStrings.B_ZKCENTER)
+        external
+        whenNotPaused
+        nonReentrant
+        onlyFromOptionalNamed(LibStrings.B_ZKCENTER)
     {
         uint256 amount = stakingState.stakingBalances[_user]; // Get the user's staked balance
 
@@ -121,7 +122,8 @@ contract L1Staking is EssentialContract, IL1Staking {
 
         if (
             stakingState.withdrawalRequestEpoch[_user] == 0
-            || getCurrentEpoch() < stakingState.withdrawalRequestEpoch[_user] + WITHDRAWAL_LOCK_EPOCH
+                || getCurrentEpoch()
+                    < stakingState.withdrawalRequestEpoch[_user] + WITHDRAWAL_LOCK_EPOCH
         ) {
             revert WITHDRAWAL_LOCKED();
         }
@@ -138,13 +140,16 @@ contract L1Staking is EssentialContract, IL1Staking {
 
     /// @dev System deposits reward to all users based on their stake.
     function stakingDepositReward()
-    external
-    onlyFromNamed(LibStrings.B_TAIKO)
-    whenNotPaused nonReentrant
+        external
+        onlyFromNamed(LibStrings.B_TAIKO)
+        whenNotPaused
+        nonReentrant
     {
         // Update last reward timestamp
         if (stakingState.lastDepositRewardTime == 0) {
             stakingState.lastDepositRewardTime = uint64(block.timestamp);
+        } else if (stakingState.lastDepositRewardTime >= block.timestamp) {
+            revert INSUFFICIENT_DEPOSIT();
         }
 
         // Calculate time elapsed since last reward distribution
@@ -162,10 +167,7 @@ contract L1Staking is EssentialContract, IL1Staking {
 
     /// @dev deposits reward to epoch reward
     /// @param _amount The amount of token to deposit.
-    function stakingDepositReward(uint256 _amount)
-    external
-    whenNotPaused nonReentrant
-    {
+    function stakingDepositReward(uint256 _amount) external whenNotPaused nonReentrant {
         if (_amount == 0) {
             revert INSUFFICIENT_DEPOSIT();
         }
@@ -179,13 +181,7 @@ contract L1Staking is EssentialContract, IL1Staking {
     /// @dev Calculate the debt reward owed to a user
     /// @param user The user address to credit.
     /// @return The debt reward owed to the user
-    function stakingCalculateRewardDebt(
-        address user
-    )
-    public
-    view
-    returns (uint256)
-    {
+    function stakingCalculateRewardDebt(address user) public view returns (uint256) {
         if (stakingState.stakingBalances[user] == 0) return 0;
 
         uint256 lastClaimedEpoch = stakingState.lastClaimedEpoch[user];
@@ -198,7 +194,7 @@ contract L1Staking is EssentialContract, IL1Staking {
         // Calculate the reward based on the user's staked amount, total supply, and elapsed time
         uint256 share = stakingState.stakingBalances[user] * 1e5 / stakingState.totalBalance;
 
-        if(currentEpoch - lastClaimedEpoch > 24) {
+        if (currentEpoch - lastClaimedEpoch > 24) {
             lastClaimedEpoch = currentEpoch - 24;
         }
 
@@ -225,12 +221,15 @@ contract L1Staking is EssentialContract, IL1Staking {
     /// @dev ZkCenter claim the reward from a user, then distribute it
     /// @param _user The user address to credit.
     function stakingClaimReward(address _user)
-    external
-    whenNotPaused nonReentrant
-    onlyFromOptionalNamed(LibStrings.B_ZKCENTER)
-    returns (uint256) {
+        external
+        whenNotPaused
+        nonReentrant
+        onlyFromOptionalNamed(LibStrings.B_ZKCENTER)
+        returns (uint256)
+    {
         uint256 currentEpoch = getCurrentEpoch();
-        uint256 reward = stakingCalculateRewardDebt(_user); // Calculate the interest owed to the user
+        uint256 reward = stakingCalculateRewardDebt(_user); // Calculate the interest owed to the
+            // user
         stakingState.lastClaimedEpoch[_user] = currentEpoch - 1;
         if (reward == 0) return 0;
         _mxc().transfer(msg.sender, reward);
@@ -245,7 +244,9 @@ contract L1Staking is EssentialContract, IL1Staking {
     function stakingSlashing(
         address _user,
         uint256 _rate
-    ) external onlyFromOptionalNamed(LibStrings.B_ZKCENTER)
+    )
+        external
+        onlyFromOptionalNamed(LibStrings.B_ZKCENTER)
     {
         uint256 amount = stakingState.stakingBalances[_user];
         if (amount == 0) return;
@@ -262,7 +263,9 @@ contract L1Staking is EssentialContract, IL1Staking {
     function pauseUserReward(
         address _user,
         uint256 _epochAmount
-    ) external onlyFromOptionalNamed(LibStrings.B_ZKCENTER)
+    )
+        external
+        onlyFromOptionalNamed(LibStrings.B_ZKCENTER)
     {
         uint256 currentEpoch = getCurrentEpoch();
         if (!_isClaimed(_user)) revert REWARD_NOT_CLAIM();
@@ -297,13 +300,9 @@ contract L1Staking is EssentialContract, IL1Staking {
 
     /// @dev Calculate the reward for the current epoch
     /// @return The reward for the current epoch
-    function calcReward()
-    internal
-    view
-    returns (uint256)
-    {
+    function calcReward() internal view returns (uint256) {
         uint256 elapsedSeconds = block.timestamp - stakingState.lastDepositRewardTime;
-        uint256 reward = (_mxc().totalSupply() * 950 / 10000 / 365 days) * elapsedSeconds; // max
+        uint256 reward = (_mxc().totalSupply() * 950 / 10_000 / 365 days) * elapsedSeconds; // max
         // apr ~= 9.99%
 
         // Limit max reward to 1e5
@@ -313,7 +312,6 @@ contract L1Staking is EssentialContract, IL1Staking {
         // Round down to the nearest 1e16
         return (reward / 1e16) * 1e16;
     }
-
 
     function _mxc() private view returns (IMxcToken) {
         return IMxcToken(IAddressResolver(this).resolve(LibStrings.B_TAIKO_TOKEN, false));

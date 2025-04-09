@@ -3,19 +3,19 @@ pragma solidity ^0.8.24;
 
 import "../L1/TaikoL1.sol";
 import "./addrcache/RollupAddressCache.sol";
-import {IL1Staking} from "../team/staking/IL1Staking.sol";
+import { IL1Staking } from "../team/staking/IL1Staking.sol";
 
-/// @title MainnetTaikoL1
-/// @dev This contract shall be deployed to replace its parent contract on Ethereum for Taiko
+/// @title GenevaMoonchainL1
+/// @dev This contract shall be deployed to replace its parent contract on Sepolia Arbitrum for
+/// Moonchain
 /// mainnet to reduce gas cost.
-/// @notice See the documentation in {TaikoL1}.
-/// @custom:security-contact security@taiko.xyz
+/// @notice See the documentation in {MoonchainL1}.
+/// @custom:security-contact luanxu@mxc.org
 contract GenevaMoonchainL1 is TaikoL1, RollupAddressCache {
-
     uint256[51] private __gap;
 
     /// @inheritdoc ITaikoL1
-    function getConfig() public pure override virtual returns (TaikoData.Config memory) {
+    function getConfig() public pure virtual override returns (TaikoData.Config memory) {
         // All hard-coded configurations:
         // - treasury: the actual TaikoL2 address.
         // - anchorGasLimit: 250_000 (based on internal devnet, its ~220_000
@@ -45,80 +45,8 @@ contract GenevaMoonchainL1 is TaikoL1, RollupAddressCache {
         });
     }
 
-    /// @notice CHANGE(MOONCHAIN): Reinitialize the contract.
-    /// @param _owner The owner of this contract. msg.sender will be used if this value is zero.
-    /// @param _rollupAddressManager The address of the {AddressManager} contract.
-    /// @param _genesisBlockHash The block hash of the genesis block.
-    /// @param _toPause true to pause the contract by default.
-    function initMigrate(
-        address _owner,
-        address _rollupAddressManager,
-        bytes32 _genesisBlockHash,
-        uint64 _l2LatestHeight,
-        bool _toPause
-    )
-        external
-        reinitializer(2)
-    {
-        __Essential_init(_owner, _rollupAddressManager);
-        doMigrate(_genesisBlockHash, _l2LatestHeight);
-        if (_toPause) _pause();
-
-        TaikoData.BlockParamsV2 memory params = TaikoData.BlockParamsV2(
-            msg.sender,
-            bytes32(uint256(1)),
-            uint64(0),
-            uint64(block.timestamp),
-            uint32(0),
-            uint32(0),
-            uint8(0)
-        );
-        bytes memory _params = abi.encode(params);
-
-        // upgrade TaikoL2 Contract
-        // create implement
-        LibProposing.proposeBlock(state, getConfig(), this, _params, "");
-    }
-
-    function doMigrate(bytes32 _genesisBlockHash, uint64 _l2LatestHeight) private {
-        TaikoData.Config memory _config = getConfig();
-        // Init state
-        state.slotA.genesisHeight = uint64(LibUtils.getBlockNumber());
-        state.slotA.genesisTimestamp = uint64(block.timestamp);
-        state.slotB.numBlocks = _l2LatestHeight + 1;
-        state.slotB.lastVerifiedBlockId = _l2LatestHeight;
-        TaikoData.SlotB memory b = state.slotB;
-
-        state.blocks[0].nextTransitionId = 2;
-        state.blocks[0].blockId = 0;
-        state.blocks[0].verifiedTransitionId = 1;
-        state.blocks[0].proposedAt = uint64(block.timestamp);
-        state.blocks[0].metaHash = bytes32(uint256(1));
-
-        state.transitions[0][1].blockHash = _genesisBlockHash;
-        state.transitions[0][1].prover = address(0);
-        state.transitions[0][1].timestamp = uint64(block.timestamp);
-        emit BlockVerifiedV2({
-            blockId: 0,
-            prover: address(0),
-            blockHash: _genesisBlockHash,
-            tier: 0
-        });
-
-        TaikoData.BlockV2 storage blk =
-            state.blocks[(b.numBlocks - 1) % _config.blockRingBufferSize];
-        blk.metaHash = bytes32(uint256(1));
-        blk.blockId = _l2LatestHeight;
-        blk.proposedIn = _l2LatestHeight;
-        blk.verifiedTransitionId = 1;
-        blk.nextTransitionId = 2;
-        TaikoData.TransitionState storage ts =
-            state.transitions[(b.numBlocks - 1) % _config.blockRingBufferSize][1];
-        ts.blockHash = bytes32(uint256(1));
-        ts.stateRoot = bytes32(uint256(1));
-    }
-
-
+    /// @inheritdoc ITaikoL1
+    /// @dev CHANGE(MOONCHAIN): This function is overriden to add the staking deposit reward call.
     function proposeBlockV2(
         bytes calldata _params,
         bytes calldata _txList
@@ -134,10 +62,11 @@ contract GenevaMoonchainL1 is TaikoL1, RollupAddressCache {
         TaikoData.Config memory config = getConfig();
         (, meta_) = LibProposing.proposeBlock(state, config, this, _params, _txList);
         if (meta_.id < config.ontakeForkHeight) revert L1_FORK_ERROR();
-        IL1Staking(resolve(LibStrings.B_STAKING,false)).stakingDepositReward();
+        IL1Staking(resolve(LibStrings.B_STAKING, false)).stakingDepositReward();
     }
 
     /// @inheritdoc ITaikoL1
+    /// @dev CHANGE(MOONCHAIN): This function is overriden to add the staking deposit reward call.
     function proposeBlocksV2(
         bytes[] calldata _paramsArr,
         bytes[] calldata _txListArr
@@ -155,7 +84,7 @@ contract GenevaMoonchainL1 is TaikoL1, RollupAddressCache {
         for (uint256 i; i < metaArr_.length; ++i) {
             if (metaArr_[i].id < config.ontakeForkHeight) revert L1_FORK_ERROR();
         }
-        IL1Staking(resolve(LibStrings.B_STAKING,false)).stakingDepositReward();
+        IL1Staking(resolve(LibStrings.B_STAKING, false)).stakingDepositReward();
     }
 
     function _getAddress(uint64 _chainId, bytes32 _name) internal view override returns (address) {
