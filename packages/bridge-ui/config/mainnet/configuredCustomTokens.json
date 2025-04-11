@@ -42,5 +42,27 @@
     "decimals": 18,
     "type": "ERC20",
     "logoURI": "https://arbiscan.io/token/images/MCDDai_32.png"
+  },
+  {
+    "name": "Dogecoin(Universal)",
+    "addresses": {
+      "42161": "0x12e96c2bfea6e835cf8dd38a5834fa61cf723736",
+      "18686": "0x66ae1B54e2bBE8DFeBB3b49f3E9e1Ce8bc9e6c3a"
+    },
+    "symbol": "uDOGE",
+    "decimals": 18,
+    "type": "ERC20",
+    "logoURI": "https://arbiscan.io/token/images/udoge_32.png"
+  },
+  {
+    "name": "Polkadot (Universal)",
+    "addresses": {
+      "42161": "0x0f813f4785b2360009f9ac9bf6121a85f109efc6",
+      "18686": "0x593F7dDbf7ccfcEFa6592dfE7AAF728ebD29ee0d"
+    },
+    "symbol": "uDOT",
+    "decimals": 18,
+    "type": "ERC20",
+    "logoURI": "https://arbiscan.io/token/images/udot_32.png"
   }
 ]
