@@ -64,5 +64,16 @@
     "decimals": 18,
     "type": "ERC20",
     "logoURI": "https://arbiscan.io/token/images/udot_32.png"
+  },
+  {
+    "name": "WETH",
+    "addresses": {
+      "42161": "0x0f813f4785b2360009f9ac9bf6121a85f109efc6",
+      "18686": "0x593F7dDbf7ccfcEFa6592dfE7AAF728ebD29ee0d"
+    },
+    "symbol": "WETH",
+    "decimals": 18,
+    "type": "ERC20",
+    "logoURI": "https://arbiscan.io/token/images/udot_32.png"
   }
 ]

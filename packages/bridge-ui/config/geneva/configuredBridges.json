@@ -8,8 +8,8 @@
         "erc20VaultAddress": "0xB0ba4805C068695871f5d95cABaE926a6D528D22",
         "erc721VaultAddress": "0x8fd1604E79a35189B02242BE68bdBcE5a041A1C4",
         "erc1155VaultAddress": "0x6c7A4C797aDa9Bd706F376cF64f8C7F8163E4262",
-        "crossChainSyncAddress": "0x3d199603e63C61256E1a7Aac3DBe5a20C7a1bEB1",
-        "signalServiceAddress": "0x3d199603e63C61256E1a7Aac3DBe5a20C7a1bEB1",
+        "crossChainSyncAddress": "0x52ce19ecBCA697Ad47edC91980F37069137FAB36",
+        "signalServiceAddress": "0x52ce19ecBCA697Ad47edC91980F37069137FAB36",
         "hops": []
       }
     },
