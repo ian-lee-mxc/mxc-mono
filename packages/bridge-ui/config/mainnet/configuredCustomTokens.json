@@ -74,6 +74,6 @@
     "symbol": "WETH",
     "decimals": 18,
     "type": "ERC20",
-    "logoURI": "https://arbiscan.io/token/images/udot_32.png"
+    "logoURI": "https://arbiscan.io/token/images/weth_28.png"
   }
 ]
