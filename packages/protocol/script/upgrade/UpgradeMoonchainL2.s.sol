@@ -48,19 +48,11 @@ contract UpgradeMoonchainL2 is DeployCapability {
         if (isMainnet) {
             console2.log("isMainnet");
             MainnetMoonchainL2 taikoL2 = new MainnetMoonchainL2();
-            bytes memory data = abi.encodeCall(
-                GenevaMoonchainL2.initMoonchain,
-                (owner, rollupAddressManagerProxyAddr, uint64(L1_CHAIN_ID), uint64(gasExcess))
-            );
-            upgradeProxyAndCall(mxcL2, address(taikoL2), data);
+            upgradeProxy(mxcL2, address(taikoL2));
         } else {
             console2.log("geneva testnet");
             GenevaMoonchainL2 taikoL2 = new GenevaMoonchainL2();
-            bytes memory data = abi.encodeCall(
-                GenevaMoonchainL2.initMoonchain,
-                (owner, rollupAddressManagerProxyAddr, uint64(L1_CHAIN_ID), uint64(gasExcess))
-            );
-            upgradeProxyAndCall(mxcL2, address(taikoL2), data);
+            upgradeProxy(mxcL2, address(taikoL2));
         }
 
         vm.stopBroadcast();

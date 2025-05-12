@@ -160,13 +160,13 @@ contract DeployOnMoonchainL1 is DeployCapability {
         );
         addressNotNull(taikoL1Addr, "taikoL1Addr");
         GenevaMoonchainL1 taikoL1 = GenevaMoonchainL1(payable(taikoL1Addr));
-        taikoL1.initMigrate(
-            contractOwner,
-            rollupAddressManager,
-            vm.envBytes32("L2_GENESIS_HASH"),
-            uint64(MOONCHAIN_MIGRATE_BLOCK_ID),
-            vm.envBool("PAUSE_TAIKO_L1")
-        );
+        // taikoL1.initMigrate(
+        //     contractOwner,
+        //     rollupAddressManager,
+        //     vm.envBytes32("L2_GENESIS_HASH"),
+        //     uint64(MOONCHAIN_MIGRATE_BLOCK_ID),
+        //     vm.envBool("PAUSE_TAIKO_L1")
+        // );
         address mxcTokenAddr = AddressManager(rollupAddressManager).getAddress(
             uint64(block.chainid), LibStrings.B_TAIKO_TOKEN
         );
