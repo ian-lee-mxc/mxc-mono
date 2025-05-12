@@ -267,9 +267,12 @@ contract L1Staking is EssentialContract, IL1Staking {
         external
         onlyFromOptionalNamed(LibStrings.B_ZKCENTER)
     {
-        uint256 currentEpoch = getCurrentEpoch();
-        if (!_isClaimed(_user)) revert REWARD_NOT_CLAIM();
-        stakingState.lastClaimedEpoch[_user] = currentEpoch + _epochAmount;
+        uint256 epochMax = getCurrentEpoch();   // Pause up to next epoch
+        uint256 newUserEpoch = stakingState.lastClaimedEpoch[_user] + _epochAmount;
+        if (newUserEpoch > epochMax) {
+            newUserEpoch = epochMax;
+        }
+        stakingState.lastClaimedEpoch[_user] = newUserEpoch;
     }
 
     /// @dev Get the staking state of a user
